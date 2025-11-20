@@ -109,15 +109,16 @@ def logged_in() -> bool:
 
 def init_db():
     with app.app_context():
-        db.create_all()
-        if not User.query.first():
-            admin = User(username="admin", is_admin=True)
-            admin.set_password("1234")
-            db.session.add(admin)
-            db.session.commit()
-        
-        # Apenas cria as tabelas, sem dados de exemplo
-        # O sistema começará completamente vazio
+        try:
+            db.create_all()
+            if not User.query.first():
+                admin = User(username="admin", is_admin=True)
+                admin.set_password("1234")
+                db.session.add(admin)
+                db.session.commit()
+                print("✅ Banco de dados inicializado com usuário admin")
+        except Exception as e:
+            print(f"❌ Erro ao inicializar banco: {e}")
 
 # Testar conexão com o banco
 def test_db_connection():
@@ -129,8 +130,21 @@ def test_db_connection():
         print(f"❌ Erro na conexão com o banco: {e}")
         # Log mais detalhado para debugging
         if database_url:
-            masked_url = database_url.split('@')[0] + '@' + database_url.split('@')[1] if '@' in database_url else database_url
-            print(f"URL usada: {masked_url}")
+            # Mascara a senha na URL para segurança
+            if '@' in database_url:
+                parts = database_url.split('@')
+                user_part = parts[0]
+                if ':' in user_part:
+                    user_pass = user_part.split(':')
+                    if len(user_pass) > 2:
+                        masked_user = user_pass[0] + ':' + '***' + '@' + parts[1]
+                    else:
+                        masked_user = user_pass[0] + ':' + '***' + '@' + parts[1]
+                else:
+                    masked_user = user_part + '@' + parts[1]
+                print(f"URL usada: {masked_user}")
+            else:
+                print(f"URL usada: {database_url}")
 
 # Inicialização do banco de dados
 init_db()
