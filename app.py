@@ -6,18 +6,36 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, inspect
-from datetime import datetime, date, timedelta  # ← Adicionei timedelta aqui
+from datetime import datetime, date, timedelta
 import pandas as pd
 from dataclasses import dataclass
 
 BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "app.db"
+DB_PATH = BASE_DIR / "app.db"          # ainda será usado como fallback local
 DATA_DIR = BASE_DIR / "data"
 
 app = Flask(__name__)
+
+# Chave secreta
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{DB_PATH}"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# =========================
+# Configuração do banco
+# =========================
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+
+if DATABASE_URL:
+    # Prod: Supabase (Render)
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+else:
+    # Dev/local: SQLite
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# =========================
 
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
