@@ -33,7 +33,7 @@ if database_url:
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    print(f"Usando PostgreSQL com pg8000: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
+    print(f"Usando PostgreSQL com psycopg2: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
 else:
     # 2) fallback: sqlite local (para rodar na sua máquina)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
