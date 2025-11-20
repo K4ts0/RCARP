@@ -28,12 +28,16 @@ if database_url:
     if database_url.startswith('(') and database_url.endswith(')'):
         database_url = database_url[1:-1]
     
-    # Corrige o protocolo se necessário
+    # PRIMEIRO: Corrige postgres:// para postgresql://
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
+    # SEGUNDO: Muda para postgresql+pg8000:// para usar o driver pg8000
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+pg8000://", 1)
+    
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    print(f"Usando PostgreSQL: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
+    print(f"Usando PostgreSQL com pg8000: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
 else:
     # 2) fallback: sqlite local (para rodar na sua máquina)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
