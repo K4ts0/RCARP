@@ -1,0 +1,20 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Cache do Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Banco de dados local (se quiser manter só em dev)
+*.db
+*.sqlite3
+
+# Arquivos de configuração sensíveis
+.env
+*.log
+
+# Outros
+.DS_Store
+Thumbs.db
