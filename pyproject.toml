@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "lavagem-api"
+version = "0.1.0"
+description = "Sistema de gestão para lavagem de carros"
+authors = ["Seu Nome <seu@email.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+Flask = "2.3.3"
+Flask-SQLAlchemy = "3.0.5"
+Flask-Bcrypt = "1.0.1"
+pandas = "2.0.3"
+python-dotenv = "1.0.0"
+gunicorn = "21.2.0"
+
+[tool.poetry.group.dev.dependencies]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
