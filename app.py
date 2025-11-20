@@ -21,13 +21,29 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
-    # render / supabase às vezes vem como postgres://, o SQLAlchemy quer postgresql://
+    # Limpa e formata a URL de conexão
+    database_url = database_url.strip()
+    
+    # Remove parênteses se existirem
+    if database_url.startswith('(') and database_url.endswith(')'):
+        database_url = database_url[1:-1]
+    
+    # Corrige o protocolo se necessário
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    print(f"Usando PostgreSQL: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
 else:
     # 2) fallback: sqlite local (para rodar na sua máquina)
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+    print("Usando SQLite local")
+
+# CONFIGURAÇÃO DO ENGINE DEVE VIR ANTES do SQLAlchemy(app)
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -103,8 +119,24 @@ def init_db():
         # Apenas cria as tabelas, sem dados de exemplo
         # O sistema começará completamente vazio
 
+# Testar conexão com o banco
+def test_db_connection():
+    try:
+        with app.app_context():
+            db.session.execute(text('SELECT 1'))
+            print("✅ Conexão com o banco de dados estabelecida com sucesso!")
+    except Exception as e:
+        print(f"❌ Erro na conexão com o banco: {e}")
+        # Log mais detalhado para debugging
+        if database_url:
+            masked_url = database_url.split('@')[0] + '@' + database_url.split('@')[1] if '@' in database_url else database_url
+            print(f"URL usada: {masked_url}")
+
 # Inicialização do banco de dados
 init_db()
+
+# Testar a conexão ao iniciar
+test_db_connection()
 
 # ========== ROTAS DA API ==========
 
