@@ -7,7 +7,6 @@ from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, inspect
 from datetime import datetime, date, timedelta
-import pandas as pd
 from dataclasses import dataclass
 
 BASE_DIR = Path(__file__).resolve().parent
