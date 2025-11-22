@@ -30,40 +30,19 @@ if database_url:
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
-    # CORREÇÃO: Garante que é postgresql://
-    if not database_url.startswith("postgresql://"):
-        if database_url.startswith("postgres:"):
-            database_url = database_url.replace("postgres:", "postgresql:", 1)
-        else:
-            database_url = "postgresql://" + database_url
+    # ? CORREÇÃO: Force o uso do psycopg (versão 3)
+    if database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
     
-    # ? Use a URL diretamente (com psycopg)
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    
-    # Mascarar URL para logs de segurança
-    masked_url = database_url
-    if '@' in database_url:
-        parts = database_url.split('@')
-        user_part = parts[0]
-        if ':' in user_part:
-            user_pass = user_part.split(':')
-            if len(user_pass) >= 3:
-                masked_url = user_pass[0] + ':' + '***' + '@' + parts[1]
-        print(f"? Usando PostgreSQL: {masked_url.split('@')[1]}")
-    else:
-        print(f"? Usando PostgreSQL: {masked_url}")
+    print(f"? Usando PostgreSQL com psycopg: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
 else:
-    # Fallback: sqlite local
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-    print("?? Usando SQLite local (modo desenvolvimento)")
+    print("?? Usando SQLite local")
 
-# CONFIGURAÇÃO OTIMIZADA PARA RENDER + SUPABASE
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
-    "pool_size": 10,
-    "max_overflow": 20,
-    "pool_timeout": 30,
 }
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
