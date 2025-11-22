@@ -4,4 +4,4 @@ Flask-Bcrypt==1.0.1
 python-dotenv==1.0.0
 gunicorn==21.2.0
 psycopg[binary]==3.2.13
-SQLAlchemy==1.4.46
+SQLAlchemy==2.0.28
