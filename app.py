@@ -38,7 +38,10 @@ if database_url:
         else:
             database_url = "postgresql://" + database_url
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    if database_url and database_url.startswith("postgresql://"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url.replace("postgresql://", "postgresql+pg8000://", 1)
+    else:
+        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     
     # Mascarar URL para logs de segurança
     masked_url = database_url
