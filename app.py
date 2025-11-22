@@ -17,32 +17,60 @@ DATA_DIR = BASE_DIR / "data"
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-# 1) tenta usar o Supabase (DATABASE_URL)
+# CONFIGURAÇÃO CORRIGIDA PARA SUPABASE + RENDER
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
-    # Limpa e formata a URL de conexão
+    # CORREÇÃO: Limpeza e formatação robusta da URL
     database_url = database_url.strip()
     
-    # Remove parênteses se existirem
-    if database_url.startswith('(') and database_url.endswith(')'):
-        database_url = database_url[1:-1]
+    # Remove parênteses e espaços extras
+    database_url = database_url.replace('(', '').replace(')', '').strip()
     
-    # PRIMEIRO: Corrige postgres:// para postgresql://
+    # CORREÇÃO CRÍTICA: Substitui postgres:// por postgresql://
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     
+    # CORREÇÃO: Garante que é postgresql://
+    if not database_url.startswith("postgresql://"):
+        if database_url.startswith("postgres:"):
+            database_url = database_url.replace("postgres:", "postgresql:", 1)
+        else:
+            database_url = "postgresql://" + database_url
+    
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    print(f"Usando PostgreSQL com psycopg2: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
+    
+    # Mascarar URL para logs de segurança
+    masked_url = database_url
+    if '@' in database_url:
+        parts = database_url.split('@')
+        user_part = parts[0]
+        if ':' in user_part:
+            user_pass = user_part.split(':')
+            if len(user_pass) >= 3:
+                masked_url = user_pass[0] + ':' + '***' + '@' + parts[1]
+        print(f"? Usando PostgreSQL: {masked_url.split('@')[1]}")
+    else:
+        print(f"? Usando PostgreSQL: {masked_url}")
 else:
-    # 2) fallback: sqlite local (para rodar na sua máquina)
+    # Fallback: sqlite local
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-    print("Usando SQLite local")
+    print("?? Usando SQLite local (modo desenvolvimento)")
 
-# CONFIGURAÇÃO DO ENGINE DEVE VIR ANTES do SQLAlchemy(app)
+# CONFIGURAÇÃO OTIMIZADA PARA RENDER + SUPABASE
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "pool_size": 10,
+    "max_overflow": 20,
+    "pool_timeout": 30,
+    "connect_args": {
+        "connect_timeout": 10,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+        "keepalives_interval": 10,
+        "keepalives_count": 5,
+    }
 }
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -98,10 +126,10 @@ class Lavagem(db.Model):
     placa = db.Column(db.String(10), nullable=False)
     servico = db.Column(db.String(50), nullable=False)
     funcionario = db.Column(db.String(50), nullable=False)
-    tipo = db.Column(db.String(20), default="assinante")  # assinante ou avulsa
+    tipo = db.Column(db.String(20), default="assinante")
     preco = db.Column(db.Float, default=0.0)
     observacoes = db.Column(db.Text)
-    produtos_utilizados = db.Column(db.Text)  # JSON string com produtos usados
+    produtos_utilizados = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 def logged_in() -> bool:
@@ -110,53 +138,70 @@ def logged_in() -> bool:
 def init_db():
     with app.app_context():
         try:
-            db.create_all()
+            # CORREÇÃO: Verifica se as tabelas existem antes de criar
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            
+            if not existing_tables:
+                db.create_all()
+                print("? Tabelas criadas com sucesso")
+            else:
+                print("? Tabelas já existem no banco")
+            
+            # Cria usuário admin se não existir
             if not User.query.first():
                 admin = User(username="admin", is_admin=True)
                 admin.set_password("1234")
                 db.session.add(admin)
                 db.session.commit()
-                print("✅ Banco de dados inicializado com usuário admin")
+                print("? Usuário admin criado: admin / 1234")
+                
         except Exception as e:
-            print(f"❌ Erro ao inicializar banco: {e}")
+            print(f"? Erro ao inicializar banco: {e}")
 
 # Testar conexão com o banco
 def test_db_connection():
     try:
         with app.app_context():
             db.session.execute(text('SELECT 1'))
-            print("✅ Conexão com o banco de dados estabelecida com sucesso!")
+            print("? Conexão com o banco de dados estabelecida com sucesso!")
+            return True
     except Exception as e:
-        print(f"❌ Erro na conexão com o banco: {e}")
-        # Log mais detalhado para debugging
-        if database_url:
-            # Mascara a senha na URL para segurança
-            if '@' in database_url:
-                parts = database_url.split('@')
-                user_part = parts[0]
-                if ':' in user_part:
-                    user_pass = user_part.split(':')
-                    if len(user_pass) > 2:
-                        masked_user = user_pass[0] + ':' + '***' + '@' + parts[1]
-                    else:
-                        masked_user = user_pass[0] + ':' + '***' + '@' + parts[1]
-                else:
-                    masked_user = user_part + '@' + parts[1]
-                print(f"URL usada: {masked_user}")
-            else:
-                print(f"URL usada: {database_url}")
+        print(f"? Erro na conexão com o banco: {e}")
+        return False
 
-# Inicialização do banco de dados
-init_db()
+# ========== INICIALIZAÇÃO ==========
+print("?? Iniciando RCARP API...")
 
-# Testar a conexão ao iniciar
-test_db_connection()
+# Testa conexão primeiro
+if test_db_connection():
+    # Se conexão OK, inicializa banco
+    init_db()
+else:
+    print("??  Conexão com banco falhou - tentando inicializar mesmo assim...")
+    try:
+        init_db()
+    except Exception as e:
+        print(f"? Falha crítica: {e}")
 
 # ========== ROTAS DA API ==========
 
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/api/health")
+def health_check():
+    """Endpoint de saúde para verificar se a API está rodando"""
+    try:
+        db_status = "healthy" if test_db_connection() else "unhealthy"
+        return jsonify({
+            "status": "online", 
+            "database": db_status,
+            "timestamp": datetime.utcnow().isoformat()
+        })
+    except:
+        return jsonify({"status": "online", "database": "unknown"})
 
 @app.route("/api/login", methods=["POST"])
 def api_login():
@@ -185,74 +230,79 @@ def api_dashboard():
     if not logged_in():
         return jsonify({'error': 'Não autenticado'}), 401
     
-    # Atualizar status dos clientes baseado na data atual
-    hoje = date.today()
-    clientes = Cliente.query.all()
-    for cliente in clientes:
-        if cliente.status == 'Pago' and cliente.vencimento < hoje:
-            cliente.status = 'Vencido'
-        elif cliente.status == 'Pendente' and cliente.vencimento < hoje:
-            cliente.status = 'Vencido'
-    db.session.commit()
-    
-    # Estatísticas
-    clientes_ativos = Cliente.query.filter_by(status="Pago").count()
-    inadimplentes = Cliente.query.filter_by(status="Vencido").count()
-    
-    # Receita de mensalidades pagas
-    receita_mensalidades = db.session.query(db.func.sum(Cliente.mensalidade)).filter_by(status="Pago").scalar() or 0
-    
-    # CORREÇÃO: Receita de lavagens avulsas - somar TODAS as lavagens avulsas
-    receita_lavagens_avulsas = db.session.query(db.func.sum(Lavagem.preco)).filter_by(tipo="avulsa").scalar() or 0
-    receita_total = receita_mensalidades + receita_lavagens_avulsas
-    
-    # Valor a receber
-    a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
-    
-    # Lavagens avulsas - contar apenas as avulsas
-    lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
-    
-    # Lucro estimado (simplificado)
-    # CORREÇÃO: Calcular custo apenas dos produtos utilizados nas lavagens
-    custo_produtos = 0
-    lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
-    for lavagem in lavagens_com_produtos:
-        if lavagem.produtos_utilizados:
-            try:
-                produtos_utilizados = json.loads(lavagem.produtos_utilizados)
-                for produto_usado in produtos_utilizados:
-                    produto = Produto.query.get(produto_usado['produtoId'])
-                    if produto:
-                        custo_produtos += produto_usado['quantidade'] * produto.preco
-            except:
-                pass
-    
-    lucro_total = receita_total - custo_produtos
-    
-    # Últimas lavagens
-    ultimas_lavagens = Lavagem.query.order_by(Lavagem.data.desc()).limit(5).all()
-    
-    return jsonify({
-        'stats': {
-            'clientesAtivos': clientes_ativos,
-            'receitaTotal': float(receita_total),
-            'inadimplentes': inadimplentes,
-            'aReceber': float(a_receber),
-            'lavagensAvulsas': lavagens_avulsas,
-            'lucroTotal': float(lucro_total)
-        },
-        'ultimasLavagens': [
-            {
-                'data': lavagem.data.isoformat(),
-                'clienteNome': lavagem.cliente_nome,
-                'placa': lavagem.placa,
-                'servico': lavagem.servico,
-                'funcionario': lavagem.funcionario,
-                'tipo': lavagem.tipo
-            }
-            for lavagem in ultimas_lavagens
-        ]
-    })
+    try:
+        # Atualizar status dos clientes baseado na data atual
+        hoje = date.today()
+        clientes = Cliente.query.all()
+        for cliente in clientes:
+            if cliente.status == 'Pago' and cliente.vencimento < hoje:
+                cliente.status = 'Vencido'
+            elif cliente.status == 'Pendente' and cliente.vencimento < hoje:
+                cliente.status = 'Vencido'
+        db.session.commit()
+        
+        # Estatísticas
+        clientes_ativos = Cliente.query.filter_by(status="Pago").count()
+        inadimplentes = Cliente.query.filter_by(status="Vencido").count()
+        
+        # Receita de mensalidades pagas
+        receita_mensalidades = db.session.query(db.func.sum(Cliente.mensalidade)).filter_by(status="Pago").scalar() or 0
+        
+        # Receita de lavagens avulsas
+        receita_lavagens_avulsas = db.session.query(db.func.sum(Lavagem.preco)).filter_by(tipo="avulsa").scalar() or 0
+        receita_total = receita_mensalidades + receita_lavagens_avulsas
+        
+        # Valor a receber
+        a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
+        
+        # Lavagens avulsas
+        lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
+        
+        # Lucro estimado
+        custo_produtos = 0
+        lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
+        for lavagem in lavagens_com_produtos:
+            if lavagem.produtos_utilizados:
+                try:
+                    produtos_utilizados = json.loads(lavagem.produtos_utilizados)
+                    for produto_usado in produtos_utilizados:
+                        produto = Produto.query.get(produto_usado['produtoId'])
+                        if produto:
+                            custo_produtos += produto_usado['quantidade'] * produto.preco
+                except:
+                    pass
+        
+        lucro_total = receita_total - custo_produtos
+        
+        # Últimas lavagens
+        ultimas_lavagens = Lavagem.query.order_by(Lavagem.data.desc()).limit(5).all()
+        
+        return jsonify({
+            'stats': {
+                'clientesAtivos': clientes_ativos,
+                'receitaTotal': float(receita_total),
+                'inadimplentes': inadimplentes,
+                'aReceber': float(a_receber),
+                'lavagensAvulsas': lavagens_avulsas,
+                'lucroTotal': float(lucro_total)
+            },
+            'ultimasLavagens': [
+                {
+                    'data': lavagem.data.isoformat(),
+                    'clienteNome': lavagem.cliente_nome,
+                    'placa': lavagem.placa,
+                    'servico': lavagem.servico,
+                    'funcionario': lavagem.funcionario,
+                    'tipo': lavagem.tipo
+                }
+                for lavagem in ultimas_lavagens
+            ]
+        })
+    except Exception as e:
+        return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
+
+# ... (as outras rotas permanecem IGUAIS - clientes, lavagens, produtos, financeiro)
+# [MANTENHA TODAS AS OUTRAS ROTAS EXATAMENTE COMO ESTAVAM]
 
 @app.route("/api/clientes")
 def api_clientes():
@@ -558,4 +608,5 @@ def api_financeiro():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+    print(f"?? Servidor iniciado na porta {port}")
     app.run(host="0.0.0.0", port=port, debug=False)
