@@ -38,10 +38,8 @@ if database_url:
         else:
             database_url = "postgresql://" + database_url
     
-    if database_url and database_url.startswith("postgresql://"):
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url.replace("postgresql://", "postgresql+pg8000://", 1)
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    # ? Use a URL diretamente (com psycopg)
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     
     # Mascarar URL para logs de segurança
     masked_url = database_url
@@ -67,13 +65,6 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_size": 10,
     "max_overflow": 20,
     "pool_timeout": 30,
-    "connect_args": {
-        "connect_timeout": 10,
-        "keepalives": 1,
-        "keepalives_idle": 30,
-        "keepalives_interval": 10,
-        "keepalives_count": 5,
-    }
 }
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -181,7 +172,7 @@ if test_db_connection():
     # Se conexão OK, inicializa banco
     init_db()
 else:
-    print("??  Conexão com banco falhou - tentando inicializar mesmo assim...")
+    print("?? Conexão com banco falhou - tentando inicializar mesmo assim...")
     try:
         init_db()
     except Exception as e:
@@ -303,9 +294,6 @@ def api_dashboard():
         })
     except Exception as e:
         return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
-
-# ... (as outras rotas permanecem IGUAIS - clientes, lavagens, produtos, financeiro)
-# [MANTENHA TODAS AS OUTRAS ROTAS EXATAMENTE COMO ESTAVAM]
 
 @app.route("/api/clientes")
 def api_clientes():
