@@ -109,28 +109,39 @@ def logged_in() -> bool:
 
 def init_db():
     with app.app_context():
-        try:
-            # CORREÇÃO: Verifica se as tabelas existem antes de criar
-            inspector = inspect(db.engine)
-            existing_tables = inspector.get_table_names()
-            
-            if not existing_tables:
-                db.create_all()
-                print("? Tabelas criadas com sucesso")
-            else:
-                print("? Tabelas já existem no banco")
-            
-            # Cria usuário admin se não existir
-            if not User.query.first():
-                admin = User(username="admin", is_admin=True)
-                admin.set_password("1234")
-                db.session.add(admin)
-                db.session.commit()
-                print("? Usuário admin criado: admin / 1234")
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                print(f"🔄 Tentativa {attempt + 1} de inicialização do banco...")
                 
-        except Exception as e:
-            print(f"? Erro ao inicializar banco: {e}")
-
+                # Testa conexão primeiro
+                db.session.execute(text('SELECT 1'))
+                
+                # Cria tabelas se não existirem
+                db.create_all()
+                print("✅ Tabelas criadas/verificadas com sucesso")
+                
+                # Cria usuário admin se não existir
+                if not User.query.first():
+                    admin = User(username="admin", is_admin=True)
+                    admin.set_password("1234")
+                    db.session.add(admin)
+                    db.session.commit()
+                    print("✅ Usuário admin criado: admin / 1234")
+                else:
+                    print("ℹ️  Usuário admin já existe")
+                
+                break  # Sai do loop se bem-sucedido
+                
+            except Exception as e:
+                print(f"❌ Tentativa {attempt + 1} falhou: {e}")
+                if attempt < max_retries - 1:
+                    print("🔄 Tentando novamente em 2 segundos...")
+                    import time
+                    time.sleep(2)
+                else:
+                    print("💥 Todas as tentativas falharam")
+                    
 # Testar conexão com o banco
 def test_db_connection():
     try:
@@ -177,20 +188,31 @@ def health_check():
 
 @app.route("/api/login", methods=["POST"])
 def api_login():
-    data = request.get_json()
-    username = data.get('username', '').strip()
-    password = data.get('password', '')
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
+            
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        if not username or not password:
+            return jsonify({'success': False, 'message': 'Usuário e senha são obrigatórios'}), 400
+        
+        u = User.query.filter_by(username=username).first()
+        if u and u.check_password(password):
+            session["uid"] = u.id
+            session["username"] = u.username
+            return jsonify({
+                'success': True,
+                'user': {'nome': u.username, 'username': u.username}
+            })
+        
+        return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
     
-    u = User.query.filter_by(username=username).first()
-    if u and u.check_password(password):
-        session["uid"] = u.id
-        session["username"] = u.username
-        return jsonify({
-            'success': True,
-            'user': {'nome': u.username, 'username': u.username}
-        })
-    
-    return jsonify({'success': False, 'message': 'Credenciais inválidas'})
+    except Exception as e:
+        print(f"❌ Erro no login: {e}")
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 @app.route("/api/logout", methods=["POST"])
 def api_logout():
@@ -575,6 +597,41 @@ def api_financeiro():
         'meses': meses
     })
 
+@app.route("/api/debug/db")
+def debug_db():
+    """Endpoint para debug da conexão com o banco"""
+    try:
+        # Testa conexão básica
+        db.session.execute(text('SELECT 1'))
+        
+        # Verifica se as tabelas existem
+        inspector = inspect(db.engine)
+        tables = inspector.get_table_names()
+        
+        # Verifica se há usuários
+        user_count = User.query.count()
+        
+        return jsonify({
+            "status": "success",
+            "tables": tables,
+            "user_count": user_count,
+            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "..." if app.config["SQLALCHEMY_DATABASE_URI"] else "None"
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "..." if app.config["SQLALCHEMY_DATABASE_URI"] else "None"
+        }), 500
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Erro interno do servidor'}), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Endpoint não encontrado'}), 404
+    
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print(f"?? Servidor iniciado na porta {port}")
