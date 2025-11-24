@@ -16,30 +16,70 @@ DATA_DIR = BASE_DIR / "data"
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
-# CONFIGURAÇÃO CORRIGIDA PARA SUPABASE + RENDER
+# CONFIGURAÇÃO ROBUSTA PARA SUPABASE + RENDER COM FALLBACK
 database_url = os.environ.get("DATABASE_URL")
 
-if database_url:
-    # CORREÇÃO: Limpeza e formatação robusta da URL
-    database_url = database_url.strip()
-    
-    # Remove parênteses e espaços extras
-    database_url = database_url.replace('(', '').replace(')', '').strip()
-    
-    # CORREÇÃO CRÍTICA: Substitui postgres:// por postgresql://
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-    
-    # ? CORREÇÃO: Force o uso do psycopg (versão 3)
-    if database_url.startswith("postgresql://"):
-        database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
-    
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    print(f"? Usando PostgreSQL com psycopg: {database_url.split('@')[1] if '@' in database_url else 'URL configurada'}")
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-    print("?? Usando SQLite local")
+# SOLUÇÃO 1: Flag para forçar SQLite temporariamente
+USE_SQLITE_TEMPORARIO = True  # Mude para False quando quiser tentar Supabase novamente
 
+# SOLUÇÃO 4: Configuração com fallback automático
+def configurar_banco():
+    """Configura o banco com fallback automático e tratamento robusto"""
+    
+    # SOLUÇÃO 1: Forçar SQLite temporariamente
+    if USE_SQLITE_TEMPORARIO:
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+        print("✅ Usando SQLite local (modo temporário - Supabase desativado)")
+        return "sqlite"
+    
+    # Tenta conectar com Supabase
+    if database_url:
+        try:
+            # CORREÇÃO: Limpeza e formatação robusta da URL
+            database_url_limpa = database_url.strip()
+            database_url_limpa = database_url_limpa.replace('(', '').replace(')', '').strip()
+            
+            # CORREÇÃO CRÍTICA: Substitui postgres:// por postgresql://
+            if database_url_limpa.startswith("postgres://"):
+                database_url_limpa = database_url_limpa.replace("postgres://", "postgresql://", 1)
+            
+            # SOLUÇÃO 3: Tenta conexão direta se for pooler
+            if 'pooler.supabase.com' in database_url_limpa:
+                database_url_limpa = database_url_limpa.replace('pooler.supabase.com', 'supabase.co')
+                # Remove prefixo AWS se existir
+                if 'aws-' in database_url_limpa:
+                    import re
+                    database_url_limpa = re.sub(r'aws-\d+-[a-z]+-\d+\.', '', database_url_limpa)
+                print("🔄 Tentando conexão direta do Supabase (sem pooler)")
+            
+            # CORREÇÃO: Force o uso do psycopg (versão 3)
+            if database_url_limpa.startswith("postgresql://"):
+                database_url_limpa = database_url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
+            
+            app.config["SQLALCHEMY_DATABASE_URI"] = database_url_limpa
+            print(f"🔄 Tentando conectar com Supabase: {database_url_limpa.split('@')[1] if '@' in database_url_limpa else 'URL configurada'}")
+            
+            # Testa a conexão imediatamente
+            with app.app_context():
+                temp_db = SQLAlchemy()
+                temp_db.init_app(app)
+                temp_db.session.execute(text('SELECT 1'))
+                print("✅ Conexão com Supabase bem-sucedida!")
+                return "supabase"
+                
+        except Exception as e:
+            print(f"❌ Falha na conexão com Supabase: {e}")
+            print("🔄 Fallback para SQLite local...")
+    
+    # Fallback para SQLite
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+    print("✅ Usando SQLite local (fallback)")
+    return "sqlite"
+
+# Configura o banco
+tipo_banco = configurar_banco()
+
+# Configurações comuns
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
@@ -49,6 +89,17 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
+
+# Adicione esta função para verificar o status do banco
+@app.route("/api/status-banco")
+def status_banco():
+    """Endpoint para verificar o status da conexão com o banco"""
+    return jsonify({
+        "tipo_banco": tipo_banco,
+        "supabase_configurado": bool(database_url),
+        "sqlite_temporario": USE_SQLITE_TEMPORARIO,
+        "status": "operacional" if tipo_banco == "sqlite" else "tentando_supabase"
+    })
 
 class User(db.Model):
     __tablename__ = "users"
