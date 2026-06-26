@@ -1,13 +1,13 @@
 from __future__ import annotations
 import os
 import json
+import re
 from pathlib import Path
 from flask import Flask, render_template, request, session, jsonify
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, inspect
 from datetime import datetime, date
-import re
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "app.db"
@@ -36,18 +36,23 @@ def configurar_banco():
             url_limpa = re.sub(r'aws-\d+-[a-z]+-\d+\.', '', url_limpa)
             print("🔄 Usando conexão direta do Supabase (sem pooler)")
 
-        # NÃO força driver psycopg2, deixa o SQLAlchemy detectar
+        # Força o uso do driver psycopg (versão 3) - compatível com Python 3.12+
+        if url_limpa.startswith("postgresql://"):
+            # psycopg já é usado por padrão com SQLAlchemy 2.0+, mas garantimos
+            url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
+
         try:
+            # Configura a URI e testa a conexão
             app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
             app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
                 "pool_recycle": 300,
                 "pool_pre_ping": True,
             }
-            # Testa a conexão com um engine temporário
-            from sqlalchemy import create_engine
-            engine = create_engine(url_limpa, **app.config["SQLALCHEMY_ENGINE_OPTIONS"])
-            with engine.connect() as conn:
-                conn.execute(text('SELECT 1'))
+            # Testa a conexão com um select simples
+            temp_db = SQLAlchemy()
+            temp_db.init_app(app)
+            with app.app_context():
+                temp_db.session.execute(text('SELECT 1'))
             print("✅ Conectado ao Supabase (PostgreSQL) com sucesso!")
             return "supabase"
         except Exception as e:
@@ -56,26 +61,28 @@ def configurar_banco():
 
     # Fallback para SQLite
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {}
     print("✅ Usando SQLite local (fallback)")
     return "sqlite"
 
+# Configura o banco
 tipo_banco = configurar_banco()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-bcrypt = Bcrypt(app)
-db = SQLAlchemy(app)  # Apenas uma instância
+# Inicializa o SQLAlchemy sem vincular ao app ainda
+db = SQLAlchemy()
+# Agora sim, vincula ao app (uma única vez)
+db.init_app(app)
 
-# -------------------------------------------------------------
-# Modelos
-# -------------------------------------------------------------
+# =============================================================
+# MODELOS
+# =============================================================
 class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    nivel = db.Column(db.String(20), default="funcionario")
+    nivel = db.Column(db.String(20), default="funcionario")  # admin, gerente, funcionario
 
     def set_password(self, raw):
         self.password_hash = bcrypt.generate_password_hash(raw).decode()
@@ -89,7 +96,7 @@ class Cliente(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(20))
     placa = db.Column(db.String(10), nullable=False, unique=True)
-    veiculo = db.Column(db.String(50), default="Carro")
+    veiculo = db.Column(db.String(50), default="Carro")  # pode conter "Outro: Van", etc.
     plano = db.Column(db.String(20), default="Mensal")
     mensalidade = db.Column(db.Float, default=0.0)
     inicio = db.Column(db.Date, nullable=False)
@@ -121,15 +128,12 @@ class Lavagem(db.Model):
     tipo = db.Column(db.String(20), default="assinante")
     preco = db.Column(db.Float, default=0.0)
     observacoes = db.Column(db.Text)
-    produtos_utilizados = db.Column(db.Text)
+    produtos_utilizados = db.Column(db.Text)  # JSON
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# -------------------------------------------------------------
-# Funções auxiliares
-# -------------------------------------------------------------
-def logged_in():
-    return bool(session.get("uid"))
-
+# =============================================================
+# INICIALIZAÇÃO DO BANCO (cria tabelas e usuário admin)
+# =============================================================
 def init_db():
     with app.app_context():
         try:
@@ -144,9 +148,12 @@ def init_db():
         except Exception as e:
             print(f"⚠️ Erro na inicialização: {e}")
 
-# -------------------------------------------------------------
-# Rotas da API (coloque aqui todas as suas rotas existentes)
-# -------------------------------------------------------------
+# =============================================================
+# ROTAS DA API
+# =============================================================
+def logged_in():
+    return bool(session.get("uid"))
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -154,8 +161,12 @@ def home():
 @app.route("/api/login", methods=["POST"])
 def api_login():
     data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
     username = data.get('username', '').strip()
     password = data.get('password', '')
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Usuário e senha obrigatórios'}), 400
     user = User.query.filter_by(username=username).first()
     if user and user.check_password(password):
         session["uid"] = user.id
@@ -171,13 +182,363 @@ def api_login():
         })
     return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
 
-# ... (coloque todas as outras rotas que você já tinha: /api/dashboard, /api/clientes, etc.)
-# Para evitar repetir todo o código, sugiro copiar as rotas do seu app.py atual.
-# Apenas as que estão aqui são exemplos; mantenha as que você já tem.
+@app.route("/api/logout", methods=["POST"])
+def api_logout():
+    session.clear()
+    return jsonify({'success': True})
 
-# -------------------------------------------------------------
-# Inicialização
-# -------------------------------------------------------------
+@app.route("/api/dashboard")
+def api_dashboard():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    try:
+        # Atualizar status dos clientes baseado na data atual
+        hoje = date.today()
+        clientes = Cliente.query.all()
+        for cliente in clientes:
+            if cliente.status == 'Pago' and cliente.vencimento < hoje:
+                cliente.status = 'Vencido'
+            elif cliente.status == 'Pendente' and cliente.vencimento < hoje:
+                cliente.status = 'Vencido'
+        db.session.commit()
+        
+        # Estatísticas
+        clientes_ativos = Cliente.query.filter_by(status="Pago").count()
+        inadimplentes = Cliente.query.filter_by(status="Vencido").count()
+        
+        # Receita de mensalidades pagas
+        receita_mensalidades = db.session.query(db.func.sum(Cliente.mensalidade)).filter_by(status="Pago").scalar() or 0
+        
+        # Receita de lavagens avulsas
+        receita_lavagens_avulsas = db.session.query(db.func.sum(Lavagem.preco)).filter_by(tipo="avulsa").scalar() or 0
+        receita_total = receita_mensalidades + receita_lavagens_avulsas
+        
+        # Valor a receber
+        a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
+        
+        # Lavagens avulsas
+        lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
+        
+        # Lucro estimado (calculado no frontend, mas mantido aqui para compatibilidade)
+        custo_produtos = 0
+        lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
+        for lavagem in lavagens_com_produtos:
+            if lavagem.produtos_utilizados:
+                try:
+                    produtos_utilizados = json.loads(lavagem.produtos_utilizados)
+                    for produto_usado in produtos_utilizados:
+                        produto = Produto.query.get(produto_usado['produtoId'])
+                        if produto:
+                            custo_produtos += produto_usado['quantidade'] * produto.preco
+                except:
+                    pass
+        lucro_total = receita_total - custo_produtos
+        
+        # Últimas lavagens
+        ultimas_lavagens = Lavagem.query.order_by(Lavagem.data.desc()).limit(5).all()
+        
+        return jsonify({
+            'stats': {
+                'clientesAtivos': clientes_ativos,
+                'receitaTotal': float(receita_total),
+                'inadimplentes': inadimplentes,
+                'aReceber': float(a_receber),
+                'lavagensAvulsas': lavagens_avulsas,
+                'lucroTotal': float(lucro_total)
+            },
+            'ultimasLavagens': [
+                {
+                    'data': lavagem.data.isoformat(),
+                    'clienteNome': lavagem.cliente_nome,
+                    'placa': lavagem.placa,
+                    'servico': lavagem.servico,
+                    'funcionario': lavagem.funcionario,
+                    'tipo': lavagem.tipo
+                }
+                for lavagem in ultimas_lavagens
+            ]
+        })
+    except Exception as e:
+        return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
+
+@app.route("/api/clientes")
+def api_clientes():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    clientes = Cliente.query.all()
+    return jsonify({
+        'clientes': [
+            {
+                'id': cliente.id,
+                'nome': cliente.nome,
+                'telefone': cliente.telefone,
+                'placa': cliente.placa,
+                'veiculo': cliente.veiculo,
+                'plano': cliente.plano,
+                'mensalidade': float(cliente.mensalidade),
+                'inicio': cliente.inicio.isoformat(),
+                'vencimento': cliente.vencimento.isoformat(),
+                'status': cliente.status,
+                'observacoes': cliente.observacoes
+            }
+            for cliente in clientes
+        ]
+    })
+
+@app.route("/api/clientes", methods=["POST"])
+def api_criar_cliente():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    data = request.get_json()
+    try:
+        cliente = Cliente(
+            nome=data['nome'],
+            telefone=data.get('telefone', ''),
+            placa=data['placa'],
+            veiculo=data.get('veiculo', 'Carro'),
+            plano=data.get('plano', 'Mensal'),
+            mensalidade=float(data.get('mensalidade', 500)),
+            inicio=datetime.fromisoformat(data['inicio']).date(),
+            vencimento=datetime.fromisoformat(data['vencimento']).date(),
+            status=data.get('status', 'Pendente'),
+            observacoes=data.get('observacoes', '')
+        )
+        db.session.add(cliente)
+        db.session.commit()
+        return jsonify({'success': True, 'id': cliente.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/clientes/<int:cliente_id>", methods=["PUT"])
+def api_atualizar_cliente(cliente_id):
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    data = request.get_json()
+    cliente = Cliente.query.get_or_404(cliente_id)
+    try:
+        cliente.nome = data['nome']
+        cliente.telefone = data.get('telefone', '')
+        cliente.placa = data['placa']
+        cliente.veiculo = data.get('veiculo', 'Carro')
+        cliente.plano = data.get('plano', 'Mensal')
+        cliente.mensalidade = float(data.get('mensalidade', 500))
+        cliente.inicio = datetime.fromisoformat(data['inicio']).date()
+        cliente.vencimento = datetime.fromisoformat(data['vencimento']).date()
+        cliente.status = data.get('status', 'Pendente')
+        cliente.observacoes = data.get('observacoes', '')
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/clientes/<int:cliente_id>", methods=["DELETE"])
+def api_excluir_cliente(cliente_id):
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    cliente = Cliente.query.get_or_404(cliente_id)
+    try:
+        db.session.delete(cliente)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/lavagens")
+def api_lavagens():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    lavagens = Lavagem.query.all()
+    return jsonify({
+        'lavagens': [
+            {
+                'id': lavagem.id,
+                'data': lavagem.data.isoformat(),
+                'clienteId': lavagem.cliente_id,
+                'clienteNome': lavagem.cliente_nome,
+                'placa': lavagem.placa,
+                'servico': lavagem.servico,
+                'funcionario': lavagem.funcionario,
+                'tipo': lavagem.tipo,
+                'preco': float(lavagem.preco),
+                'observacoes': lavagem.observacoes,
+                'produtosUtilizados': json.loads(lavagem.produtos_utilizados) if lavagem.produtos_utilizados else []
+            }
+            for lavagem in lavagens
+        ]
+    })
+
+@app.route("/api/lavagens", methods=["POST"])
+def api_criar_lavagem():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    data = request.get_json()
+    try:
+        lavagem = Lavagem(
+            data=datetime.fromisoformat(data['data']).date(),
+            cliente_id=data.get('clienteId'),
+            cliente_nome=data['clienteNome'],
+            placa=data['placa'],
+            servico=data['servico'],
+            funcionario=data['funcionario'],
+            tipo=data['tipo'],
+            preco=float(data.get('preco', 0)),
+            observacoes=data.get('observacoes', ''),
+            produtos_utilizados=json.dumps(data.get('produtosUtilizados', []))
+        )
+        # Atualizar estoque dos produtos utilizados
+        for produto_usado in data.get('produtosUtilizados', []):
+            produto = Produto.query.get(produto_usado['produtoId'])
+            if produto:
+                produto.quantidade -= produto_usado['quantidade']
+        db.session.add(lavagem)
+        db.session.commit()
+        return jsonify({'success': True, 'id': lavagem.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/lavagens/<int:lavagem_id>", methods=["DELETE"])
+def api_excluir_lavagem(lavagem_id):
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    lavagem = Lavagem.query.get_or_404(lavagem_id)
+    try:
+        # Restaurar estoque dos produtos utilizados
+        if lavagem.produtos_utilizados:
+            produtos_utilizados = json.loads(lavagem.produtos_utilizados)
+            for produto_usado in produtos_utilizados:
+                produto = Produto.query.get(produto_usado['produtoId'])
+                if produto:
+                    produto.quantidade += produto_usado['quantidade']
+        db.session.delete(lavagem)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/produtos")
+def api_produtos():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    produtos = Produto.query.all()
+    return jsonify({
+        'produtos': [
+            {
+                'id': produto.id,
+                'produto': produto.produto,
+                'categoria': produto.categoria,
+                'unidade': produto.unidade,
+                'quantidade': produto.quantidade,
+                'estoqueMin': produto.estoque_min,
+                'preco': float(produto.preco)
+            }
+            for produto in produtos
+        ]
+    })
+
+@app.route("/api/produtos", methods=["POST"])
+def api_criar_produto():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    data = request.get_json()
+    try:
+        produto = Produto(
+            produto=data['produto'],
+            categoria=data.get('categoria', 'Limpeza'),
+            unidade=data.get('unidade', 'Unidade'),
+            quantidade=float(data.get('quantidade', 0)),
+            estoque_min=float(data.get('estoqueMin', 0)),
+            preco=float(data.get('preco', 0))
+        )
+        db.session.add(produto)
+        db.session.commit()
+        return jsonify({'success': True, 'id': produto.id})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/produtos/<int:produto_id>", methods=["PUT"])
+def api_atualizar_produto(produto_id):
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    data = request.get_json()
+    produto = Produto.query.get_or_404(produto_id)
+    try:
+        produto.produto = data['produto']
+        produto.categoria = data.get('categoria', 'Limpeza')
+        produto.unidade = data.get('unidade', 'Unidade')
+        produto.quantidade = float(data.get('quantidade', 0))
+        produto.estoque_min = float(data.get('estoqueMin', 0))
+        produto.preco = float(data.get('preco', 0))
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/produtos/<int:produto_id>", methods=["DELETE"])
+def api_excluir_produto(produto_id):
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    produto = Produto.query.get_or_404(produto_id)
+    try:
+        db.session.delete(produto)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route("/api/financeiro")
+def api_financeiro():
+    if not logged_in():
+        return jsonify({'error': 'Não autenticado'}), 401
+    
+    # Cálculos financeiros mensais
+    ano_atual = datetime.now().year
+    meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+             'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+    
+    receitas_mensais = []
+    for mes in range(12):
+        receita_mensalidades = db.session.query(db.func.sum(Cliente.mensalidade)).filter(
+            db.extract('month', Cliente.inicio) == mes + 1,
+            db.extract('year', Cliente.inicio) == ano_atual,
+            Cliente.status == 'Pago'
+        ).scalar() or 0
+        
+        receita_lavagens = db.session.query(db.func.sum(Lavagem.preco)).filter(
+            db.extract('month', Lavagem.data) == mes + 1,
+            db.extract('year', Lavagem.data) == ano_atual,
+            Lavagem.tipo == 'avulsa'
+        ).scalar() or 0
+        
+        receitas_mensais.append(float(receita_mensalidades + receita_lavagens))
+    
+    return jsonify({
+        'receitasMensais': receitas_mensais,
+        'meses': meses
+    })
+
+# =============================================================
+# INICIALIZAÇÃO
+# =============================================================
 if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 5000))
