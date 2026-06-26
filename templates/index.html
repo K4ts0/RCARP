@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RPCAR - Sistema de Gestão</title>
+    <title>Way For System - Gestão Automotiva</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -688,7 +688,7 @@
     <!-- Tela de Login -->
     <div class="login-container" id="loginScreen">
         <div class="login-form">
-            <h2><i class="fas fa-car"></i> RPCAR - Sistema</h2>
+            <h2><i class="fas fa-car"></i> Way For System</h2>
             <div class="form-group">
                 <label for="username">Usuário</label>
                 <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username">
@@ -705,7 +705,7 @@
     <div class="app-container" id="appScreen">
         <header>
             <div class="header-content">
-                <div class="logo">RPCAR Lavagem Automotiva</div>
+                <div class="logo">Way For System</div>
                 <div class="user-info">
                     <span id="userName">Administrador</span>
                     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
@@ -721,6 +721,7 @@
                     <li data-tab="lavagens">Lavagens</li>
                     <li data-tab="estoque">Estoque</li>
                     <li data-tab="relatorios">Relatórios</li>
+                    <li data-tab="admin" id="navAdmin" style="display:none; color: var(--accent);">⚙ Painel Administrativo</li>
                 </ul>
             </div>
         </nav>
@@ -825,6 +826,8 @@
                 <div class="tabs-container">
                     <button class="tab-button active" data-tab="lavagens-assinantes">Lavagens de Assinantes</button>
                     <button class="tab-button" data-tab="lavagens-avulsas">Lavagens Avulsas</button>
+                    <button class="tab-button" data-tab="lavagens-vendas">Venda de Produtos</button>
+                    <button class="tab-button" data-tab="lavagens-servicos">Prestação de Serviço</button>
                 </div>
 
                 <div class="alert alert-success" id="lavagemAlert" style="display: none;"></div>
@@ -867,6 +870,57 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Venda de Produtos -->
+                <div class="tab-panel" id="lavagens-vendas">
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3>Vendas de Produtos</h3>
+                        <button class="btn" id="addVendaBtn"><i class="fas fa-plus"></i> Nova Venda</button>
+                    </div>
+                    <table id="vendasTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Valor Unit.</th>
+                                <th>Total (R$)</th>
+                                <th>Funcionário</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendasTableBody">
+                            <tr><td colspan="8" style="text-align:center; color:#999;">Nenhuma venda registrada</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Prestação de Serviço -->
+                <div class="tab-panel" id="lavagens-servicos">
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3>Prestação de Serviços</h3>
+                        <button class="btn" id="addServicoBtn"><i class="fas fa-plus"></i> Novo Serviço</button>
+                    </div>
+                    <table id="servicosTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Placa</th>
+                                <th>Serviço</th>
+                                <th>Descrição</th>
+                                <th>Valor (R$)</th>
+                                <th>Funcionário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicosTableBody">
+                            <tr><td colspan="9" style="text-align:center; color:#999;">Nenhum serviço registrado</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Estoque -->
@@ -905,7 +959,6 @@
                     <h2>Relatórios</h2>
                     <div>
                         <button class="btn btn-success" id="imprimirRelatorio"><i class="fas fa-print"></i> Imprimir</button>
-                        <button class="btn btn-warning" id="exportarRelatorio"><i class="fas fa-download"></i> Exportar</button>
                     </div>
                 </div>
 
@@ -970,6 +1023,60 @@
         </div>
     </div>
 
+    <!-- Painel Administrativo (apenas admin) -->
+    <div class="tab-content" id="admin">
+        <div class="page-header">
+            <h2>⚙ Painel Administrativo</h2>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-button active" data-subtab="admin-usuarios">Usuários</button>
+            <button class="tab-button" data-subtab="admin-permissoes">Permissões</button>
+        </div>
+
+        <!-- Usuários -->
+        <div class="tab-panel active" id="admin-usuarios">
+            <div class="page-header" style="margin-top:15px;">
+                <h3>Gerenciamento de Usuários</h3>
+                <button class="btn" id="addUsuarioBtn"><i class="fas fa-plus"></i> Novo Usuário</button>
+            </div>
+            <div class="alert" id="adminAlert" style="display:none;"></div>
+            <table id="usuariosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Usuário</th>
+                        <th>Nível</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Permissões -->
+        <div class="tab-panel" id="admin-permissoes">
+            <div style="margin-top:15px;">
+                <h3>Níveis de Acesso</h3>
+                <div class="stats-container" style="margin-top:20px;">
+                    <div class="stat-card">
+                        <h3>👑 Administrador</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso total: Dashboard, Clientes, Lavagens, Estoque, Relatórios e Painel Administrativo.</p>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>🧑‍💼 Gerente</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso a: Estoque, Lavagens e Clientes.</p>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>👷 Funcionário</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso a: Lavagens e Clientes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para adicionar/editar cliente -->
     <div class="modal" id="clienteModal">
         <div class="modal-content">
@@ -995,12 +1102,19 @@
                     </div>
                     <div class="form-control">
                         <label for="clienteVeiculo">Tipo de Veículo</label>
-                        <select id="clienteVeiculo">
+                        <select id="clienteVeiculo" onchange="toggleOutroVeiculo(this)">
                             <option value="Carro">Carro</option>
                             <option value="Moto">Moto</option>
                             <option value="SUV">SUV</option>
                             <option value="Caminhonete">Caminhonete</option>
+                            <option value="Outro">Outro</option>
                         </select>
+                    </div>
+                </div>
+                <div class="form-row" id="outroVeiculoRow" style="display:none;">
+                    <div class="form-control">
+                        <label for="clienteVeiculoOutro">Descreva o tipo de veículo</label>
+                        <input type="text" id="clienteVeiculoOutro" placeholder="Ex: Caminhão, Van, Micro-ônibus...">
                     </div>
                 </div>
                 <div class="form-row">
@@ -1189,6 +1303,179 @@
                 </div>
                 <div style="margin-top: 20px; display: flex; gap: 10px;">
                     <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para venda de produto -->
+    <div class="modal" id="vendaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Venda de Produto</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="vendaForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaData">Data</label>
+                        <input type="date" id="vendaData" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaCliente">Cliente</label>
+                        <select id="vendaCliente" required>
+                            <option value="">Selecione um cliente</option>
+                            <option value="avulso">Cliente Avulso</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaProduto">Produto</label>
+                        <select id="vendaProduto" required>
+                            <option value="">Selecione o produto</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaQuantidade">Quantidade</label>
+                        <input type="number" id="vendaQuantidade" min="1" value="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaValorUnit">Valor Unitário (R$)</label>
+                        <input type="number" step="0.01" id="vendaValorUnit" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaFuncionario">Funcionário</label>
+                        <input type="text" id="vendaFuncionario" required>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label for="vendaObs">Observações</label>
+                    <input type="text" id="vendaObs">
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Registrar Venda</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para prestação de serviço -->
+    <div class="modal" id="servicoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Prestação de Serviço</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="servicoForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoData">Data</label>
+                        <input type="date" id="servicoData" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoCliente">Cliente</label>
+                        <select id="servicoCliente" required>
+                            <option value="">Selecione um cliente</option>
+                            <option value="avulso">Cliente Avulso</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoPlaca">Placa</label>
+                        <input type="text" id="servicoPlaca" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoTipo">Tipo de Serviço</label>
+                        <select id="servicoTipo" required>
+                            <option value="Polimento">Polimento</option>
+                            <option value="Cristalização">Cristalização</option>
+                            <option value="Higienização Interna">Higienização Interna</option>
+                            <option value="Recuperação de Faróis">Recuperação de Faróis</option>
+                            <option value="Tratamento de Couro">Tratamento de Couro</option>
+                            <option value="Plotagem">Plotagem</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoDescricao">Descrição</label>
+                        <input type="text" id="servicoDescricao" placeholder="Detalhes do serviço">
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoValor">Valor (R$)</label>
+                        <input type="number" step="0.01" id="servicoValor" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoFuncionario">Funcionário Responsável</label>
+                        <input type="text" id="servicoFuncionario" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoStatus">Status</label>
+                        <select id="servicoStatus">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Registrar Serviço</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar usuário -->
+    <div class="modal" id="usuarioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="usuarioModalTitle">Novo Usuário</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="usuarioForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="usuarioNome">Nome Completo</label>
+                        <input type="text" id="usuarioNome" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="usuarioLogin">Login</label>
+                        <input type="text" id="usuarioLogin" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="usuarioSenha">Senha</label>
+                        <input type="password" id="usuarioSenha" placeholder="Deixe em branco para não alterar">
+                    </div>
+                    <div class="form-control">
+                        <label for="usuarioNivel">Nível de Acesso</label>
+                        <select id="usuarioNivel" required>
+                            <option value="administrador">👑 Administrador</option>
+                            <option value="gerente">🧑‍💼 Gerente</option>
+                            <option value="funcionario">👷 Funcionário</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label for="usuarioStatusAtivo">Status</label>
+                    <select id="usuarioStatusAtivo">
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Salvar Usuário</button>
                     <button type="button" class="btn btn-danger close-modal">Cancelar</button>
                 </div>
             </form>
@@ -1450,7 +1737,6 @@
             
             document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
             document.getElementById('imprimirRelatorio').addEventListener('click', imprimirRelatorio);
-            document.getElementById('exportarRelatorio').addEventListener('click', exportarRelatorio);
             
             // Controle de preço na lavagem avulsa
             document.getElementById('lavagemTipo').addEventListener('change', function() {
@@ -1498,6 +1784,24 @@
                 document.getElementById('lavagemProdutos').value = '';
                 document.getElementById('produtoQuantidadeUsada').value = '1';
             });
+
+            // Botões venda, serviço e usuário
+            document.getElementById('addVendaBtn').addEventListener('click', abrirModalVenda);
+            document.getElementById('addServicoBtn').addEventListener('click', abrirModalServico);
+            document.getElementById('addUsuarioBtn').addEventListener('click', abrirModalUsuario);
+            document.getElementById('vendaForm').addEventListener('submit', salvarVenda);
+            document.getElementById('servicoForm').addEventListener('submit', salvarServico);
+            document.getElementById('usuarioForm').addEventListener('submit', salvarUsuario);
+
+            // Subtabs do painel admin
+            document.querySelectorAll('[data-subtab]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-subtab]').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('#admin .tab-panel').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.getAttribute('data-subtab')).classList.add('active');
+                });
+            });
         }
 
         // Função de login
@@ -1519,12 +1823,44 @@
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('appScreen').style.display = 'block';
                     
+                    // Aplicar controle de acesso por nível
+                    aplicarControleAcesso(result.user.nivel || 'funcionario');
+                    
                     await carregarDados();
                 } else {
                     alert(result.message || 'Erro no login');
                 }
             } catch (error) {
                 alert('Erro ao fazer login: ' + error.message);
+            }
+        }
+
+        // Controle de acesso por nível
+        function aplicarControleAcesso(nivel) {
+            estado.nivelUsuario = nivel;
+            const navAdmin = document.getElementById('navAdmin');
+            const tabEstoque = document.querySelector('.nav-tabs li[data-tab="estoque"]');
+            const tabRelatorios = document.querySelector('.nav-tabs li[data-tab="relatorios"]');
+            const tabDashboard = document.querySelector('.nav-tabs li[data-tab="dashboard"]');
+
+            if (nivel === 'administrador') {
+                // Acesso total
+                navAdmin.style.display = 'block';
+                if (tabEstoque) tabEstoque.style.display = '';
+                if (tabRelatorios) tabRelatorios.style.display = '';
+                if (tabDashboard) tabDashboard.style.display = '';
+            } else if (nivel === 'gerente') {
+                // Estoque, Lavagens, Clientes
+                navAdmin.style.display = 'none';
+                if (tabEstoque) tabEstoque.style.display = '';
+                if (tabRelatorios) tabRelatorios.style.display = 'none';
+                if (tabDashboard) tabDashboard.style.display = 'none';
+            } else {
+                // Funcionário: Lavagens e Clientes
+                navAdmin.style.display = 'none';
+                if (tabEstoque) tabEstoque.style.display = 'none';
+                if (tabRelatorios) tabRelatorios.style.display = 'none';
+                if (tabDashboard) tabDashboard.style.display = 'none';
             }
         }
 
@@ -1567,6 +1903,10 @@
                 await carregarLavagens();
             } else if (abaId === 'estoque') {
                 await carregarEstoque();
+            } else if (abaId === 'admin') {
+                carregarUsuarios();
+            }
+                await carregarEstoque();
             } else if (abaId === 'relatorios') {
                 // Não carregar dados automaticamente para relatórios
             }
@@ -1603,11 +1943,20 @@
                 
                 // Atualizar estatísticas
                 document.getElementById('clientesAtivos').textContent = data.stats.clientesAtivos;
-                document.getElementById('receitaTotal').textContent = data.stats.receitaTotal.toFixed(2);
+                document.getElementById('receitaTotal').textContent = parseFloat(data.stats.receitaTotal || 0).toFixed(2);
                 document.getElementById('inadimplentes').textContent = data.stats.inadimplentes;
-                document.getElementById('aReceber').textContent = data.stats.aReceber.toFixed(2);
+                document.getElementById('aReceber').textContent = parseFloat(data.stats.aReceber || 0).toFixed(2);
                 document.getElementById('lavagensAvulsas').textContent = data.stats.lavagensAvulsas;
-                document.getElementById('lucroTotal').textContent = data.stats.lucroTotal.toFixed(2);
+                
+                // Lucro estimado = receita avulsas + mensalidades pagas (sem dupla contagem)
+                const receitaAvulsasDash = (estado.lavagens || [])
+                    .filter(l => l.tipo === 'avulsa')
+                    .reduce((s, l) => s + parseFloat(l.preco || 0), 0);
+                const receitaMensalDash = (estado.clientes || [])
+                    .filter(c => c.status === 'Pago')
+                    .reduce((s, c) => s + parseFloat(c.mensalidade || 0), 0);
+                const lucroEstimado = receitaAvulsasDash + receitaMensalDash;
+                document.getElementById('lucroTotal').textContent = lucroEstimado.toFixed(2);
                 
                 // Atualizar últimas lavagens
                 const tbody = document.querySelector('#ultimasLavagens tbody');
@@ -1948,7 +2297,12 @@
             const nome = document.getElementById('clienteNome').value;
             const telefone = document.getElementById('clienteTelefone').value;
             const placa = document.getElementById('clientePlaca').value.toUpperCase(); // Converter para maiúsculas
-            const veiculo = document.getElementById('clienteVeiculo').value;
+            let veiculo = document.getElementById('clienteVeiculo').value;
+            if (veiculo === 'Outro') {
+                const outro = document.getElementById('clienteVeiculoOutro').value.trim();
+                if (!outro) { alert('Descreva o tipo de veículo.'); return; }
+                veiculo = outro;
+            }
             const plano = document.getElementById('clientePlano').value;
             const mensalidade = parseFloat(document.getElementById('clienteMensalidade').value);
             const inicio = document.getElementById('clienteInicio').value;
@@ -2349,6 +2703,12 @@
             `;
 
             lavagensFiltradas.forEach(lavagem => {
+                // Para assinantes, busca a mensalidade do cliente
+                let precoExibir = lavagem.preco;
+                if (lavagem.tipo === 'assinante' && lavagem.clienteId) {
+                    const cli = estado.clientes.find(c => c.id === lavagem.clienteId);
+                    if (cli) precoExibir = cli.mensalidade;
+                }
                 html += `
                     <tr>
                         <td>${formatarData(lavagem.data)}</td>
@@ -2357,7 +2717,7 @@
                         <td>${lavagem.servico}</td>
                         <td>${lavagem.funcionario}</td>
                         <td>${lavagem.tipo === 'avulsa' ? 'Avulsa' : 'Assinante'}</td>
-                        <td>R$ ${lavagem.preco.toFixed(2)}</td>
+                        <td>R$ ${parseFloat(precoExibir || 0).toFixed(2)}</td>
                     </tr>
                 `;
             });
@@ -2694,7 +3054,293 @@
             janela.document.close();
         }
 
-        // Mostrar alerta
+        // Toggle campo "Outro" veículo
+        function toggleOutroVeiculo(sel) {
+            const row = document.getElementById('outroVeiculoRow');
+            const input = document.getElementById('clienteVeiculoOutro');
+            if (sel.value === 'Outro') {
+                row.style.display = '';
+                input.required = true;
+            } else {
+                row.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // ========== VENDAS DE PRODUTOS ==========
+        let vendas = [];
+
+        function abrirModalVenda() {
+            const modal = document.getElementById('vendaModal');
+            document.getElementById('vendaForm').reset();
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('vendaData').value = hoje;
+
+            // Preencher clientes
+            const sel = document.getElementById('vendaCliente');
+            sel.innerHTML = '<option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option>';
+            estado.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.nome} - ${c.placa}`;
+                sel.appendChild(opt);
+            });
+
+            // Preencher produtos
+            const selProd = document.getElementById('vendaProduto');
+            selProd.innerHTML = '<option value="">Selecione o produto</option>';
+            estado.produtos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.produto} (Estoque: ${p.quantidade}) - R$ ${parseFloat(p.preco).toFixed(2)}`;
+                opt.dataset.preco = p.preco;
+                selProd.appendChild(opt);
+            });
+
+            selProd.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                if (opt.dataset.preco) {
+                    document.getElementById('vendaValorUnit').value = parseFloat(opt.dataset.preco).toFixed(2);
+                }
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        async function salvarVenda(e) {
+            e.preventDefault();
+            const data = document.getElementById('vendaData').value;
+            const clienteId = document.getElementById('vendaCliente').value;
+            const produtoId = document.getElementById('vendaProduto').value;
+            const quantidade = parseInt(document.getElementById('vendaQuantidade').value);
+            const valorUnit = parseFloat(document.getElementById('vendaValorUnit').value);
+            const funcionario = document.getElementById('vendaFuncionario').value;
+            const obs = document.getElementById('vendaObs').value;
+
+            if (!data || !clienteId || !produtoId || !quantidade || !valorUnit || !funcionario) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
+            if (!produto || quantidade > produto.quantidade) {
+                alert(`Estoque insuficiente. Disponível: ${produto ? produto.quantidade : 0}`);
+                return;
+            }
+
+            const cliente = clienteId === 'avulso' ? { nome: 'Cliente Avulso' } : estado.clientes.find(c => c.id === parseInt(clienteId));
+            const total = quantidade * valorUnit;
+
+            const venda = {
+                id: Date.now(),
+                data, clienteId, clienteNome: cliente.nome,
+                produtoId: parseInt(produtoId), produtoNome: produto.produto,
+                quantidade, valorUnit, total, funcionario, obs
+            };
+
+            vendas.push(venda);
+            // Desconta do estoque local
+            produto.quantidade -= quantidade;
+
+            renderVendas();
+            fecharTodosModais();
+            mostrarAlerta('Venda registrada com sucesso!', 'success', 'lavagemAlert');
+            await carregarEstoque();
+        }
+
+        function renderVendas() {
+            const tbody = document.getElementById('vendasTableBody');
+            if (vendas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">Nenhuma venda registrada</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            vendas.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatarData(v.data)}</td>
+                    <td>${v.clienteNome}</td>
+                    <td>${v.produtoNome}</td>
+                    <td>${v.quantidade}</td>
+                    <td>R$ ${parseFloat(v.valorUnit).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(v.total).toFixed(2)}</td>
+                    <td>${v.funcionario}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirVenda(${v.id})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirVenda(id) {
+            if (confirm('Excluir esta venda?')) {
+                vendas = vendas.filter(v => v.id !== id);
+                renderVendas();
+            }
+        }
+
+        // ========== PRESTAÇÃO DE SERVIÇOS ==========
+        let servicos_registrados = [];
+
+        function abrirModalServico() {
+            const modal = document.getElementById('servicoModal');
+            document.getElementById('servicoForm').reset();
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('servicoData').value = hoje;
+
+            const sel = document.getElementById('servicoCliente');
+            sel.innerHTML = '<option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option>';
+            estado.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.nome} - ${c.placa}`;
+                sel.appendChild(opt);
+            });
+
+            sel.addEventListener('change', function() {
+                const cli = estado.clientes.find(c => c.id === parseInt(this.value));
+                if (cli) document.getElementById('servicoPlaca').value = cli.placa;
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        async function salvarServico(e) {
+            e.preventDefault();
+            const data = document.getElementById('servicoData').value;
+            const clienteId = document.getElementById('servicoCliente').value;
+            const placa = document.getElementById('servicoPlaca').value;
+            const tipo = document.getElementById('servicoTipo').value;
+            const descricao = document.getElementById('servicoDescricao').value;
+            const valor = parseFloat(document.getElementById('servicoValor').value);
+            const funcionario = document.getElementById('servicoFuncionario').value;
+            const statusServ = document.getElementById('servicoStatus').value;
+
+            if (!data || !clienteId || !placa || !tipo || !valor || !funcionario) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const cliente = clienteId === 'avulso' ? { nome: 'Cliente Avulso' } : estado.clientes.find(c => c.id === parseInt(clienteId));
+
+            servicos_registrados.push({
+                id: Date.now(),
+                data, clienteNome: cliente.nome, placa,
+                tipo, descricao, valor, funcionario, status: statusServ
+            });
+
+            renderServicos();
+            fecharTodosModais();
+            mostrarAlerta('Serviço registrado com sucesso!', 'success', 'lavagemAlert');
+        }
+
+        function renderServicos() {
+            const tbody = document.getElementById('servicosTableBody');
+            if (servicos_registrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">Nenhum serviço registrado</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            servicos_registrados.forEach(s => {
+                const statusClass = s.status === 'Concluído' ? 'status-pago' : s.status === 'Em Andamento' ? 'status-pendente' : 'status-vencido';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatarData(s.data)}</td>
+                    <td>${s.clienteNome}</td>
+                    <td>${s.placa}</td>
+                    <td>${s.tipo}</td>
+                    <td>${s.descricao || '-'}</td>
+                    <td>R$ ${parseFloat(s.valor).toFixed(2)}</td>
+                    <td>${s.funcionario}</td>
+                    <td><span class="status-badge ${statusClass}">${s.status}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirServico(${s.id})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirServico(id) {
+            if (confirm('Excluir este serviço?')) {
+                servicos_registrados = servicos_registrados.filter(s => s.id !== id);
+                renderServicos();
+            }
+        }
+
+        // ========== USUÁRIOS (PAINEL ADMIN) ==========
+        let usuarios = [
+            { id: 1, nome: 'Administrador', login: 'admin', nivel: 'administrador', status: 'ativo' }
+        ];
+
+        function abrirModalUsuario(id = null) {
+            const modal = document.getElementById('usuarioModal');
+            document.getElementById('usuarioForm').reset();
+            document.getElementById('usuarioModalTitle').textContent = id ? 'Editar Usuário' : 'Novo Usuário';
+            if (id) {
+                const u = usuarios.find(u => u.id === id);
+                if (u) {
+                    document.getElementById('usuarioNome').value = u.nome;
+                    document.getElementById('usuarioLogin').value = u.login;
+                    document.getElementById('usuarioNivel').value = u.nivel;
+                    document.getElementById('usuarioStatusAtivo').value = u.status;
+                    modal.dataset.editId = id;
+                }
+            } else {
+                delete modal.dataset.editId;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function salvarUsuario(e) {
+            e.preventDefault();
+            const modal = document.getElementById('usuarioModal');
+            const editId = modal.dataset.editId ? parseInt(modal.dataset.editId) : null;
+            const nome = document.getElementById('usuarioNome').value;
+            const login = document.getElementById('usuarioLogin').value;
+            const senha = document.getElementById('usuarioSenha').value;
+            const nivel = document.getElementById('usuarioNivel').value;
+            const status = document.getElementById('usuarioStatusAtivo').value;
+
+            if (editId) {
+                const u = usuarios.find(u => u.id === editId);
+                if (u) { u.nome = nome; u.login = login; u.nivel = nivel; u.status = status; if (senha) u.senha = senha; }
+            } else {
+                usuarios.push({ id: Date.now(), nome, login, nivel, status });
+            }
+            carregarUsuarios();
+            fecharTodosModais();
+            mostrarAlerta('Usuário salvo com sucesso!', 'success', 'adminAlert');
+        }
+
+        function carregarUsuarios() {
+            const tbody = document.querySelector('#usuariosTable tbody');
+            tbody.innerHTML = '';
+            const nivelLabel = { administrador: '👑 Administrador', gerente: '🧑‍💼 Gerente', funcionario: '👷 Funcionário' };
+            usuarios.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${u.nome}</td>
+                    <td>${u.login}</td>
+                    <td>${nivelLabel[u.nivel] || u.nivel}</td>
+                    <td><span class="status-badge ${u.status === 'ativo' ? 'status-pago' : 'status-vencido'}">${u.status}</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="abrirModalUsuario(${u.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirUsuario(${u.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirUsuario(id) {
+            if (usuarios.length === 1) { alert('Não é possível excluir o único usuário.'); return; }
+            if (confirm('Excluir este usuário?')) {
+                usuarios = usuarios.filter(u => u.id !== id);
+                carregarUsuarios();
+            }
+        }
+
+        // Salvar cliente: capturar campo "Outro" se selecionado
+        
         function mostrarAlerta(mensagem, tipo, elementoId) {
             const alerta = document.getElementById(elementoId);
             alerta.textContent = mensagem;
@@ -2707,10 +3353,13 @@
             }, 5000);
         }
 
-        // Formatar data para exibição
+        // Formatar data para exibição (corrigido fuso horário)
         function formatarData(dataString) {
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
+            if (!dataString) return '-';
+            // Extrair apenas a parte da data (YYYY-MM-DD) e montar manualmente
+            const parte = dataString.split('T')[0];
+            const [ano, mes, dia] = parte.split('-');
+            return `${dia}/${mes}/${ano}`;
         }
     </script>
 </body>
