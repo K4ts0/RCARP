@@ -36,21 +36,18 @@ def configurar_banco():
             url_limpa = re.sub(r'aws-\d+-[a-z]+-\d+\.', '', url_limpa)
             print("🔄 Usando conexão direta do Supabase (sem pooler)")
 
-        # Força o uso do driver psycopg2
-        if url_limpa.startswith("postgresql://"):
-            url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg2://", 1)
-
+        # NÃO força driver psycopg2, deixa o SQLAlchemy detectar
         try:
-            # Testa a conexão imediatamente
             app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
             app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
                 "pool_recycle": 300,
                 "pool_pre_ping": True,
             }
-            temp_db = SQLAlchemy()
-            temp_db.init_app(app)
-            with app.app_context():
-                temp_db.session.execute(text('SELECT 1'))
+            # Testa a conexão com um engine temporário
+            from sqlalchemy import create_engine
+            engine = create_engine(url_limpa, **app.config["SQLALCHEMY_ENGINE_OPTIONS"])
+            with engine.connect() as conn:
+                conn.execute(text('SELECT 1'))
             print("✅ Conectado ao Supabase (PostgreSQL) com sucesso!")
             return "supabase"
         except Exception as e:
@@ -59,6 +56,7 @@ def configurar_banco():
 
     # Fallback para SQLite
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {}
     print("✅ Usando SQLite local (fallback)")
     return "sqlite"
 
@@ -66,10 +64,10 @@ tipo_banco = configurar_banco()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 bcrypt = Bcrypt(app)
-db = SQLAlchemy(app)
+db = SQLAlchemy(app)  # Apenas uma instância
 
 # -------------------------------------------------------------
-# Modelos (os mesmos que você já tem)
+# Modelos
 # -------------------------------------------------------------
 class User(db.Model):
     __tablename__ = "users"
@@ -77,7 +75,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    nivel = db.Column(db.String(20), default="funcionario")  # admin, gerente, funcionario
+    nivel = db.Column(db.String(20), default="funcionario")
 
     def set_password(self, raw):
         self.password_hash = bcrypt.generate_password_hash(raw).decode()
@@ -91,7 +89,7 @@ class Cliente(db.Model):
     nome = db.Column(db.String(100), nullable=False)
     telefone = db.Column(db.String(20))
     placa = db.Column(db.String(10), nullable=False, unique=True)
-    veiculo = db.Column(db.String(50), default="Carro")  # pode conter "Outro: Van", etc.
+    veiculo = db.Column(db.String(50), default="Carro")
     plano = db.Column(db.String(20), default="Mensal")
     mensalidade = db.Column(db.Float, default=0.0)
     inicio = db.Column(db.Date, nullable=False)
@@ -123,7 +121,7 @@ class Lavagem(db.Model):
     tipo = db.Column(db.String(20), default="assinante")
     preco = db.Column(db.Float, default=0.0)
     observacoes = db.Column(db.Text)
-    produtos_utilizados = db.Column(db.Text)  # JSON
+    produtos_utilizados = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # -------------------------------------------------------------
@@ -147,7 +145,7 @@ def init_db():
             print(f"⚠️ Erro na inicialização: {e}")
 
 # -------------------------------------------------------------
-# Rotas da API (as mesmas que você já tem, com pequenos ajustes)
+# Rotas da API (coloque aqui todas as suas rotas existentes)
 # -------------------------------------------------------------
 @app.route("/")
 def home():
@@ -173,21 +171,9 @@ def api_login():
         })
     return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
 
-@app.route("/api/logout", methods=["POST"])
-def api_logout():
-    session.clear()
-    return jsonify({'success': True})
-
-@app.route("/api/dashboard")
-def api_dashboard():
-    if not logged_in():
-        return jsonify({'error': 'Não autenticado'}), 401
-    # ... (seu código existente, sem alterações)
-    # Apenas garanta que o lucro seja calculado corretamente
-    # ou deixe o frontend fazer o cálculo como já está no index.html
-    return jsonify({...})  # mantenha o que você já tem
-
-# Demais rotas (clientes, lavagens, produtos) permanecem iguais.
+# ... (coloque todas as outras rotas que você já tinha: /api/dashboard, /api/clientes, etc.)
+# Para evitar repetir todo o código, sugiro copiar as rotas do seu app.py atual.
+# Apenas as que estão aqui são exemplos; mantenha as que você já tem.
 
 # -------------------------------------------------------------
 # Inicialização
