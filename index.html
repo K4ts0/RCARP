@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== CSS COMPLETO (MANTIDO ORIGINAL) ===== */
+        /* ===== CSS COMPLETO ===== */
         :root {
             --primary: #1a5276;
             --secondary: #3498db;
@@ -284,7 +284,7 @@
         </div>
     </div>
 
-    <!-- Modais -->
+    <!-- ===== MODAIS ===== -->
     <!-- Cliente Modal -->
     <div class="modal" id="clienteModal">
         <div class="modal-content">
@@ -444,7 +444,6 @@
 
     <script>
         // ===================== CONFIGURAÇÃO SUPABASE =====================
-        // Renomeado para supabaseClient para evitar conflito
         const SUPABASE_URL = 'https://uzwyzmgbzeoonrproevh.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_O_0mHby8J7S_XGbi3_Behg_GppDqpG5';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -514,7 +513,6 @@
             }
 
             try {
-                // Buscar usuário no Supabase
                 const { data, error } = await supabaseClient
                     .from('usuarios')
                     .select('*')
@@ -527,15 +525,12 @@
                     return;
                 }
 
-                console.log('Dados do usuário:', data);
-
-                // CORREÇÃO: usar senha_hash (coluna correta)
+                // Verifica senha (coluna senha_hash)
                 if (password !== data.senha_hash) {
                     alert('Senha incorreta.');
                     return;
                 }
 
-                // Login bem-sucedido
                 estado.usuarioLogado = data;
                 document.getElementById('userName').textContent = data.nome;
                 localStorage.setItem('usuarioLogado', JSON.stringify(data));
@@ -582,7 +577,7 @@
             document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
         });
 
-        // ===================== CARREGAR DADOS =====================
+        // ===================== CARREGAR DADOS (CORRIGIDO) =====================
         async function carregarDados() {
             await carregarClientes();
             await carregarProdutos();
@@ -593,13 +588,68 @@
             await carregarDashboard();
         }
 
+        // CORREÇÃO: usamos order('id') porque essas tabelas não têm 'created_at'
         async function carregarClientes() {
-            const { data, error } = await supabaseClient.from('clientes').select('*').order('id', { ascending: false });
+            const { data, error } = await supabaseClient
+                .from('clientes')
+                .select('*')
+                .order('id', { ascending: false });
             if (error) { console.error('Erro ao carregar clientes:', error); return; }
             estado.clientes = data;
             renderizarClientes();
         }
 
+        async function carregarProdutos() {
+            const { data, error } = await supabaseClient
+                .from('produtos')
+                .select('*')
+                .order('id', { ascending: false });
+            if (error) { console.error('Erro ao carregar produtos:', error); return; }
+            estado.produtos = data;
+            renderizarProdutos();
+        }
+
+        async function carregarUsuarios() {
+            const { data, error } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .order('id', { ascending: false });
+            if (error) { console.error('Erro ao carregar usuários:', error); return; }
+            estado.usuarios = data;
+            renderizarUsuarios();
+        }
+
+        async function carregarLavagens() {
+            const { data, error } = await supabaseClient
+                .from('lavagens')
+                .select('*')
+                .order('data', { ascending: false });
+            if (error) { console.error('Erro ao carregar lavagens:', error); return; }
+            estado.lavagens = data;
+            renderizarLavagens();
+        }
+
+        async function carregarVendas() {
+            const { data, error } = await supabaseClient
+                .from('vendas')
+                .select('*')
+                .order('data', { ascending: false });
+            if (error) { console.error('Erro ao carregar vendas:', error); return; }
+            estado.vendas = data;
+            renderizarVendas();
+        }
+
+        async function carregarServicos() {
+            const { data, error } = await supabaseClient
+                .from('servicos_prestados')
+                .select('*')
+                .order('data', { ascending: false });
+            if (error) { console.error('Erro ao carregar serviços:', error); return; }
+            estado.servicos = data;
+            renderizarServicos();
+        }
+
+        // ===================== RENDERIZAÇÕES =====================
         function renderizarClientes() {
             const tbody = document.querySelector('#clientesTable tbody');
             tbody.innerHTML = '';
@@ -629,13 +679,6 @@
             });
         }
 
-        async function carregarProdutos() {
-            const { data, error } = await supabaseClient.from('produtos').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Erro ao carregar produtos:', error); return; }
-            estado.produtos = data;
-            renderizarProdutos();
-        }
-
         function renderizarProdutos() {
             const tbody = document.querySelector('#estoqueTable tbody');
             tbody.innerHTML = '';
@@ -663,13 +706,6 @@
             document.querySelectorAll('.excluir-produto').forEach(btn => {
                 btn.addEventListener('click', function() { excluirProduto(this.dataset.id); });
             });
-        }
-
-        async function carregarLavagens() {
-            const { data, error } = await supabaseClient.from('lavagens').select('*').order('data', { ascending: false });
-            if (error) { console.error('Erro ao carregar lavagens:', error); return; }
-            estado.lavagens = data;
-            renderizarLavagens();
         }
 
         function renderizarLavagens() {
@@ -711,13 +747,6 @@
             });
         }
 
-        async function carregarVendas() {
-            const { data, error } = await supabaseClient.from('vendas').select('*').order('data', { ascending: false });
-            if (error) { console.error('Erro ao carregar vendas:', error); return; }
-            estado.vendas = data;
-            renderizarVendas();
-        }
-
         function renderizarVendas() {
             const tbody = document.getElementById('vendasTableBody');
             if (estado.vendas.length === 0) {
@@ -742,13 +771,6 @@
             document.querySelectorAll('.excluir-venda').forEach(btn => {
                 btn.addEventListener('click', function() { excluirVenda(this.dataset.id); });
             });
-        }
-
-        async function carregarServicos() {
-            const { data, error } = await supabaseClient.from('servicos_prestados').select('*').order('data', { ascending: false });
-            if (error) { console.error('Erro ao carregar serviços:', error); return; }
-            estado.servicos = data;
-            renderizarServicos();
         }
 
         function renderizarServicos() {
@@ -777,13 +799,6 @@
             document.querySelectorAll('.excluir-servico').forEach(btn => {
                 btn.addEventListener('click', function() { excluirServico(this.dataset.id); });
             });
-        }
-
-        async function carregarUsuarios() {
-            const { data, error } = await supabaseClient.from('usuarios').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Erro ao carregar usuários:', error); return; }
-            estado.usuarios = data;
-            renderizarUsuarios();
         }
 
         function renderizarUsuarios() {
