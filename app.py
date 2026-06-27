@@ -1,7 +1,6 @@
 from __future__ import annotations
 import os
 import json
-import re
 from pathlib import Path
 from flask import Flask, render_template, request, session, jsonify
 from flask_bcrypt import Bcrypt
@@ -16,62 +15,35 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados (com fallback para SQLite)
+# Configuração do banco de dados (sem modificações na URL)
 # -------------------------------------------------------------
-def configurar_banco():
-    database_url = os.environ.get("DATABASE_URL")
-    
-    if database_url:
-        # Limpeza e formatação da URL
-        url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
-        
-        # Substitui 'postgres://' por 'postgresql://' (SQLAlchemy exige)
-        if url_limpa.startswith("postgres://"):
-            url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
-        
-        # Se for URL do pooler do Supabase, ajusta para conexão direta (opcional)
-        if 'pooler.supabase.com' in url_limpa:
-            # Remove o pooler e tenta conexão direta (pode resolver problemas de DNS)
-            url_limpa = url_limpa.replace('pooler.supabase.com', 'supabase.co')
-            url_limpa = re.sub(r'aws-\d+-[a-z]+-\d+\.', '', url_limpa)
-            print("🔄 Usando conexão direta do Supabase (sem pooler)")
-        
-        # Força o driver psycopg (versão 3)
-        if url_limpa.startswith("postgresql://"):
-            url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
-        
-        try:
-            app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-            app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-                "pool_recycle": 300,
-                "pool_pre_ping": True,
-            }
-            # Testa a conexão
-            temp_db = SQLAlchemy()
-            temp_db.init_app(app)
-            with app.app_context():
-                temp_db.session.execute(text('SELECT 1'))
-            print("✅ Conectado ao Supabase (PostgreSQL) com sucesso!")
-            return "supabase"
-        except Exception as e:
-            print(f"❌ Falha na conexão com Supabase: {e}")
-            print("🔄 Fallback para SQLite local...")
-    
-    # Fallback para SQLite
+database_url = os.environ.get("DATABASE_URL")
+
+if database_url:
+    # Apenas limpeza básica (remove espaços e parênteses)
+    url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
+    # Substitui 'postgres://' por 'postgresql://' (SQLAlchemy exige)
+    if url_limpa.startswith("postgres://"):
+        url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
+    # NÃO FAZ MAIS NENHUMA MODIFICAÇÃO NA URL!
+    app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
+    print(f"🔄 Conectando ao Supabase: {url_limpa.split('@')[1] if '@' in url_limpa else 'URL configurada'}")
+else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     print("✅ Usando SQLite local (fallback)")
-    return "sqlite"
 
-# Configura o banco
-tipo_banco = configurar_banco()
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Inicializa o SQLAlchemy (sem vincular ao app ainda)
-db = SQLAlchemy()
-# Agora vincula ao app (uma única vez)
-db.init_app(app)
-
 bcrypt = Bcrypt(app)
+
+# -------------------------------------------------------------
+# Inicialização do SQLAlchemy (uma única vez)
+# -------------------------------------------------------------
+db = SQLAlchemy(app)  # <- já passamos o app diretamente
 
 # -------------------------------------------------------------
 # MODELOS
@@ -152,7 +124,7 @@ def init_db():
             print(f"⚠️ Erro na inicialização: {e}")
 
 # -------------------------------------------------------------
-# ROTAS DA API
+# ROTAS DA API (TODAS AS QUE VOCÊ JÁ TINHA)
 # -------------------------------------------------------------
 @app.route("/")
 def home():
@@ -193,7 +165,6 @@ def api_dashboard():
         return jsonify({'error': 'Não autenticado'}), 401
     
     try:
-        # Atualizar status dos clientes
         hoje = date.today()
         clientes = Cliente.query.all()
         for cliente in clientes:
@@ -211,7 +182,6 @@ def api_dashboard():
         a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
         lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
         
-        # Lucro estimado (considerando custo dos produtos)
         custo_produtos = 0
         lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
         for lavagem in lavagens_com_produtos:
@@ -379,7 +349,6 @@ def api_criar_lavagem():
             observacoes=data.get('observacoes', ''),
             produtos_utilizados=json.dumps(data.get('produtosUtilizados', []))
         )
-        # Baixa no estoque
         for pu in data.get('produtosUtilizados', []):
             produto = Produto.query.get(pu['produtoId'])
             if produto:
@@ -397,7 +366,6 @@ def api_excluir_lavagem(lavagem_id):
         return jsonify({'error': 'Não autenticado'}), 401
     lavagem = Lavagem.query.get_or_404(lavagem_id)
     try:
-        # Restaura estoque
         if lavagem.produtos_utilizados:
             for pu in json.loads(lavagem.produtos_utilizados):
                 produto = Produto.query.get(pu['produtoId'])
@@ -483,7 +451,7 @@ def api_excluir_produto(produto_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
-# ========== ROTA FINANCEIRO (opcional) ==========
+# ========== ROTA FINANCEIRO ==========
 @app.route("/api/financeiro")
 def api_financeiro():
     if not logged_in():
@@ -506,7 +474,7 @@ def api_financeiro():
         receitas_mensais.append(float(receita_mensalidades + receita_lavagens))
     return jsonify({'receitasMensais': receitas_mensais, 'meses': meses})
 
-# ========== DEBUG (opcional) ==========
+# ========== DEBUG ==========
 @app.route("/api/debug/db")
 def debug_db():
     try:
