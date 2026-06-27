@@ -5,127 +5,842 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Way For System - Gestão Automotiva</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== CSS COMPLETO ===== */
+        /* CSS da versão moderna (primeira página) - mantido integralmente */
         :root {
-            --primary: #1a5276;
-            --secondary: #3498db;
-            --accent: #e74c3c;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
-            --water-blue: #5dade2;
-            --soap: #aed6f1;
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --secondary: #3b82f6;
+            --secondary-light: #60a5fa;
+            --accent: #f43f5e;
+            --accent-light: #fb7185;
+            --success: #10b981;
+            --success-light: #34d399;
+            --warning: #f59e0b;
+            --warning-light: #fbbf24;
+            --info: #06b6d4;
+            --info-light: #22d3ee;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --radius-sm: 0.375rem;
+            --radius: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
-        body { background-color:#f5f7fa; color:#333; line-height:1.6; background-image:linear-gradient(to bottom right,#e8f4f8,#d6eaf8); }
-        .login-container { display:flex; justify-content:center; align-items:center; min-height:100vh; background:linear-gradient(135deg,var(--primary),var(--water-blue)); padding:20px; position:relative; overflow:hidden; }
-        .login-container::before { content:""; position:absolute; width:200px; height:200px; background:rgba(255,255,255,0.1); border-radius:50%; top:-100px; left:-100px; }
-        .login-container::after { content:""; position:absolute; width:150px; height:150px; background:rgba(255,255,255,0.1); border-radius:50%; bottom:-75px; right:-75px; }
-        .login-form { background:white; padding:40px; border-radius:10px; box-shadow:var(--shadow); width:100%; max-width:400px; position:relative; z-index:1; }
-        .login-form h2 { text-align:center; margin-bottom:30px; color:var(--primary); display:flex; align-items:center; justify-content:center; gap:10px; }
-        .login-form h2 i { color:var(--water-blue); }
-        .form-group { margin-bottom:20px; }
-        .form-group label { display:block; margin-bottom:8px; font-weight:500; }
-        .form-group input { width:100%; padding:12px; border:1px solid #ddd; border-radius:5px; font-size:16px; transition:border 0.3s; }
-        .form-group input:focus { border-color:var(--water-blue); outline:none; }
-        .btn { display:inline-block; padding:10px 20px; background:var(--secondary); color:white; border:none; border-radius:5px; font-size:16px; cursor:pointer; transition:background 0.3s; text-decoration:none; }
-        .btn:hover { background:#2980b9; }
-        .btn-success { background:var(--success); }
-        .btn-success:hover { background:#219653; }
-        .btn-warning { background:var(--warning); }
-        .btn-warning:hover { background:#e67e22; }
-        .btn-danger { background:var(--accent); }
-        .btn-danger:hover { background:#c0392b; }
-        .btn-block { display:block; width:100%; }
-        .btn-sm { padding:5px 10px; font-size:14px; }
-        .app-container { display:none; }
-        header { background:var(--primary); color:white; padding:15px 0; box-shadow:var(--shadow); position:relative; overflow:hidden; }
-        header::before { content:""; position:absolute; width:100%; height:5px; background:var(--water-blue); bottom:0; left:0; }
-        .header-content { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 20px; }
-        .logo { font-size:24px; font-weight:bold; display:flex; align-items:center; gap:10px; }
-        .logo::before { content:"🚗"; font-size:28px; }
-        .user-info { display:flex; align-items:center; gap:10px; }
-        .user-info button { background:transparent; border:none; color:white; cursor:pointer; padding:5px 10px; border-radius:4px; transition:background 0.3s; }
-        .user-info button:hover { background:rgba(255,255,255,0.1); }
-        nav { background:white; box-shadow:var(--shadow); }
-        .nav-container { max-width:1200px; margin:0 auto; padding:0 20px; }
-        .nav-tabs { display:flex; list-style:none; flex-wrap:wrap; }
-        .nav-tabs li { padding:15px 20px; cursor:pointer; border-bottom:3px solid transparent; transition:all 0.3s; position:relative; }
-        .nav-tabs li.active { border-bottom:3px solid var(--secondary); color:var(--secondary); font-weight:500; }
-        .nav-tabs li:hover { background:#f8f9fa; }
-        .main-content { max-width:1200px; margin:20px auto; padding:0 20px; }
-        .tab-content { display:none; background:white; border-radius:8px; box-shadow:var(--shadow); padding:20px; margin-top:20px; }
-        .tab-content.active { display:block; }
-        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #eee; }
-        .page-header h2 { color:var(--primary); }
-        .stats-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:30px; }
-        .stat-card { background:white; border-radius:8px; box-shadow:var(--shadow); padding:20px; text-align:center; border-top:4px solid var(--secondary); transition:transform 0.3s; }
-        .stat-card:hover { transform:translateY(-5px); }
-        .stat-card h3 { font-size:14px; color:#7f8c8d; margin-bottom:10px; }
-        .stat-card .value { font-size:28px; font-weight:bold; color:var(--primary); }
-        .stat-card.success { border-top-color:var(--success); }
-        .stat-card.warning { border-top-color:var(--warning); }
-        .stat-card.danger { border-top-color:var(--accent); }
-        table { width:100%; border-collapse:collapse; margin-top:20px; }
-        table th, table td { padding:12px 15px; text-align:left; border-bottom:1px solid #eee; }
-        table th { background:#f8f9fa; font-weight:600; color:var(--primary); }
-        table tr:hover { background:#f8f9fa; }
-        .status-badge { display:inline-block; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:500; }
-        .status-pago { background:#d5f4e6; color:var(--success); }
-        .status-pendente { background:#fef5e7; color:var(--warning); }
-        .status-vencido { background:#fde8e6; color:var(--accent); }
-        .form-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:15px; }
-        .form-control { margin-bottom:15px; }
-        .form-control label { display:block; margin-bottom:5px; font-weight:500; }
-        .form-control input, .form-control select { width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; }
-        .form-control input:focus, .form-control select:focus { border-color:var(--water-blue); outline:none; }
-        .alert { padding:12px 15px; border-radius:5px; margin-bottom:20px; }
-        .alert-success { background:#d5f4e6; color:var(--success); border:1px solid #a3e4c1; }
-        .alert-warning { background:#fef5e7; color:var(--warning); border:1px solid #fad7a0; }
-        .alert-danger { background:#fde8e6; color:var(--accent); border:1px solid #f5b7b1; }
-        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; padding:20px; }
-        .modal-content { background:white; border-radius:8px; width:100%; max-width:500px; padding:20px; box-shadow:0 5px 15px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto; }
-        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #eee; }
-        .modal-header h3 { color:var(--primary); }
-        .close-modal { background:none; border:none; font-size:20px; cursor:pointer; color:#7f8c8d; }
-        .report-filters { background:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px; }
-        .report-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:20px; }
-        .summary-card { background:white; border-radius:8px; padding:15px; box-shadow:var(--shadow); text-align:center; }
-        .summary-card h4 { font-size:14px; color:#7f8c8d; margin-bottom:10px; }
-        .summary-card .value { font-size:20px; font-weight:bold; color:var(--primary); }
-        .tabs-container { display:flex; margin-bottom:20px; border-bottom:1px solid #ddd; }
-        .tab-button { padding:10px 20px; background:none; border:none; cursor:pointer; border-bottom:3px solid transparent; transition:all 0.3s; }
-        .tab-button.active { border-bottom:3px solid var(--secondary); color:var(--secondary); font-weight:500; }
-        .tab-panel { display:none; }
-        .tab-panel.active { display:block; }
-        .produtos-container { margin:15px 0; padding:15px; border:1px solid #ddd; border-radius:5px; background:#f9f9f9; }
-        .lista-produtos { list-style:none; margin:10px 0; padding:0; }
-        .lista-produtos li { padding:8px; margin:5px 0; background:white; border-radius:4px; display:flex; justify-content:space-between; align-items:center; }
-        .produto-quantidade { display:flex; gap:10px; align-items:center; }
-        .produto-quantidade input { width:80px; }
-        .financeiro-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin:20px 0; }
-        .report-table { width:100%; border-collapse:collapse; margin-top:15px; }
-        .report-table th, .report-table td { border:1px solid #ddd; padding:10px; text-align:left; }
-        .report-table th { background-color:#f8f9fa; font-weight:600; }
-        .report-table tr:nth-child(even) { background-color:#f9f9f9; }
-        @media (max-width:768px) {
-            .nav-tabs { flex-direction:column; }
-            .stats-container { grid-template-columns:1fr; }
-            .form-row { grid-template-columns:1fr; }
-            .report-summary { grid-template-columns:1fr; }
-            .page-header { flex-direction:column; align-items:flex-start; gap:10px; }
-            .header-content { flex-direction:column; gap:10px; text-align:center; }
-            .modal-content { padding:15px; }
-            table { display:block; overflow-x:auto; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--gray-800);
+            line-height: 1.6;
+            min-height: 100vh;
         }
+
+        /* LOGIN */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a5f 50%, #0f172a 100%);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-container::before {
+            content: "";
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            top: -200px;
+            right: -200px;
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        .login-container::after {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            bottom: -100px;
+            left: -100px;
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite 2s;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        .login-form {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 48px 40px;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .login-form .logo-section { text-align: center; margin-bottom: 32px; }
+        .login-form .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+        .login-form .logo-icon i { font-size: 32px; color: white; }
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--gray-900);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .login-form .subtitle { text-align: center; color: var(--gray-500); font-size: 14px; margin-bottom: 32px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 14px 14px 44px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 15px;
+            transition: var(--transition);
+            background: var(--gray-50);
+            font-family: inherit;
+            color: var(--gray-800);
+        }
+        .form-group input:focus {
+            border-color: var(--secondary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0);
+            transition: var(--transition);
+        }
+        .btn:hover::after { background: rgba(255,255,255,0.1); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            color: white;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5); }
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), var(--success-light));
+            color: white;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5); }
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), var(--warning-light));
+            color: white;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
+        }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(244, 63, 94, 0.5); }
+        .btn-block { display: flex; width: 100%; padding: 16px; font-size: 16px; }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+        .btn-ghost {
+            background: transparent;
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+        }
+        .btn-ghost:hover { background: var(--gray-100); color: var(--gray-800); }
+        .app-container { display: none; min-height: 100vh; }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 0;
+            box-shadow: var(--shadow-lg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 16px 24px;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        .logo-icon-header {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .logo-icon-header i { font-size: 20px; color: white; }
+        .user-info { display: flex; align-items: center; gap: 16px; }
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .user-badge .avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .user-badge span { font-weight: 600; font-size: 14px; }
+        .user-info button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-info button:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+
+        /* NAV */
+        nav {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 72px;
+            z-index: 99;
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            gap: 4px;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .nav-tabs li {
+            padding: 16px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-500);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-tabs li i { font-size: 16px; }
+        .nav-tabs li:hover { color: var(--secondary); background: var(--gray-50); }
+        .nav-tabs li.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+
+        /* MAIN */
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .page-header h2 {
+            color: var(--gray-900);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-header h2 i { color: var(--secondary); font-size: 20px; }
+        .page-header h3 {
+            color: var(--gray-800);
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* STATS */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, var(--secondary), var(--info));
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .stat-card.success::before { background: linear-gradient(180deg, var(--success), var(--success-light)); }
+        .stat-card.warning::before { background: linear-gradient(180deg, var(--warning), var(--warning-light)); }
+        .stat-card.danger::before { background: linear-gradient(180deg, var(--accent), var(--accent-light)); }
+        .stat-card .stat-icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 20px;
+            color: white;
+        }
+        .stat-icon.blue { background: linear-gradient(135deg, var(--secondary), var(--info)); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .stat-icon.green { background: linear-gradient(135deg, var(--success), var(--success-light)); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .stat-icon.orange { background: linear-gradient(135deg, var(--warning), var(--warning-light)); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+        .stat-icon.red { background: linear-gradient(135deg, var(--accent), var(--accent-light)); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #a78bfa); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+        .stat-icon.cyan { background: linear-gradient(135deg, var(--info), var(--info-light)); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3); }
+        .stat-card h3 {
+            font-size: 13px;
+            color: var(--gray-500);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+        .stat-card .trend {
+            font-size: 12px;
+            color: var(--gray-400);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stat-card .trend.up { color: var(--success); }
+        .stat-card .trend.down { color: var(--accent); }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-body { padding: 24px; }
+
+        /* TABLES */
+        .table-container { overflow-x: auto; border-radius: var(--radius); }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        table th {
+            background: var(--gray-50);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--gray-600);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
+        }
+        table th:first-child { border-radius: var(--radius) 0 0 0; }
+        table th:last-child { border-radius: 0 var(--radius) 0 0; }
+        table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+            font-weight: 500;
+        }
+        table tr:hover td { background: var(--gray-50); }
+        table tr:last-child td:first-child { border-radius: 0 0 0 var(--radius); }
+        table tr:last-child td:last-child { border-radius: 0 0 var(--radius) 0; }
+
+        /* BADGES */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .status-badge::before {
+            content: "";
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-pago { background: #d1fae5; color: #065f46; }
+        .status-pago::before { background: #10b981; }
+        .status-pendente { background: #fef3c7; color: #92400e; }
+        .status-pendente::before { background: #f59e0b; }
+        .status-vencido { background: #fee2e2; color: #991b1b; }
+        .status-vencido::before { background: #f43f5e; }
+        .status-concluido { background: #d1fae5; color: #065f46; }
+        .status-concluido::before { background: #10b981; }
+        .status-andamento { background: #cffafe; color: #155e75; }
+        .status-andamento::before { background: #06b6d4; }
+
+        /* FORMS */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .form-control { margin-bottom: 0; }
+        .form-control label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+        .form-control input,
+        .form-control select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 15px;
+            transition: var(--transition);
+            background: var(--gray-50);
+            font-family: inherit;
+            color: var(--gray-800);
+        }
+        .form-control input:focus,
+        .form-control select:focus {
+            border-color: var(--secondary);
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        .form-control select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert i { font-size: 18px; }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-xl);
+            width: 100%;
+            max-width: 560px;
+            padding: 0;
+            box-shadow: var(--shadow-xl);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--gray-100);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        }
+        .modal-header h3 {
+            color: var(--gray-900);
+            font-size: 18px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-header h3 i { color: var(--secondary); }
+        .close-modal {
+            background: var(--gray-100);
+            border: none;
+            width: 36px; height: 36px;
+            border-radius: var(--radius);
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--gray-500);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-modal:hover { background: var(--gray-200); color: var(--gray-800); transform: rotate(90deg); }
+        .modal-body { padding: 28px; }
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            position: sticky;
+            bottom: 0;
+            background: white;
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        }
+
+        /* TABS */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: var(--gray-100);
+            padding: 6px;
+            border-radius: var(--radius);
+            width: fit-content;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--gray-500);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-button:hover { color: var(--gray-700); background: rgba(255, 255, 255, 0.5); }
+        .tab-button.active { background: white; color: var(--secondary); box-shadow: var(--shadow-sm); }
+        .tab-panel { display: none; animation: fadeIn 0.3s ease; }
+        .tab-panel.active { display: block; }
+
+        /* REPORTS */
+        .report-filters {
+            background: white;
+            padding: 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+            margin-bottom: 24px;
+        }
+        .report-filters h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-100);
+            text-align: center;
+            transition: var(--transition);
+        }
+        .summary-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .summary-card h4 {
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .summary-card .value { font-size: 24px; font-weight: 800; color: var(--gray-900); }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .report-table th,
+        .report-table td { border: 1px solid var(--gray-200); padding: 12px; text-align: left; }
+        .report-table th {
+            background-color: var(--gray-50);
+            font-weight: 700;
+            color: var(--gray-600);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .report-table tr:nth-child(even) { background-color: var(--gray-50); }
+
+        /* PRODUCTS */
+        .produtos-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed var(--gray-200);
+            border-radius: var(--radius);
+            background: var(--gray-50);
+            transition: var(--transition);
+        }
+        .produtos-container:hover { border-color: var(--secondary); background: rgba(59, 130, 246, 0.02); }
+        .produtos-container h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lista-produtos { list-style: none; margin: 12px 0; padding: 0; }
+        .lista-produtos li {
+            padding: 12px 16px;
+            margin: 8px 0;
+            background: white;
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .produto-quantidade { display: flex; gap: 12px; align-items: center; }
+        .produto-quantidade input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* FINANCE */
+        .financeiro-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--gray-400);
+        }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state p { font-size: 15px; font-weight: 500; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; gap: 12px; padding: 12px 16px; }
+            .nav-tabs { padding: 0 8px; }
+            .nav-tabs li { padding: 12px 14px; font-size: 13px; }
+            .main-content { padding: 16px; }
+            .stats-container { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .report-summary { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .login-form { padding: 32px 24px; }
+            .modal-content { max-width: 100%; margin: 0; border-radius: var(--radius-lg); }
+            table { display: block; overflow-x: auto; }
+            .tabs-container { width: 100%; overflow-x: auto; }
+        }
+
         @media print {
-            header, nav, .page-header button, .print-btn { display:none !important; }
-            .tab-content { box-shadow:none; padding:0; }
-            body { background:white; }
+            header, nav, .page-header button, .print-btn, .tabs-container { display: none !important; }
+            .tab-content { box-shadow: none; padding: 0; display: block !important; }
+            body { background: white; }
+            .card { box-shadow: none; border: 1px solid var(--gray-200); }
         }
     </style>
 </head>
@@ -133,16 +848,28 @@
     <!-- ===== TELA DE LOGIN ===== -->
     <div class="login-container" id="loginScreen">
         <div class="login-form">
-            <h2><i class="fas fa-car"></i> Way For System</h2>
+            <div class="logo-section">
+                <div class="logo-icon"><i class="fas fa-car-wash"></i></div>
+                <h2>Way For System</h2>
+                <p class="subtitle">Gestão Automotiva Inteligente</p>
+            </div>
             <div class="form-group">
                 <label for="username">Usuário</label>
-                <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username">
+                <div class="input-wrapper">
+                    <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username">
+                    <i class="fas fa-user"></i>
+                </div>
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password">
+                <div class="input-wrapper">
+                    <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password">
+                    <i class="fas fa-lock"></i>
+                </div>
             </div>
-            <button class="btn btn-block" id="loginBtn">Entrar</button>
+            <button class="btn btn-primary btn-block" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
+            </button>
         </div>
     </div>
 
@@ -150,9 +877,15 @@
     <div class="app-container" id="appScreen">
         <header>
             <div class="header-content">
-                <div class="logo">Way For System</div>
+                <div class="logo">
+                    <div class="logo-icon-header"><i class="fas fa-car-wash"></i></div>
+                    Way For System
+                </div>
                 <div class="user-info">
-                    <span id="userName">Administrador</span>
+                    <div class="user-badge">
+                        <div class="avatar">A</div>
+                        <span id="userName">Administrador</span>
+                    </div>
                     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
                 </div>
             </div>
@@ -161,12 +894,12 @@
         <nav>
             <div class="nav-container">
                 <ul class="nav-tabs">
-                    <li class="active" data-tab="dashboard">Dashboard</li>
-                    <li data-tab="clientes">Clientes</li>
-                    <li data-tab="lavagens">Lavagens</li>
-                    <li data-tab="estoque">Estoque</li>
-                    <li data-tab="relatorios">Relatórios</li>
-                    <li data-tab="admin" id="navAdmin" style="display:none; color:var(--accent);">⚙ Painel Administrativo</li>
+                    <li class="active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</li>
+                    <li data-tab="clientes"><i class="fas fa-users"></i> Clientes</li>
+                    <li data-tab="lavagens"><i class="fas fa-soap"></i> Lavagens</li>
+                    <li data-tab="estoque"><i class="fas fa-boxes"></i> Estoque</li>
+                    <li data-tab="relatorios"><i class="fas fa-file-alt"></i> Relatórios</li>
+                    <li data-tab="admin" id="navAdmin" style="display:none;"><i class="fas fa-cog"></i> Painel Admin</li>
                 </ul>
             </div>
         </nav>
@@ -175,82 +908,209 @@
             <!-- Dashboard -->
             <div class="tab-content active" id="dashboard">
                 <div class="page-header">
-                    <h2>Dashboard</h2>
-                    <div><button class="btn" id="refreshDashboard"><i class="fas fa-sync-alt"></i> Atualizar</button></div>
+                    <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+                    <button class="btn btn-ghost" id="refreshDashboard"><i class="fas fa-sync-alt"></i> Atualizar</button>
                 </div>
                 <div class="stats-container">
-                    <div class="stat-card"><h3>Clientes Ativos</h3><div class="value" id="clientesAtivos">0</div></div>
-                    <div class="stat-card success"><h3>Receita Total (R$)</h3><div class="value" id="receitaTotal">0</div></div>
-                    <div class="stat-card warning"><h3>Inadimplentes</h3><div class="value" id="inadimplentes">0</div></div>
-                    <div class="stat-card danger"><h3>A Receber (R$)</h3><div class="value" id="aReceber">0</div></div>
-                    <div class="stat-card"><h3>Lavagens Avulsas</h3><div class="value" id="lavagensAvulsas">0</div></div>
-                    <div class="stat-card success"><h3>Lucro Estimado (R$)</h3><div class="value" id="lucroTotal">0</div></div>
-                    <div class="stat-card"><h3>Valor em Estoque (R$)</h3><div class="value" id="valorEstoque">0</div></div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                        <h3>Clientes Ativos</h3>
+                        <div class="value" id="clientesAtivos">0</div>
+                        <div class="trend up"><i class="fas fa-arrow-up"></i> +12% este mês</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+                        <h3>Receita Total (R$)</h3>
+                        <div class="value" id="receitaTotal">0</div>
+                        <div class="trend up"><i class="fas fa-arrow-up"></i> +8% este mês</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h3>Inadimplentes</h3>
+                        <div class="value" id="inadimplentes">0</div>
+                        <div class="trend down"><i class="fas fa-arrow-down"></i> -5% este mês</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div>
+                        <h3>A Receber (R$)</h3>
+                        <div class="value" id="aReceber">0</div>
+                        <div class="trend"><i class="fas fa-minus"></i> Sem alteração</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-car"></i></div>
+                        <h3>Lavagens Avulsas</h3>
+                        <div class="value" id="lavagensAvulsas">0</div>
+                        <div class="trend up"><i class="fas fa-arrow-up"></i> +15% este mês</div>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon cyan"><i class="fas fa-piggy-bank"></i></div>
+                        <h3>Lucro Estimado (R$)</h3>
+                        <div class="value" id="lucroTotal">0</div>
+                        <div class="trend up"><i class="fas fa-arrow-up"></i> +10% este mês</div>
+                    </div>
                 </div>
-                <div class="page-header"><h3>Últimas Lavagens</h3></div>
-                <table id="ultimasLavagens">
-                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Tipo</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-history"></i> Últimas Lavagens</h3></div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="ultimasLavagens">
+                                <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Tipo</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Clientes -->
             <div class="tab-content" id="clientes">
-                <div class="page-header"><h2>Gestão de Clientes</h2><div><button class="btn" id="addClienteBtn"><i class="fas fa-plus"></i> Novo Cliente</button></div></div>
-                <div class="alert alert-warning" id="clienteAlert" style="display:none;"></div>
-                <table id="clientesTable">
-                    <thead><tr><th>Nome</th><th>Telefone</th><th>Placa</th><th>Veículo</th><th>Plano</th><th>Mensalidade</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
-                    <tbody></tbody>
-                </table>
+                <div class="page-header">
+                    <h2><i class="fas fa-users"></i> Gestão de Clientes</h2>
+                    <button class="btn btn-primary" id="addClienteBtn"><i class="fas fa-plus"></i> Novo Cliente</button>
+                </div>
+                <div class="alert alert-warning" id="clienteAlert" style="display: none;"><i class="fas fa-exclamation-circle"></i><span></span></div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="clientesTable">
+                                <thead><tr><th>Nome</th><th>Telefone</th><th>Placa</th><th>Veículo</th><th>Plano</th><th>Mensalidade</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Lavagens -->
             <div class="tab-content" id="lavagens">
-                <div class="page-header"><h2>Controle de Lavagens</h2><div><button class="btn" id="addLavagemBtn"><i class="fas fa-plus"></i> Nova Lavagem</button></div></div>
-                <div class="tabs-container">
-                    <button class="tab-button active" data-tab="lavagens-assinantes">Lavagens de Assinantes</button>
-                    <button class="tab-button" data-tab="lavagens-avulsas">Lavagens Avulsas</button>
-                    <button class="tab-button" data-tab="lavagens-vendas">Venda de Produtos</button>
-                    <button class="tab-button" data-tab="lavagens-servicos">Prestação de Serviço</button>
+                <div class="page-header">
+                    <h2><i class="fas fa-soap"></i> Controle de Lavagens</h2>
+                    <button class="btn btn-primary" id="addLavagemBtn"><i class="fas fa-plus"></i> Nova Lavagem</button>
                 </div>
-                <div class="alert alert-success" id="lavagemAlert" style="display:none;"></div>
+                <div class="tabs-container">
+                    <button class="tab-button active" data-tab="lavagens-assinantes"><i class="fas fa-id-card"></i> Assinantes</button>
+                    <button class="tab-button" data-tab="lavagens-avulsas"><i class="fas fa-car"></i> Avulsas</button>
+                    <button class="tab-button" data-tab="lavagens-vendas"><i class="fas fa-shopping-cart"></i> Vendas</button>
+                    <button class="tab-button" data-tab="lavagens-servicos"><i class="fas fa-tools"></i> Serviços</button>
+                </div>
+                <div class="alert alert-success" id="lavagemAlert" style="display: none;"><i class="fas fa-check-circle"></i><span></span></div>
                 <div class="tab-panel active" id="lavagens-assinantes">
-                    <table id="lavagensTable"><thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Observações</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table id="lavagensTable">
+                                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Observações</th><th>Ações</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="tab-panel" id="lavagens-avulsas">
-                    <table id="lavagensAvulsasTable"><thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Preço (R$)</th><th>Observações</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table id="lavagensAvulsasTable">
+                                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Preço (R$)</th><th>Observações</th><th>Ações</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="tab-panel" id="lavagens-vendas">
-                    <div class="page-header" style="margin-top:15px;"><h3>Vendas de Produtos</h3><button class="btn" id="addVendaBtn"><i class="fas fa-plus"></i> Nova Venda</button></div>
-                    <table id="vendasTable"><thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Valor Unit.</th><th>Total (R$)</th><th>Funcionário</th><th>Ações</th></tr></thead><tbody id="vendasTableBody"><tr><td colspan="8" style="text-align:center;color:#999;">Nenhuma venda registrada</td></tr></tbody></table>
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3><i class="fas fa-shopping-cart"></i> Vendas de Produtos</h3>
+                        <button class="btn btn-primary" id="addVendaBtn"><i class="fas fa-plus"></i> Nova Venda</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table id="vendasTable">
+                                    <thead><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Valor Unit.</th><th>Total (R$)</th><th>Funcionário</th><th>Ações</th></tr></thead>
+                                    <tbody id="vendasTableBody">
+                                        <tr><td colspan="8" class="empty-state"><i class="fas fa-shopping-basket"></i><p>Nenhuma venda registrada</p></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="tab-panel" id="lavagens-servicos">
-                    <div class="page-header" style="margin-top:15px;"><h3>Prestação de Serviços</h3><button class="btn" id="addServicoBtn"><i class="fas fa-plus"></i> Novo Serviço</button></div>
-                    <table id="servicosTable"><thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Descrição</th><th>Valor (R$)</th><th>Funcionário</th><th>Status</th><th>Ações</th></tr></thead><tbody id="servicosTableBody"><tr><td colspan="9" style="text-align:center;color:#999;">Nenhum serviço registrado</td></tr></tbody></table>
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3><i class="fas fa-tools"></i> Prestação de Serviços</h3>
+                        <button class="btn btn-primary" id="addServicoBtn"><i class="fas fa-plus"></i> Novo Serviço</button>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table id="servicosTable">
+                                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Descrição</th><th>Valor (R$)</th><th>Funcionário</th><th>Status</th><th>Ações</th></tr></thead>
+                                    <tbody id="servicosTableBody">
+                                        <tr><td colspan="9" class="empty-state"><i class="fas fa-wrench"></i><p>Nenhum serviço registrado</p></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Estoque -->
             <div class="tab-content" id="estoque">
-                <div class="page-header"><h2>Controle de Estoque</h2><div><button class="btn" id="addProdutoBtn"><i class="fas fa-plus"></i> Novo Produto</button></div></div>
-                <div class="alert alert-warning" id="estoqueAlert" style="display:none;"></div>
-                <table id="estoqueTable"><thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th>Estoque</th><th>Estoque Mínimo</th><th>Preço Unitário</th><th>Valor Total</th><th>Ações</th></tr></thead><tbody></tbody></table>
+                <div class="page-header">
+                    <h2><i class="fas fa-boxes"></i> Controle de Estoque</h2>
+                    <button class="btn btn-primary" id="addProdutoBtn"><i class="fas fa-plus"></i> Novo Produto</button>
+                </div>
+                <div class="alert alert-warning" id="estoqueAlert" style="display: none;"><i class="fas fa-exclamation-circle"></i><span></span></div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table id="estoqueTable">
+                                <thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th>Estoque</th><th>Estoque Mínimo</th><th>Preço Unitário</th><th>Valor Total</th><th>Ações</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Relatórios -->
             <div class="tab-content" id="relatorios">
-                <div class="page-header"><h2>Relatórios</h2><div><button class="btn btn-success" id="imprimirRelatorio"><i class="fas fa-print"></i> Imprimir</button></div></div>
+                <div class="page-header">
+                    <h2><i class="fas fa-file-alt"></i> Relatórios</h2>
+                    <button class="btn btn-success" id="imprimirRelatorio"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
                 <div class="report-filters">
-                    <h3>Filtros do Relatório</h3>
+                    <h3><i class="fas fa-filter"></i> Filtros do Relatório</h3>
                     <div class="form-row">
-                        <div class="form-control"><label for="tipoRelatorio">Tipo de Relatório</label><select id="tipoRelatorio"><option value="lavagens">Lavagens</option><option value="financeiro">Financeiro</option><option value="clientes">Clientes</option><option value="estoque">Estoque</option></select></div>
-                        <div class="form-control"><label for="periodo">Período</label><select id="periodo"><option value="hoje">Hoje</option><option value="semana">Esta Semana</option><option value="mes" selected>Este Mês</option><option value="trimestre">Este Trimestre</option><option value="ano">Este Ano</option><option value="personalizado">Personalizado</option></select></div>
-                        <div class="form-control" id="dataInicioContainer" style="display:none;"><label for="dataInicio">Data Início</label><input type="date" id="dataInicio"></div>
-                        <div class="form-control" id="dataFimContainer" style="display:none;"><label for="dataFim">Data Fim</label><input type="date" id="dataFim"></div>
+                        <div class="form-control">
+                            <label for="tipoRelatorio">Tipo de Relatório</label>
+                            <select id="tipoRelatorio"><option value="lavagens">Lavagens</option><option value="financeiro">Financeiro</option><option value="clientes">Clientes</option><option value="estoque">Estoque</option></select>
+                        </div>
+                        <div class="form-control">
+                            <label for="periodo">Período</label>
+                            <select id="periodo">
+                                <option value="hoje">Hoje</option>
+                                <option value="semana">Esta Semana</option>
+                                <option value="mes" selected>Este Mês</option>
+                                <option value="trimestre">Este Trimestre</option>
+                                <option value="ano">Este Ano</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="form-control" id="dataInicioContainer" style="display: none;">
+                            <label for="dataInicio">Data Início</label>
+                            <input type="date" id="dataInicio">
+                        </div>
+                        <div class="form-control" id="dataFimContainer" style="display: none;">
+                            <label for="dataFim">Data Fim</label>
+                            <input type="date" id="dataFim">
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="gerarRelatorio"><i class="fas fa-chart-bar"></i> Gerar Relatório</button>
                 </div>
-                <div class="report-summary" id="resumoRelatorio" style="display:none;">
+                <div class="report-summary" id="resumoRelatorio" style="display: none;">
                     <div class="summary-card"><h4>Total Registros</h4><div class="value" id="totalRegistros">0</div></div>
                     <div class="summary-card"><h4>Receita Total</h4><div class="value" id="receitaPeriodo">R$ 0</div></div>
                     <div class="summary-card"><h4>Lucro Estimado</h4><div class="value" id="lucroPeriodo">R$ 0</div></div>
@@ -263,182 +1123,255 @@
 
     <!-- ===== PAINEL ADMINISTRATIVO ===== -->
     <div class="tab-content" id="admin">
-        <div class="page-header"><h2>⚙ Painel Administrativo</h2></div>
+        <div class="page-header"><h2><i class="fas fa-cog"></i> Painel Administrativo</h2></div>
         <div class="tabs-container">
-            <button class="tab-button active" data-subtab="admin-usuarios">Usuários</button>
-            <button class="tab-button" data-subtab="admin-permissoes">Permissões</button>
+            <button class="tab-button active" data-subtab="admin-usuarios"><i class="fas fa-users-cog"></i> Usuários</button>
+            <button class="tab-button" data-subtab="admin-permissoes"><i class="fas fa-shield-alt"></i> Permissões</button>
         </div>
         <div class="tab-panel active" id="admin-usuarios">
-            <div class="page-header" style="margin-top:15px;"><h3>Gerenciamento de Usuários</h3><button class="btn" id="addUsuarioBtn"><i class="fas fa-plus"></i> Novo Usuário</button></div>
+            <div class="page-header" style="margin-top:15px;">
+                <h3><i class="fas fa-users-cog"></i> Gerenciamento de Usuários</h3>
+                <button class="btn btn-primary" id="addUsuarioBtn"><i class="fas fa-plus"></i> Novo Usuário</button>
+            </div>
             <div class="alert" id="adminAlert" style="display:none;"></div>
-            <table id="usuariosTable"><thead><tr><th>Nome</th><th>Usuário</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead><tbody></tbody></table>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table id="usuariosTable">
+                            <thead><tr><th>Nome</th><th>Usuário</th><th>Nível</th><th>Status</th><th>Ações</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="tab-panel" id="admin-permissoes">
-            <div style="margin-top:15px;"><h3>Níveis de Acesso</h3>
+            <div style="margin-top:15px;">
+                <h3><i class="fas fa-shield-alt"></i> Níveis de Acesso</h3>
                 <div class="stats-container" style="margin-top:20px;">
-                    <div class="stat-card"><h3>👑 Administrador</h3><p style="font-size:13px;color:#555;margin-top:8px;">Acesso total: Dashboard, Clientes, Lavagens, Estoque, Relatórios e Painel Administrativo.</p></div>
-                    <div class="stat-card warning"><h3>🧑‍💼 Gerente</h3><p style="font-size:13px;color:#555;margin-top:8px;">Acesso a: Estoque, Lavagens e Clientes.</p></div>
-                    <div class="stat-card success"><h3>👷 Funcionário</h3><p style="font-size:13px;color:#555;margin-top:8px;">Acesso a: Lavagens e Clientes.</p></div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-crown"></i></div>
+                        <h3>Administrador</h3>
+                        <p style="font-size:13px; color:var(--gray-500); margin-top:8px; line-height:1.5;">Acesso total ao sistema: Dashboard, Clientes, Lavagens, Estoque, Relatórios e Painel Administrativo.</p>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-icon orange"><i class="fas fa-user-tie"></i></div>
+                        <h3>Gerente</h3>
+                        <p style="font-size:13px; color:var(--gray-500); margin-top:8px; line-height:1.5;">Acesso a: Estoque, Lavagens e Clientes. Sem acesso a relatórios financeiros detalhados.</p>
+                    </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon green"><i class="fas fa-user"></i></div>
+                        <h3>Funcionário</h3>
+                        <p style="font-size:13px; color:var(--gray-500); margin-top:8px; line-height:1.5;">Acesso a: Lavagens e Clientes. Visualização básica apenas.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== MODAIS ===== -->
-    <!-- Cliente Modal -->
+    <!-- ===== MODAIS (com estrutura moderna) ===== -->
+    <!-- MODAL CLIENTE -->
     <div class="modal" id="clienteModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="clienteModalTitle">Adicionar Cliente</h3><button class="close-modal">&times;</button></div>
-            <form id="clienteForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="clienteNome">Nome</label><input type="text" id="clienteNome" required></div>
-                    <div class="form-control"><label for="clienteTelefone">Telefone</label><input type="text" id="clienteTelefone"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="clientePlaca">Placa</label><input type="text" id="clientePlaca" required></div>
-                    <div class="form-control"><label for="clienteVeiculo">Tipo de Veículo</label><select id="clienteVeiculo" onchange="toggleOutroVeiculo(this)"><option value="Carro">Carro</option><option value="Moto">Moto</option><option value="SUV">SUV</option><option value="Caminhonete">Caminhonete</option><option value="Outro">Outro</option></select></div>
-                </div>
-                <div class="form-row" id="outroVeiculoRow" style="display:none;">
-                    <div class="form-control"><label for="clienteVeiculoOutro">Descreva o tipo de veículo</label><input type="text" id="clienteVeiculoOutro" placeholder="Ex: Caminhão, Van, Micro-ônibus..."></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="clientePlano">Plano</label><select id="clientePlano"><option value="Mensal">Mensal</option><option value="Trimestral">Trimestral</option><option value="Semestral">Semestral</option><option value="Anual">Anual</option></select></div>
-                    <div class="form-control"><label for="clienteMensalidade">Mensalidade (R$)</label><input type="number" id="clienteMensalidade" value="500" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="clienteInicio">Data de Início</label><input type="date" id="clienteInicio" required></div>
-                    <div class="form-control"><label for="clienteVencimento">Data de Vencimento</label><input type="date" id="clienteVencimento" required></div>
-                </div>
-                <div class="form-control"><label for="clienteStatus">Status do Pagamento</label><select id="clienteStatus"><option value="Pago">Pago</option><option value="Pendente">Pendente</option><option value="Vencido">Vencido</option></select></div>
-                <div class="form-control"><label for="clienteObservacoes">Observações</label><input type="text" id="clienteObservacoes"></div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Salvar</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> <span id="clienteModalTitle">Adicionar Cliente</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="clienteForm">
+                    <div class="form-row">
+                        <div class="form-control"><label for="clienteNome">Nome</label><input type="text" id="clienteNome" required placeholder="Nome completo"></div>
+                        <div class="form-control"><label for="clienteTelefone">Telefone</label><input type="text" id="clienteTelefone" placeholder="(00) 00000-0000"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="clientePlaca">Placa</label><input type="text" id="clientePlaca" required placeholder="ABC-1234"></div>
+                        <div class="form-control"><label for="clienteVeiculo">Tipo de Veículo</label><select id="clienteVeiculo" onchange="toggleOutroVeiculo(this)"><option value="Carro">Carro</option><option value="Moto">Moto</option><option value="SUV">SUV</option><option value="Caminhonete">Caminhonete</option><option value="Outro">Outro</option></select></div>
+                    </div>
+                    <div class="form-row" id="outroVeiculoRow" style="display:none;">
+                        <div class="form-control"><label for="clienteVeiculoOutro">Descreva o tipo de veículo</label><input type="text" id="clienteVeiculoOutro" placeholder="Ex: Caminhão, Van, Micro-ônibus..."></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="clientePlano">Plano</label><select id="clientePlano"><option value="Mensal">Mensal</option><option value="Trimestral">Trimestral</option><option value="Semestral">Semestral</option><option value="Anual">Anual</option></select></div>
+                        <div class="form-control"><label for="clienteMensalidade">Mensalidade (R$)</label><input type="number" id="clienteMensalidade" value="500" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="clienteInicio">Data de Início</label><input type="date" id="clienteInicio" required></div>
+                        <div class="form-control"><label for="clienteVencimento">Data de Vencimento</label><input type="date" id="clienteVencimento" required></div>
+                    </div>
+                    <div class="form-control"><label for="clienteStatus">Status do Pagamento</label><select id="clienteStatus"><option value="Pago">Pago</option><option value="Pendente">Pendente</option><option value="Vencido">Vencido</option></select></div>
+                    <div class="form-control"><label for="clienteObservacoes">Observações</label><input type="text" id="clienteObservacoes" placeholder="Observações adicionais..."></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="clienteForm"><i class="fas fa-save"></i> Salvar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Lavagem Modal -->
+    <!-- MODAL LAVAGEM -->
     <div class="modal" id="lavagemModal">
         <div class="modal-content">
-            <div class="modal-header"><h3>Registrar Lavagem</h3><button class="close-modal">&times;</button></div>
-            <form id="lavagemForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="lavagemData">Data</label><input type="date" id="lavagemData" required></div>
-                    <div class="form-control"><label for="lavagemTipo">Tipo de Lavagem</label><select id="lavagemTipo" required><option value="assinante">Lavagem de Assinante</option><option value="avulsa">Lavagem Avulsa</option></select></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="lavagemCliente">Cliente</label><select id="lavagemCliente" required></select></div>
-                    <div class="form-control"><label for="lavagemPlaca">Placa</label><input type="text" id="lavagemPlaca" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="lavagemServico">Tipo de Serviço</label><select id="lavagemServico" required><option value="Lavagem Simples">Lavagem Simples</option><option value="Lavagem Completa">Lavagem Completa</option><option value="Lavagem com Cera">Lavagem com Cera</option><option value="Polimento">Polimento</option><option value="Higienização">Higienização</option></select></div>
-                    <div class="form-control" id="precoContainer"><label for="precolavagem">Preço Unitário (R$)</label><input type="number" id="precolavagem" step="0.01" min="0" placeholder="0,00"></div>
-                </div>
-                <div class="produtos-container">
-                    <h4>Produtos Utilizados</h4>
+            <div class="modal-header">
+                <h3><i class="fas fa-soap"></i> Registrar Lavagem</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="lavagemForm">
                     <div class="form-row">
-                        <div class="form-control"><label for="lavagemProdutos">Produto</label><select id="lavagemProdutos"></select></div>
-                        <div class="form-control produto-quantidade"><label for="produtoQuantidadeUsada">Quantidade</label><input type="number" id="produtoQuantidadeUsada" min="1" value="1"></div>
+                        <div class="form-control"><label for="lavagemData">Data</label><input type="date" id="lavagemData" required></div>
+                        <div class="form-control"><label for="lavagemTipo">Tipo de Lavagem</label><select id="lavagemTipo" required><option value="assinante">Lavagem de Assinante</option><option value="avulsa">Lavagem Avulsa</option></select></div>
                     </div>
-                    <button type="button" class="btn" id="adicionarProdutoBtn"><i class="fas fa-plus"></i> Adicionar Produto</button>
-                    <ul class="lista-produtos" id="listaProdutosUtilizados"></ul>
-                </div>
-                <div class="form-control"><label for="lavagemFuncionario">Funcionário Responsável</label><input type="text" id="lavagemFuncionario" required></div>
-                <div class="form-control"><label for="lavagemObservacoes">Observações</label><input type="text" id="lavagemObservacoes"></div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Registrar</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+                    <div class="form-row">
+                        <div class="form-control"><label for="lavagemCliente">Cliente</label><select id="lavagemCliente" required></select></div>
+                        <div class="form-control"><label for="lavagemPlaca">Placa</label><input type="text" id="lavagemPlaca" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="lavagemServico">Tipo de Serviço</label><select id="lavagemServico" required><option value="Lavagem Simples">Lavagem Simples</option><option value="Lavagem Completa">Lavagem Completa</option><option value="Lavagem com Cera">Lavagem com Cera</option><option value="Polimento">Polimento</option><option value="Higienização">Higienização</option></select></div>
+                        <div class="form-control" id="precoContainer"><label for="precolavagem">Preço Unitário (R$)</label><input type="number" id="precolavagem" step="0.01" min="0" placeholder="0,00"></div>
+                    </div>
+                    <div class="produtos-container">
+                        <h4><i class="fas fa-box-open"></i> Produtos Utilizados</h4>
+                        <div class="form-row">
+                            <div class="form-control"><label for="lavagemProdutos">Produto</label><select id="lavagemProdutos"></select></div>
+                            <div class="form-control produto-quantidade"><label for="produtoQuantidadeUsada">Quantidade</label><input type="number" id="produtoQuantidadeUsada" min="1" value="1"></div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="adicionarProdutoBtn"><i class="fas fa-plus"></i> Adicionar Produto</button>
+                        <ul class="lista-produtos" id="listaProdutosUtilizados"></ul>
+                    </div>
+                    <div class="form-control"><label for="lavagemFuncionario">Funcionário Responsável</label><input type="text" id="lavagemFuncionario" required></div>
+                    <div class="form-control"><label for="lavagemObservacoes">Observações</label><input type="text" id="lavagemObservacoes" placeholder="Observações..."></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="lavagemForm"><i class="fas fa-save"></i> Registrar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Produto Modal -->
+    <!-- MODAL PRODUTO -->
     <div class="modal" id="produtoModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="produtoModalTitle">Adicionar Produto</h3><button class="close-modal">&times;</button></div>
-            <form id="produtoForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="produtoNome">Produto</label><input type="text" id="produtoNome" required></div>
-                    <div class="form-control"><label for="produtoCategoria">Categoria</label><select id="produtoCategoria" required><option value="Limpeza">Limpeza</option><option value="Químico">Químico</option><option value="Acessório">Acessório</option><option value="Ferragem">Ferragem</option><option value="Outros">Outros</option></select></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="produtoUnidade">Unidade</label><select id="produtoUnidade" required><option value="Unidade">Unidade</option><option value="Litro">Litro</option><option value="Kg">Kg</option><option value="Pacote">Pacote</option><option value="Caixa">Caixa</option></select></div>
-                    <div class="form-control"><label for="produtoQuantidade">Quantidade em Estoque</label><input type="number" id="produtoQuantidade" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="produtoEstoqueMin">Estoque Mínimo</label><input type="number" id="produtoEstoqueMin" required></div>
-                    <div class="form-control"><label for="produtoPreco">Preço Unitário (R$)</label><input type="number" step="0.01" id="produtoPreco" required></div>
-                </div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Salvar</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+            <div class="modal-header">
+                <h3><i class="fas fa-box"></i> <span id="produtoModalTitle">Adicionar Produto</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="produtoForm">
+                    <div class="form-row">
+                        <div class="form-control"><label for="produtoNome">Produto</label><input type="text" id="produtoNome" required></div>
+                        <div class="form-control"><label for="produtoCategoria">Categoria</label><select id="produtoCategoria" required><option value="Limpeza">Limpeza</option><option value="Químico">Químico</option><option value="Acessório">Acessório</option><option value="Ferragem">Ferragem</option><option value="Outros">Outros</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="produtoUnidade">Unidade</label><select id="produtoUnidade" required><option value="Unidade">Unidade</option><option value="Litro">Litro</option><option value="Kg">Kg</option><option value="Pacote">Pacote</option><option value="Caixa">Caixa</option></select></div>
+                        <div class="form-control"><label for="produtoQuantidade">Quantidade em Estoque</label><input type="number" id="produtoQuantidade" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="produtoEstoqueMin">Estoque Mínimo</label><input type="number" id="produtoEstoqueMin" required></div>
+                        <div class="form-control"><label for="produtoPreco">Preço Unitário (R$)</label><input type="number" step="0.01" id="produtoPreco" required></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="produtoForm"><i class="fas fa-save"></i> Salvar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Venda Modal -->
+    <!-- MODAL VENDA -->
     <div class="modal" id="vendaModal">
         <div class="modal-content">
-            <div class="modal-header"><h3>Registrar Venda de Produto</h3><button class="close-modal">&times;</button></div>
-            <form id="vendaForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="vendaData">Data</label><input type="date" id="vendaData" required></div>
-                    <div class="form-control"><label for="vendaCliente">Cliente</label><select id="vendaCliente" required><option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option></select></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="vendaProduto">Produto</label><select id="vendaProduto" required><option value="">Selecione o produto</option></select></div>
-                    <div class="form-control"><label for="vendaQuantidade">Quantidade</label><input type="number" id="vendaQuantidade" min="1" value="1" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="vendaValorUnit">Valor Unitário (R$)</label><input type="number" step="0.01" id="vendaValorUnit" required></div>
-                    <div class="form-control"><label for="vendaFuncionario">Funcionário</label><input type="text" id="vendaFuncionario" required></div>
-                </div>
-                <div class="form-control"><label for="vendaObs">Observações</label><input type="text" id="vendaObs"></div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Registrar Venda</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+            <div class="modal-header">
+                <h3><i class="fas fa-shopping-cart"></i> Registrar Venda de Produto</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="vendaForm">
+                    <div class="form-row">
+                        <div class="form-control"><label for="vendaData">Data</label><input type="date" id="vendaData" required></div>
+                        <div class="form-control"><label for="vendaCliente">Cliente</label><select id="vendaCliente" required><option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="vendaProduto">Produto</label><select id="vendaProduto" required><option value="">Selecione o produto</option></select></div>
+                        <div class="form-control"><label for="vendaQuantidade">Quantidade</label><input type="number" id="vendaQuantidade" min="1" value="1" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="vendaValorUnit">Valor Unitário (R$)</label><input type="number" step="0.01" id="vendaValorUnit" required></div>
+                        <div class="form-control"><label for="vendaFuncionario">Funcionário</label><input type="text" id="vendaFuncionario" required></div>
+                    </div>
+                    <div class="form-control"><label for="vendaObs">Observações</label><input type="text" id="vendaObs"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="vendaForm"><i class="fas fa-save"></i> Registrar Venda</button>
+            </div>
         </div>
     </div>
 
-    <!-- Serviço Modal -->
+    <!-- MODAL SERVIÇO -->
     <div class="modal" id="servicoModal">
         <div class="modal-content">
-            <div class="modal-header"><h3>Registrar Prestação de Serviço</h3><button class="close-modal">&times;</button></div>
-            <form id="servicoForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="servicoData">Data</label><input type="date" id="servicoData" required></div>
-                    <div class="form-control"><label for="servicoCliente">Cliente</label><select id="servicoCliente" required><option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option></select></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="servicoPlaca">Placa</label><input type="text" id="servicoPlaca" required></div>
-                    <div class="form-control"><label for="servicoTipo">Tipo de Serviço</label><select id="servicoTipo" required onchange="toggleOutroServico(this)"><option value="Polimento">Polimento</option><option value="Cristalização">Cristalização</option><option value="Higienização Interna">Higienização Interna</option><option value="Recuperação de Faróis">Recuperação de Faróis</option><option value="Tratamento de Couro">Tratamento de Couro</option><option value="Plotagem">Plotagem</option><option value="Outro">Outro</option></select></div>
-                </div>
-                <div class="form-row" id="outroServicoRow" style="display:none;">
-                    <div class="form-control"><label for="servicoOutroDesc">Descreva o serviço</label><input type="text" id="servicoOutroDesc" placeholder="Ex: Troca de óleo, revisão..."></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="servicoDescricao">Descrição</label><input type="text" id="servicoDescricao" placeholder="Detalhes do serviço"></div>
-                    <div class="form-control"><label for="servicoValor">Valor (R$)</label><input type="number" step="0.01" id="servicoValor" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="servicoFuncionario">Funcionário Responsável</label><input type="text" id="servicoFuncionario" required></div>
-                    <div class="form-control"><label for="servicoStatus">Status</label><select id="servicoStatus"><option value="Pendente">Pendente</option><option value="Em Andamento">Em Andamento</option><option value="Concluído">Concluído</option></select></div>
-                </div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Registrar Serviço</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+            <div class="modal-header">
+                <h3><i class="fas fa-tools"></i> Registrar Prestação de Serviço</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="servicoForm">
+                    <div class="form-row">
+                        <div class="form-control"><label for="servicoData">Data</label><input type="date" id="servicoData" required></div>
+                        <div class="form-control"><label for="servicoCliente">Cliente</label><select id="servicoCliente" required><option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="servicoPlaca">Placa</label><input type="text" id="servicoPlaca" required></div>
+                        <div class="form-control"><label for="servicoTipo">Tipo de Serviço</label><select id="servicoTipo" required onchange="toggleOutroServico(this)"><option value="Polimento">Polimento</option><option value="Cristalização">Cristalização</option><option value="Higienização Interna">Higienização Interna</option><option value="Recuperação de Faróis">Recuperação de Faróis</option><option value="Tratamento de Couro">Tratamento de Couro</option><option value="Plotagem">Plotagem</option><option value="Outro">Outro</option></select></div>
+                    </div>
+                    <div class="form-row" id="outroServicoRow" style="display:none;">
+                        <div class="form-control"><label for="servicoOutroDesc">Descreva o serviço</label><input type="text" id="servicoOutroDesc" placeholder="Ex: Troca de óleo, revisão..."></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="servicoDescricao">Descrição</label><input type="text" id="servicoDescricao" placeholder="Detalhes do serviço"></div>
+                        <div class="form-control"><label for="servicoValor">Valor (R$)</label><input type="number" step="0.01" id="servicoValor" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="servicoFuncionario">Funcionário Responsável</label><input type="text" id="servicoFuncionario" required></div>
+                        <div class="form-control"><label for="servicoStatus">Status</label><select id="servicoStatus"><option value="Pendente">Pendente</option><option value="Em Andamento">Em Andamento</option><option value="Concluído">Concluído</option></select></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="servicoForm"><i class="fas fa-save"></i> Registrar Serviço</button>
+            </div>
         </div>
     </div>
 
-    <!-- Usuário Modal -->
+    <!-- MODAL USUÁRIO -->
     <div class="modal" id="usuarioModal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="usuarioModalTitle">Novo Usuário</h3><button class="close-modal">&times;</button></div>
-            <form id="usuarioForm">
-                <div class="form-row">
-                    <div class="form-control"><label for="usuarioNome">Nome Completo</label><input type="text" id="usuarioNome" required></div>
-                    <div class="form-control"><label for="usuarioLogin">Login</label><input type="text" id="usuarioLogin" required></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-control"><label for="usuarioSenha">Senha</label><input type="password" id="usuarioSenha" placeholder="Deixe em branco para não alterar"></div>
-                    <div class="form-control"><label for="usuarioNivel">Nível de Acesso</label><select id="usuarioNivel" required><option value="administrador">👑 Administrador</option><option value="gerente">🧑‍💼 Gerente</option><option value="funcionario">👷 Funcionário</option></select></div>
-                </div>
-                <div class="form-control"><label for="usuarioStatusAtivo">Status</label><select id="usuarioStatusAtivo"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
-                <div style="margin-top:20px;display:flex;gap:10px;"><button type="submit" class="btn btn-success">Salvar Usuário</button><button type="button" class="btn btn-danger close-modal">Cancelar</button></div>
-            </form>
+            <div class="modal-header">
+                <h3><i class="fas fa-user-cog"></i> <span id="usuarioModalTitle">Novo Usuário</span></h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="usuarioForm">
+                    <div class="form-row">
+                        <div class="form-control"><label for="usuarioNome">Nome Completo</label><input type="text" id="usuarioNome" required></div>
+                        <div class="form-control"><label for="usuarioLogin">Login</label><input type="text" id="usuarioLogin" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-control"><label for="usuarioSenha">Senha</label><input type="password" id="usuarioSenha" placeholder="Deixe em branco para não alterar"></div>
+                        <div class="form-control"><label for="usuarioNivel">Nível de Acesso</label><select id="usuarioNivel" required><option value="administrador">Administrador</option><option value="gerente">Gerente</option><option value="funcionario">Funcionário</option></select></div>
+                    </div>
+                    <div class="form-control"><label for="usuarioStatusAtivo">Status</label><select id="usuarioStatusAtivo"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-success" form="usuarioForm"><i class="fas fa-save"></i> Salvar Usuário</button>
+            </div>
         </div>
     </div>
 
@@ -485,7 +1418,7 @@
             const tabRelatorios = document.querySelector('.nav-tabs li[data-tab="relatorios"]');
             const tabDashboard = document.querySelector('.nav-tabs li[data-tab="dashboard"]');
             if (nivel === 'administrador') {
-                navAdmin.style.display = 'block';
+                navAdmin.style.display = 'flex';
                 if (tabEstoque) tabEstoque.style.display = '';
                 if (tabRelatorios) tabRelatorios.style.display = '';
                 if (tabDashboard) tabDashboard.style.display = '';
@@ -525,7 +1458,6 @@
                     return;
                 }
 
-                // Verifica senha (coluna senha_hash)
                 if (password !== data.senha_hash) {
                     alert('Senha incorreta.');
                     return;
@@ -556,7 +1488,6 @@
             document.getElementById('appScreen').style.display = 'none';
         }
 
-        // Verificar sessão ao carregar
         window.addEventListener('DOMContentLoaded', function() {
             const userData = localStorage.getItem('usuarioLogado');
             if (userData) {
@@ -577,7 +1508,7 @@
             document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
         });
 
-        // ===================== CARREGAR DADOS (CORRIGIDO - usa 'criado_em') =====================
+        // ===================== CARREGAR DADOS (SUPABASE) =====================
         async function carregarDados() {
             await carregarClientes();
             await carregarProdutos();
@@ -588,7 +1519,6 @@
             await carregarDashboard();
         }
 
-        // CORREÇÃO FINAL: usar 'criado_em' (coluna correta) e NÃO 'created_at'
         async function carregarClientes() {
             const { data, error } = await supabaseClient
                 .from('clientes')
@@ -649,7 +1579,7 @@
             renderizarServicos();
         }
 
-        // ===== RENDERIZAÇÕES =====
+        // ===== RENDERIZAÇÕES (idênticas à versão com Supabase) =====
         function renderizarClientes() {
             const tbody = document.querySelector('#clientesTable tbody');
             tbody.innerHTML = '';
@@ -862,7 +1792,7 @@
             });
         }
 
-        // ===================== CRUD CLIENTES =====================
+        // ===== CRUD (todas as funções de manipulação) – idênticas à versão com Supabase =====
         function abrirModalCliente(id = null) {
             const modal = document.getElementById('clienteModal');
             const titulo = document.getElementById('clienteModalTitle');
@@ -955,7 +1885,6 @@
             }
         }
 
-        // ===================== CRUD PRODUTOS =====================
         function abrirModalProduto(id = null) {
             const modal = document.getElementById('produtoModal');
             const titulo = document.getElementById('produtoModalTitle');
@@ -1022,7 +1951,6 @@
             }
         }
 
-        // ===================== CRUD LAVAGENS =====================
         function abrirModalLavagem() {
             const modal = document.getElementById('lavagemModal');
             const form = document.getElementById('lavagemForm');
@@ -1130,7 +2058,6 @@
             }
         }
 
-        // ===================== CRUD VENDAS =====================
         function abrirModalVenda() {
             const modal = document.getElementById('vendaModal');
             const form = document.getElementById('vendaForm');
@@ -1225,7 +2152,6 @@
             }
         }
 
-        // ===================== CRUD SERVIÇOS =====================
         function abrirModalServico() {
             const modal = document.getElementById('servicoModal');
             const form = document.getElementById('servicoForm');
@@ -1311,7 +2237,6 @@
             }
         }
 
-        // ===================== CRUD USUÁRIOS =====================
         function abrirModalUsuario(id = null) {
             const modal = document.getElementById('usuarioModal');
             const titulo = document.getElementById('usuarioModalTitle');
@@ -1374,7 +2299,7 @@
             }
         }
 
-        // ===================== RELATÓRIOS =====================
+        // ===== RELATÓRIOS =====
         async function gerarRelatorio() {
             try {
                 const tipo = document.getElementById('tipoRelatorio').value;
@@ -1523,7 +2448,7 @@
             win.document.close();
         }
 
-        // ===================== EVENTOS E INICIALIZAÇÃO =====================
+        // ===== FUNÇÕES DE EVENTOS E INICIALIZAÇÃO =====
         function toggleOutroVeiculo(sel) {
             const row = document.getElementById('outroVeiculoRow');
             if (sel.value === 'Outro') { row.style.display = ''; } else { row.style.display = 'none'; }
@@ -1628,7 +2553,7 @@
             configurarEventos();
         });
 
-        // Aviso no console para desabilitar RLS
+        // Aviso RLS no console
         console.warn('ATENÇÃO: Para que o sistema funcione, desabilite o RLS no Supabase com os comandos:');
         console.warn('ALTER TABLE clientes DISABLE ROW LEVEL SECURITY;');
         console.warn('ALTER TABLE produtos DISABLE ROW LEVEL SECURITY;');
