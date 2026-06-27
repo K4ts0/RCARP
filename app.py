@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados (sem modificações na URL)
+# Configuração do banco de dados (usando psycopg 3)
 # -------------------------------------------------------------
 database_url = os.environ.get("DATABASE_URL")
 
@@ -23,7 +23,9 @@ if database_url:
     url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
     if url_limpa.startswith("postgres://"):
         url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
-    # NÃO modifique a URL além disso
+    # CORREÇÃO: usa o driver psycopg (versão 3) em vez do psycopg2
+    if url_limpa.startswith("postgresql://"):
+        url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
     print(f"🔄 Conectando ao Supabase: {url_limpa.split('@')[1] if '@' in url_limpa else 'URL configurada'}")
 else:
@@ -41,8 +43,8 @@ bcrypt = Bcrypt(app)
 # -------------------------------------------------------------
 # Inicialização do SQLAlchemy (sem criar engine ainda)
 # -------------------------------------------------------------
-db = SQLAlchemy()  # <- não passa app, depois usamos init_app
-db.init_app(app)   # <- vincula ao app
+db = SQLAlchemy()       # não passa app
+db.init_app(app)        # vincula ao app
 
 # -------------------------------------------------------------
 # MODELOS
@@ -99,7 +101,7 @@ class Lavagem(db.Model):
     tipo = db.Column(db.String(20), default="assinante")
     preco = db.Column(db.Float, default=0.0)
     observacoes = db.Column(db.Text)
-    produtos_utilizados = db.Column(db.Text)
+    produtos_utilizados = db.Column(db.Text)  # JSON
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # -------------------------------------------------------------
@@ -124,7 +126,7 @@ def init_db():
             print(f"⚠️ Erro na inicialização: {e}")
 
 # -------------------------------------------------------------
-# ROTAS (TODAS AS QUE VOCÊ JÁ TINHA)
+# ROTAS DA API
 # -------------------------------------------------------------
 @app.route("/")
 def home():
