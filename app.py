@@ -15,9 +15,15 @@ INDEX_HTML = BASE_DIR / "index.html"
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-lavagem-2024")
 
-# -------------------------------------------------------------
-# Configuração do banco de dados (PostgreSQL ou SQLite fallback)
-# -------------------------------------------------------------
+# ============================================================
+# CONFIGURAÇÃO SUPABASE (SERVICE_ROLE para operações admin)
+# ============================================================
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://uzwyzmgbzeoonrproevh.supabase.co")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
+
+# ============================================================
+# CONFIGURAÇÃO DO BANCO DE DADOS (PostgreSQL ou SQLite fallback)
+# ============================================================
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
@@ -194,6 +200,12 @@ def init_db():
         except Exception as e:
             print(f"⚠️ Erro na inicialização: {e}")
             db.session.rollback()
+
+# ============================================================
+# INICIALIZAÇÃO DO BANCO (executa ao importar o módulo)
+# ============================================================
+# CORREÇÃO: init_db() roda aqui para funcionar no Render com gunicorn
+init_db()
 
 # ============================================================
 # ROTAS
@@ -558,11 +570,8 @@ def debug_db():
         return jsonify({"status": "error", "error": str(e)}), 500
 
 # ============================================================
-# INICIALIZAÇÃO
+# INICIALIZAÇÃO DO SERVIDOR
 # ============================================================
-with app.app_context():
-    init_db()
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
