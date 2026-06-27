@@ -1,24 +1,12 @@
 from __future__ import annotations
 import os
 import json
-import atexit
 from pathlib import Path
-from flask import Flask, render_template, request, session, jsonify, g
+from flask import Flask, render_template, request, session, jsonify
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, inspect, event
+from sqlalchemy import text, inspect
 from datetime import datetime, date
-
-# ============================================================
-# SUPABASE INTEGRATION
-# ============================================================
-# Tentar importar supabase, se não estiver instalado usar SQLite como fallback
-try:
-    from supabase import create_client, Client
-    SUPABASE_AVAILABLE = True
-except ImportError:
-    SUPABASE_AVAILABLE = False
-    print("⚠️ supabase-py não instalado. Usando SQLite local.")
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "app.db"
@@ -27,22 +15,8 @@ app = Flask(__name__, template_folder=str(BASE_DIR))
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-lavagem-2024")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados (Supabase PostgreSQL ou SQLite)
+# Configuração do banco de dados
 # -------------------------------------------------------------
-supabase_url = os.environ.get("SUPABASE_URL")
-supabase_key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get("SUPABASE_KEY")
-
-# Cliente Supabase (para operações diretas quando necessário)
-supabase_client = None
-
-if SUPABASE_AVAILABLE and supabase_url and supabase_key:
-    try:
-        supabase_client = create_client(supabase_url, supabase_key)
-        print("✅ Cliente Supabase inicializado")
-    except Exception as e:
-        print(f"⚠️ Erro ao conectar Supabase: {e}")
-
-# Configuração SQLAlchemy (PostgreSQL via Supabase ou SQLite local)
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
@@ -52,20 +26,10 @@ if database_url:
     if url_limpa.startswith("postgresql://"):
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Usando PostgreSQL: {url_limpa.split('@')[1] if '@' in url_limpa else 'URL configurada'}")
+    print(f"🔄 Usando PostgreSQL")
 else:
-    # Tentar conectar diretamente ao Supabase PostgreSQL
-    if supabase_url and supabase_key:
-        supabase_direct_url = os.environ.get("SUPABASE_DIRECT_URL")
-        if supabase_direct_url:
-            app.config["SQLALCHEMY_DATABASE_URI"] = supabase_direct_url
-            print("🔄 Usando Supabase PostgreSQL (DIRECT URL)")
-        else:
-            app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-            print("✅ Usando SQLite local (fallback - sem DIRECT URL)")
-    else:
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-        print("✅ Usando SQLite local (fallback)")
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
+    print("✅ Usando SQLite local")
 
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
@@ -210,7 +174,7 @@ def init_db():
                 db.session.commit()
                 print("✅ Usuário admin criado: admin / 1234")
             else:
-                print("✅ Usuários já existem no banco")
+                print("✅ Usuários já existem")
 
             if not Produto.query.first():
                 produtos_exemplo = [
@@ -224,15 +188,11 @@ def init_db():
                 db.session.commit()
                 print("✅ Produtos de exemplo criados")
             else:
-                print("✅ Produtos já existem no banco")
+                print("✅ Produtos já existem")
 
         except Exception as e:
             print(f"⚠️ Erro na inicialização: {e}")
             db.session.rollback()
-
-# CHAMAR init_db() NA INICIALIZAÇÃO DO MÓDULO (importante para Render/gunicorn)
-with app.app_context():
-    init_db()
 
 # ============================================================
 # ROTAS DA API
@@ -241,9 +201,6 @@ with app.app_context():
 def home():
     return render_template("index.html")
 
-# -------------------------------------------------------------
-# AUTENTICAÇÃO
-# -------------------------------------------------------------
 @app.route("/api/login", methods=["POST"])
 def api_login():
     try:
@@ -282,9 +239,6 @@ def api_logout():
     session.clear()
     return jsonify({'success': True})
 
-# -------------------------------------------------------------
-# DASHBOARD
-# -------------------------------------------------------------
 @app.route("/api/dashboard")
 def api_dashboard():
     if not logged_in():
@@ -349,7 +303,6 @@ def api_dashboard():
         print(f"Erro no dashboard: {e}")
         return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
 
-# ========== ROTAS DE CLIENTES ==========
 @app.route("/api/clientes")
 def api_clientes():
     if not logged_in():
@@ -421,7 +374,6 @@ def api_excluir_cliente(cliente_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
-# ========== ROTAS DE LAVAGENS ==========
 @app.route("/api/lavagens")
 def api_lavagens():
     if not logged_in():
@@ -482,7 +434,6 @@ def api_excluir_lavagem(lavagem_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
-# ========== ROTAS DE PRODUTOS ==========
 @app.route("/api/produtos")
 def api_produtos():
     if not logged_in():
@@ -546,7 +497,6 @@ def api_excluir_produto(produto_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
-# ========== ROTA FINANCEIRO ==========
 @app.route("/api/financeiro")
 def api_financeiro():
     if not logged_in():
@@ -572,7 +522,6 @@ def api_financeiro():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# ========== DEBUG ==========
 @app.route("/api/debug/db")
 def debug_db():
     try:
@@ -584,15 +533,18 @@ def debug_db():
             "status": "success",
             "tables": tables,
             "user_count": user_count,
-            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "...",
-            "supabase_connected": supabase_client is not None
+            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "..."
         })
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
 
 # ============================================================
-# INICIALIZAÇÃO
+# INICIALIZAÇÃO - CHAMADA EXPLÍCITA NO NÍVEL DO MÓDULO
 # ============================================================
+# Isso garante que o banco seja inicializado quando o gunicorn importar o módulo
+with app.app_context():
+    init_db()
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
