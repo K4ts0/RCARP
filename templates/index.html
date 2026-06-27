@@ -564,7 +564,6 @@
             border-radius: 5px;
         }
 
-        /* Estilos para produtos utilizados */
         .produtos-container {
             margin: 15px 0;
             padding: 15px;
@@ -599,7 +598,6 @@
             width: 80px;
         }
 
-        /* NOVO: Estilos para relatórios */
         .financeiro-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1484,8 +1482,6 @@
 
     <script>
         // ========== INTEGRAÇÃO COM API ==========
-
-        // Funções para comunicação com a API
         const api = {
             async request(endpoint, options = {}) {
                 try {
@@ -1509,7 +1505,6 @@
                 }
             },
 
-            // Autenticação
             async login(username, password) {
                 return this.request('/login', {
                     method: 'POST',
@@ -1521,7 +1516,6 @@
                 return this.request('/logout', { method: 'POST' });
             },
 
-            // Dados
             async getDashboard() {
                 return this.request('/dashboard');
             },
@@ -1533,7 +1527,6 @@
             async saveCliente(cliente) {
                 const endpoint = cliente.id ? `/clientes/${cliente.id}` : '/clientes';
                 const method = cliente.id ? 'PUT' : 'POST';
-                
                 return this.request(endpoint, {
                     method,
                     body: JSON.stringify(cliente)
@@ -1566,7 +1559,6 @@
             async saveProduto(produto) {
                 const endpoint = produto.id ? `/produtos/${produto.id}` : '/produtos';
                 const method = produto.id ? 'PUT' : 'POST';
-                
                 return this.request(endpoint, {
                     method,
                     body: JSON.stringify(produto)
@@ -1593,43 +1585,32 @@
             lavagens: []
         };
 
-        // Inicialização do sistema
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurar data atual nos campos de data
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('clienteInicio').value = hoje;
             document.getElementById('lavagemData').value = hoje;
             
-            // Calcular data de vencimento (30 dias a partir de hoje)
             const vencimento = new Date();
             vencimento.setDate(vencimento.getDate() + 30);
             document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
             
-            // Configurar eventos
             configurarEventos();
         });
 
-        // Validação em tempo real da placa (opcional)
         function configurarValidacaoPlaca() {
             const campoPlaca = document.getElementById('clientePlaca');
-            
             campoPlaca.addEventListener('blur', function() {
                 const placa = this.value.toUpperCase().trim();
-                
                 if (placa) {
-                    // Verificar se já existe cliente com esta placa (exceto se estiver editando)
                     const placaExistente = estado.clientes.find(cliente => {
                         if (estado.clienteEditando && cliente.id === estado.clienteEditando.id) {
                             return false;
                         }
                         return cliente.placa.toUpperCase() === placa;
                     });
-                    
                     if (placaExistente) {
                         this.style.borderColor = 'var(--accent)';
                         this.style.backgroundColor = '#fde8e6';
-                        
-                        // Mostrar mensagem de aviso
                         let mensagemErro = this.parentNode.querySelector('.placa-erro');
                         if (!mensagemErro) {
                             mensagemErro = document.createElement('div');
@@ -1643,38 +1624,26 @@
                     } else {
                         this.style.borderColor = '';
                         this.style.backgroundColor = '';
-                        
-                        // Remover mensagem de erro se existir
                         const mensagemErro = this.parentNode.querySelector('.placa-erro');
-                        if (mensagemErro) {
-                            mensagemErro.remove();
-                        }
+                        if (mensagemErro) mensagemErro.remove();
                     }
                 }
             });
-            
-            // Limpar validação quando começar a digitar
             campoPlaca.addEventListener('input', function() {
                 this.style.borderColor = '';
                 this.style.backgroundColor = '';
-                
                 const mensagemErro = this.parentNode.querySelector('.placa-erro');
-                if (mensagemErro) {
-                    mensagemErro.remove();
-                }
+                if (mensagemErro) mensagemErro.remove();
             });
         }
 
-        // Configurar todos os eventos da aplicação
         function configurarEventos() {
-            // Login
             document.getElementById('loginBtn').addEventListener('click', fazerLogin);
             document.getElementById('password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') fazerLogin();
             });
             document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
             
-            // Navegação por abas
             document.querySelectorAll('.nav-tabs li').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
@@ -1682,7 +1651,6 @@
                 });
             });
             
-            // Subabas de lavagens
             document.querySelectorAll('.tab-button').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
@@ -1690,42 +1658,32 @@
                 });
             });
             
-            // Botões de ação
             document.getElementById('addClienteBtn').addEventListener('click', function() {
                 abrirModalCliente();
             });
-            
             document.getElementById('addLavagemBtn').addEventListener('click', function() {
                 abrirModalLavagem();
             });
-            
             document.getElementById('addProdutoBtn').addEventListener('click', function() {
                 abrirModalProduto();
             });
-            
             document.getElementById('refreshDashboard').addEventListener('click', function() {
                 carregarDashboard();
             });
-            // Formulários
-            document.getElementById('clienteForm').addEventListener('submit', salvarCliente);
             
-            // Fechar modais
             document.querySelectorAll('.close-modal').forEach(btn => {
                 btn.addEventListener('click', function() {
                     fecharTodosModais();
                 });
             });
             
-            // Formulários
             document.getElementById('clienteForm').addEventListener('submit', salvarCliente);
             document.getElementById('lavagemForm').addEventListener('submit', salvarLavagem);
             document.getElementById('produtoForm').addEventListener('submit', salvarProduto);
             
-            // Relatórios
             document.getElementById('periodo').addEventListener('change', function() {
                 const periodo = this.value;
                 estado.periodoRelatorio = periodo;
-                
                 if (periodo === 'personalizado') {
                     document.getElementById('dataInicioContainer').style.display = 'block';
                     document.getElementById('dataFimContainer').style.display = 'block';
@@ -1738,11 +1696,9 @@
             document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
             document.getElementById('imprimirRelatorio').addEventListener('click', imprimirRelatorio);
             
-            // Controle de preço na lavagem avulsa
             document.getElementById('lavagemTipo').addEventListener('change', function() {
                 const tipo = this.value;
                 const precoContainer = document.getElementById('precoContainer');
-                
                 if (tipo === 'avulsa') {
                     precoContainer.style.display = 'block';
                     document.getElementById('precolavagem').required = true;
@@ -1752,23 +1708,18 @@
                 }
             });
 
-            // Botão para adicionar produto à lista na lavagem
             document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
                 const produtoId = document.getElementById('lavagemProdutos').value;
                 const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
-                
                 if (!produtoId || quantidade <= 0) {
                     alert('Selecione um produto e informe uma quantidade válida.');
                     return;
                 }
-                
                 const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
                 if (produto && quantidade > produto.quantidade) {
                     alert(`Quantidade indisponível em estoque. Disponível: ${produto.quantidade} ${produto.unidade}`);
                     return;
                 }
-                
-                // Adicionar à lista visual
                 const listaProdutos = document.getElementById('listaProdutosUtilizados');
                 const li = document.createElement('li');
                 li.innerHTML = `
@@ -1779,13 +1730,10 @@
                     <input type="hidden" name="produtos[]" value="${produtoId}:${quantidade}">
                 `;
                 listaProdutos.appendChild(li);
-                
-                // Limpar seleção
                 document.getElementById('lavagemProdutos').value = '';
                 document.getElementById('produtoQuantidadeUsada').value = '1';
             });
 
-            // Botões venda, serviço e usuário
             document.getElementById('addVendaBtn').addEventListener('click', abrirModalVenda);
             document.getElementById('addServicoBtn').addEventListener('click', abrirModalServico);
             document.getElementById('addUsuarioBtn').addEventListener('click', abrirModalUsuario);
@@ -1793,7 +1741,6 @@
             document.getElementById('servicoForm').addEventListener('submit', salvarServico);
             document.getElementById('usuarioForm').addEventListener('submit', salvarUsuario);
 
-            // Subtabs do painel admin
             document.querySelectorAll('[data-subtab]').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('[data-subtab]').forEach(b => b.classList.remove('active'));
@@ -1804,28 +1751,22 @@
             });
         }
 
-        // Função de login
+        // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
         async function fazerLogin() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            
             if (!username || !password) {
                 alert('Por favor, preencha todos os campos.');
                 return;
             }
-            
             try {
                 const result = await api.login(username, password);
-                
                 if (result.success) {
                     estado.usuarioLogado = result.user;
                     document.getElementById('userName').textContent = result.user.nome;
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('appScreen').style.display = 'block';
-                    
-                    // Aplicar controle de acesso por nível
                     aplicarControleAcesso(result.user.nivel || 'funcionario');
-                    
                     await carregarDados();
                 } else {
                     alert(result.message || 'Erro no login');
@@ -1835,7 +1776,6 @@
             }
         }
 
-        // Controle de acesso por nível
         function aplicarControleAcesso(nivel) {
             estado.nivelUsuario = nivel;
             const navAdmin = document.getElementById('navAdmin');
@@ -1844,19 +1784,16 @@
             const tabDashboard = document.querySelector('.nav-tabs li[data-tab="dashboard"]');
 
             if (nivel === 'administrador') {
-                // Acesso total
                 navAdmin.style.display = 'block';
                 if (tabEstoque) tabEstoque.style.display = '';
                 if (tabRelatorios) tabRelatorios.style.display = '';
                 if (tabDashboard) tabDashboard.style.display = '';
             } else if (nivel === 'gerente') {
-                // Estoque, Lavagens, Clientes
                 navAdmin.style.display = 'none';
                 if (tabEstoque) tabEstoque.style.display = '';
                 if (tabRelatorios) tabRelatorios.style.display = 'none';
                 if (tabDashboard) tabDashboard.style.display = 'none';
             } else {
-                // Funcionário: Lavagens e Clientes
                 navAdmin.style.display = 'none';
                 if (tabEstoque) tabEstoque.style.display = 'none';
                 if (tabRelatorios) tabRelatorios.style.display = 'none';
@@ -1864,14 +1801,12 @@
             }
         }
 
-        // Função de logout
         async function fazerLogout() {
             try {
                 await api.logout();
             } catch (error) {
                 console.error('Erro no logout:', error);
             }
-            
             estado.usuarioLogado = null;
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
@@ -1881,20 +1816,15 @@
 
         // ========== FUNÇÃO ALTERNAR ABA CORRIGIDA ==========
         async function alternarAba(abaId) {
-            // Remover classe active de todas as abas
             document.querySelectorAll('.nav-tabs li').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            
-            // Adicionar classe active à aba selecionada
             document.querySelector(`.nav-tabs li[data-tab="${abaId}"]`).classList.add('active');
             document.getElementById(abaId).classList.add('active');
-            
-            // Carregar dados específicos da aba
+
             if (abaId === 'dashboard') {
                 await carregarDashboard();
             } else if (abaId === 'clientes') {
@@ -1906,27 +1836,21 @@
             } else if (abaId === 'admin') {
                 carregarUsuarios();
             } else if (abaId === 'relatorios') {
-                // Não carregar dados automaticamente para relatórios
+                // não carrega automaticamente
             }
         }
 
-        // Alternar entre subabas
         function alternarSubAba(subAbaId) {
-            // Remover classe active de todas as subabas
             document.querySelectorAll('.tab-button').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
             document.querySelectorAll('.tab-panel').forEach(panel => {
                 panel.classList.remove('active');
             });
-            
-            // Adicionar classe active à subaba selecionada
             document.querySelector(`.tab-button[data-tab="${subAbaId}"]`).classList.add('active');
             document.getElementById(subAbaId).classList.add('active');
         }
 
-        // Carregar todos os dados do sistema
         async function carregarDados() {
             await carregarDashboard();
             await carregarClientes();
@@ -1934,32 +1858,23 @@
             await carregarEstoque();
         }
 
-        // Carregar dados do dashboard
+        // ========== FUNÇÕES DE CARREGAMENTO ==========
         async function carregarDashboard() {
             try {
                 const data = await api.getDashboard();
-                
-                // Atualizar estatísticas
                 document.getElementById('clientesAtivos').textContent = data.stats.clientesAtivos;
                 document.getElementById('receitaTotal').textContent = parseFloat(data.stats.receitaTotal || 0).toFixed(2);
                 document.getElementById('inadimplentes').textContent = data.stats.inadimplentes;
                 document.getElementById('aReceber').textContent = parseFloat(data.stats.aReceber || 0).toFixed(2);
                 document.getElementById('lavagensAvulsas').textContent = data.stats.lavagensAvulsas;
                 
-                // Lucro estimado = receita avulsas + mensalidades pagas (sem dupla contagem)
-                const receitaAvulsasDash = (estado.lavagens || [])
-                    .filter(l => l.tipo === 'avulsa')
-                    .reduce((s, l) => s + parseFloat(l.preco || 0), 0);
-                const receitaMensalDash = (estado.clientes || [])
-                    .filter(c => c.status === 'Pago')
-                    .reduce((s, c) => s + parseFloat(c.mensalidade || 0), 0);
+                const receitaAvulsasDash = (estado.lavagens || []).filter(l => l.tipo === 'avulsa').reduce((s, l) => s + parseFloat(l.preco || 0), 0);
+                const receitaMensalDash = (estado.clientes || []).filter(c => c.status === 'Pago').reduce((s, c) => s + parseFloat(c.mensalidade || 0), 0);
                 const lucroEstimado = receitaAvulsasDash + receitaMensalDash;
                 document.getElementById('lucroTotal').textContent = lucroEstimado.toFixed(2);
                 
-                // Atualizar últimas lavagens
                 const tbody = document.querySelector('#ultimasLavagens tbody');
                 tbody.innerHTML = '';
-                
                 data.ultimasLavagens.forEach(lavagem => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -1972,21 +1887,17 @@
                     `;
                     tbody.appendChild(tr);
                 });
-                
             } catch (error) {
                 console.error('Erro ao carregar dashboard:', error);
             }
         }
 
-        // Carregar dados dos clientes
         async function carregarClientes() {
             try {
                 const data = await api.getClientes();
                 estado.clientes = data.clientes;
-                
                 const tbody = document.querySelector('#clientesTable tbody');
                 tbody.innerHTML = '';
-                
                 estado.clientes.forEach(cliente => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -2005,37 +1916,30 @@
                     `;
                     tbody.appendChild(tr);
                 });
-                
-                // Adicionar eventos aos botões de editar e excluir
                 document.querySelectorAll('.editar-cliente').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.getAttribute('data-id'));
                         abrirModalCliente(id);
                     });
                 });
-                
                 document.querySelectorAll('.excluir-cliente').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.getAttribute('data-id'));
                         excluirCliente(id);
                     });
                 });
-                
             } catch (error) {
                 console.error('Erro ao carregar clientes:', error);
             }
         }
 
-        // Carregar dados das lavagens
         async function carregarLavagens() {
             try {
                 const data = await api.getLavagens();
                 estado.lavagens = data.lavagens;
                 
-                // Lavagens de assinantes
                 const tbodyAssinantes = document.querySelector('#lavagensTable tbody');
                 tbodyAssinantes.innerHTML = '';
-                
                 const lavagensAssinantes = estado.lavagens.filter(l => l.tipo === 'assinante');
                 lavagensAssinantes.forEach(lavagem => {
                     const tr = document.createElement('tr');
@@ -2052,11 +1956,9 @@
                     `;
                     tbodyAssinantes.appendChild(tr);
                 });
-                
-                // Lavagens avulsas
+
                 const tbodyAvulsas = document.querySelector('#lavagensAvulsasTable tbody');
                 tbodyAvulsas.innerHTML = '';
-                
                 const lavagensAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa');
                 lavagensAvulsas.forEach(lavagem => {
                     const tr = document.createElement('tr');
@@ -2074,29 +1976,24 @@
                     `;
                     tbodyAvulsas.appendChild(tr);
                 });
-                
-                // Adicionar eventos aos botões de excluir
+
                 document.querySelectorAll('.excluir-lavagem').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.getAttribute('data-id'));
                         excluirLavagem(id);
                     });
                 });
-                
             } catch (error) {
                 console.error('Erro ao carregar lavagens:', error);
             }
         }
 
-        // Carregar dados do estoque
         async function carregarEstoque() {
             try {
                 const data = await api.getProdutos();
                 estado.produtos = data.produtos;
-                
                 const tbody = document.querySelector('#estoqueTable tbody');
                 tbody.innerHTML = '';
-                
                 estado.produtos.forEach(produto => {
                     const valorTotal = produto.quantidade * produto.preco;
                     const tr = document.createElement('tr');
@@ -2115,45 +2012,33 @@
                     `;
                     tbody.appendChild(tr);
                 });
-                
-                // Adicionar eventos aos botões de editar e excluir
                 document.querySelectorAll('.editar-produto').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.getAttribute('data-id'));
                         abrirModalProduto(id);
                     });
                 });
-                
                 document.querySelectorAll('.excluir-produto').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const id = parseInt(this.getAttribute('data-id'));
                         excluirProduto(id);
                     });
                 });
-                
             } catch (error) {
                 console.error('Erro ao carregar estoque:', error);
             }
         }
 
-        // Abrir modal para adicionar/editar cliente
+        // ========== FUNÇÕES DE MODAIS ==========
         function abrirModalCliente(id = null) {
             const modal = document.getElementById('clienteModal');
-            const form = document.getElementById('clienteForm');
             const titulo = document.getElementById('clienteModalTitle');
-            
-            // Limpar formulário
+            const form = document.getElementById('clienteForm');
             form.reset();
-            
-            // Configurar validação de placa
             configurarValidacaoPlaca();
-            
             if (id) {
-                // Modo edição
                 titulo.textContent = 'Editar Cliente';
                 estado.clienteEditando = estado.clientes.find(c => c.id === id);
-                
-                // Preencher formulário com dados do cliente
                 document.getElementById('clienteNome').value = estado.clienteEditando.nome;
                 document.getElementById('clienteTelefone').value = estado.clienteEditando.telefone;
                 document.getElementById('clientePlaca').value = estado.clienteEditando.placa;
@@ -2165,38 +2050,26 @@
                 document.getElementById('clienteStatus').value = estado.clienteEditando.status;
                 document.getElementById('clienteObservacoes').value = estado.clienteEditando.observacoes || '';
             } else {
-                // Modo adição
                 titulo.textContent = 'Adicionar Cliente';
                 estado.clienteEditando = null;
-                
-                // Configurar data atual
                 const hoje = new Date().toISOString().split('T')[0];
                 document.getElementById('clienteInicio').value = hoje;
-                
-                // Calcular data de vencimento (30 dias a partir de hoje)
                 const vencimento = new Date();
                 vencimento.setDate(vencimento.getDate() + 30);
                 document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
             }
-            
             modal.style.display = 'flex';
         }
 
-        // Abrir modal para adicionar lavagem
         async function abrirModalLavagem() {
             const modal = document.getElementById('lavagemModal');
             const form = document.getElementById('lavagemForm');
             const selectCliente = document.getElementById('lavagemCliente');
             const selectProdutos = document.getElementById('lavagemProdutos');
-            
-            // Limpar formulário
             form.reset();
-            
-            // Configurar data atual
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('lavagemData').value = hoje;
             
-            // Preencher select de clientes
             selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
             estado.clientes.forEach(cliente => {
                 const option = document.createElement('option');
@@ -2204,33 +2077,26 @@
                 option.textContent = `${cliente.nome} - ${cliente.placa}`;
                 selectCliente.appendChild(option);
             });
-            
-            // Adicionar opção para cliente avulso
             const optionAvulso = document.createElement('option');
             optionAvulso.value = 'avulso';
             optionAvulso.textContent = 'Cliente Avulso';
             selectCliente.appendChild(optionAvulso);
             
-            // Configurar evento para preencher placa automaticamente
             selectCliente.addEventListener('change', function() {
                 const clienteId = this.value;
                 const campoPlaca = document.getElementById('lavagemPlaca');
-                
                 if (clienteId && clienteId !== 'avulso') {
                     const cliente = estado.clientes.find(c => c.id === parseInt(clienteId));
                     if (cliente) {
                         campoPlaca.value = cliente.placa;
-                        // Tornar o campo placa readonly quando cliente é selecionado
                         campoPlaca.readOnly = true;
                     }
                 } else {
-                    // Se for cliente avulso ou nenhum cliente selecionado, liberar para editar
                     campoPlaca.value = '';
                     campoPlaca.readOnly = false;
                 }
             });
 
-            // Preencher select de produtos
             selectProdutos.innerHTML = '<option value="">Selecione os produtos utilizados</option>';
             estado.produtos.forEach(produto => {
                 const option = document.createElement('option');
@@ -2239,33 +2105,20 @@
                 selectProdutos.appendChild(option);
             });
 
-            // Configurar campo de quantidade de produto
             document.getElementById('produtoQuantidadeUsada').value = '1';
-            
-            // Limpar lista de produtos utilizados
             document.getElementById('listaProdutosUtilizados').innerHTML = '';
-            
-            // Ocultar campo de preço inicialmente
             document.getElementById('precoContainer').style.display = 'none';
-            
             modal.style.display = 'flex';
         }
 
-        // Abrir modal para adicionar/editar produto
         function abrirModalProduto(id = null) {
             const modal = document.getElementById('produtoModal');
-            const form = document.getElementById('produtoForm');
             const titulo = document.getElementById('produtoModalTitle');
-            
-            // Limpar formulário
+            const form = document.getElementById('produtoForm');
             form.reset();
-            
             if (id) {
-                // Modo edição
                 titulo.textContent = 'Editar Produto';
                 estado.produtoEditando = estado.produtos.find(p => p.id === id);
-                
-                // Preencher formulário com dados do produto
                 document.getElementById('produtoNome').value = estado.produtoEditando.produto;
                 document.getElementById('produtoCategoria').value = estado.produtoEditando.categoria;
                 document.getElementById('produtoUnidade').value = estado.produtoEditando.unidade;
@@ -2273,28 +2126,24 @@
                 document.getElementById('produtoEstoqueMin').value = estado.produtoEditando.estoqueMin;
                 document.getElementById('produtoPreco').value = estado.produtoEditando.preco;
             } else {
-                // Modo adição
                 titulo.textContent = 'Adicionar Produto';
                 estado.produtoEditando = null;
             }
-            
             modal.style.display = 'flex';
         }
 
-        // Fechar todos os modais
         function fecharTodosModais() {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.style.display = 'none';
             });
         }
 
-        // Salvar cliente (adicionar ou editar) - COM VALIDAÇÃO DE PLACA DUPLICADA
+        // ========== FUNÇÕES SALVAR/EXCLUIR ==========
         async function salvarCliente(e) {
             e.preventDefault();
-            
             const nome = document.getElementById('clienteNome').value;
             const telefone = document.getElementById('clienteTelefone').value;
-            const placa = document.getElementById('clientePlaca').value.toUpperCase(); // Converter para maiúsculas
+            const placa = document.getElementById('clientePlaca').value.toUpperCase();
             let veiculo = document.getElementById('clienteVeiculo').value;
             if (veiculo === 'Outro') {
                 const outro = document.getElementById('clienteVeiculoOutro').value.trim();
@@ -2307,56 +2156,25 @@
             const vencimento = document.getElementById('clienteVencimento').value;
             const status = document.getElementById('clienteStatus').value;
             const observacoes = document.getElementById('clienteObservacoes').value;
-            
-            // Validações básicas
-            if (!nome || !placa) {
-                alert('Nome e placa são obrigatórios.');
-                return;
-            }
-            
-            // VALIDAÇÃO DE PLACA DUPLICADA
+
+            if (!nome || !placa) { alert('Nome e placa são obrigatórios.'); return; }
             const placaExistente = estado.clientes.find(cliente => {
-                // Se estiver editando, ignorar o próprio cliente
-                if (estado.clienteEditando && cliente.id === estado.clienteEditando.id) {
-                    return false;
-                }
+                if (estado.clienteEditando && cliente.id === estado.clienteEditando.id) return false;
                 return cliente.placa.toUpperCase() === placa.toUpperCase();
             });
-            
             if (placaExistente) {
-                alert(`Já existe um cliente cadastrado com a placa ${placa}. Por favor, verifique os dados.`);
+                alert(`Já existe um cliente cadastrado com a placa ${placa}.`);
                 document.getElementById('clientePlaca').focus();
                 return;
             }
-            
-            const clienteData = {
-                nome,
-                telefone,
-                placa,
-                veiculo,
-                plano,
-                mensalidade,
-                inicio,
-                vencimento,
-                status,
-                observacoes
-            };
-            
-            if (estado.clienteEditando) {
-                clienteData.id = estado.clienteEditando.id;
-            }
-            
+
+            const clienteData = { nome, telefone, placa, veiculo, plano, mensalidade, inicio, vencimento, status, observacoes };
+            if (estado.clienteEditando) clienteData.id = estado.clienteEditando.id;
+
             try {
                 const result = await api.saveCliente(clienteData);
-                
                 if (result.success) {
-                    mostrarAlerta(
-                        estado.clienteEditando ? 'Cliente atualizado com sucesso!' : 'Cliente adicionado com sucesso!', 
-                        'success', 
-                        'clienteAlert'
-                    );
-                    
-                    // Fechar modal e atualizar dados
+                    mostrarAlerta(estado.clienteEditando ? 'Cliente atualizado com sucesso!' : 'Cliente adicionado com sucesso!', 'success', 'clienteAlert');
                     fecharTodosModais();
                     await carregarClientes();
                     await carregarDashboard();
@@ -2368,10 +2186,8 @@
             }
         }
 
-        // Salvar lavagem
         async function salvarLavagem(e) {
             e.preventDefault();
-            
             const data = document.getElementById('lavagemData').value;
             const tipo = document.getElementById('lavagemTipo').value;
             const clienteId = document.getElementById('lavagemCliente').value;
@@ -2380,50 +2196,34 @@
             const funcionario = document.getElementById('lavagemFuncionario').value;
             const observacoes = document.getElementById('lavagemObservacoes').value;
             let preco = 0;
-            
-            // Validações
+
             if (!data || !clienteId || !placa || !servico || !funcionario) {
                 alert('Todos os campos obrigatórios devem ser preenchidos.');
                 return;
             }
-            
-            // Obter nome do cliente
+
             let clienteNome = '';
             if (clienteId === 'avulso') {
                 clienteNome = 'Cliente Avulso';
             } else {
                 const cliente = estado.clientes.find(c => c.id === parseInt(clienteId));
-                if (cliente) {
-                    clienteNome = cliente.nome;
-                }
+                if (cliente) clienteNome = cliente.nome;
             }
-            
-            // Definir preço baseado no TIPO, não no cliente
+
             if (tipo === 'avulsa') {
-                // Para lavagem avulsa, o preço é obrigatório
                 const precoInput = document.getElementById('precolavagem');
                 preco = parseFloat(precoInput.value);
-                
-                if (!preco || preco <= 0) {
-                    alert('Para lavagem avulsa, o preço é obrigatório.');
-                    return;
-                }
+                if (!preco || preco <= 0) { alert('Para lavagem avulsa, o preço é obrigatório.'); return; }
             } else {
-                // Para lavagem de assinante, o preço é zero
                 preco = 0;
             }
 
-            // Coletar produtos utilizados
             const produtosUtilizados = [];
-            const inputsProdutos = document.querySelectorAll('input[name="produtos[]"]');
-            inputsProdutos.forEach(input => {
+            document.querySelectorAll('input[name="produtos[]"]').forEach(input => {
                 const [produtoId, quantidade] = input.value.split(':');
-                produtosUtilizados.push({
-                    produtoId: parseInt(produtoId),
-                    quantidade: parseInt(quantidade)
-                });
+                produtosUtilizados.push({ produtoId: parseInt(produtoId), quantidade: parseInt(quantidade) });
             });
-            
+
             const lavagemData = {
                 data,
                 clienteId: clienteId === 'avulso' ? null : parseInt(clienteId),
@@ -2436,14 +2236,11 @@
                 observacoes,
                 produtosUtilizados
             };
-            
+
             try {
                 const result = await api.saveLavagem(lavagemData);
-                
                 if (result.success) {
                     mostrarAlerta('Lavagem registrada com sucesso!', 'success', 'lavagemAlert');
-                    
-                    // Fechar modal e atualizar dados
                     fecharTodosModais();
                     await carregarLavagens();
                     await carregarDashboard();
@@ -2456,47 +2253,27 @@
             }
         }
 
-        // Salvar produto
         async function salvarProduto(e) {
             e.preventDefault();
-            
             const produto = document.getElementById('produtoNome').value;
             const categoria = document.getElementById('produtoCategoria').value;
             const unidade = document.getElementById('produtoUnidade').value;
             const quantidade = parseInt(document.getElementById('produtoQuantidade').value);
             const estoqueMin = parseInt(document.getElementById('produtoEstoqueMin').value);
             const preco = parseFloat(document.getElementById('produtoPreco').value);
-            
-            // Validações
+
             if (!produto || !categoria || !unidade || isNaN(quantidade) || isNaN(estoqueMin) || isNaN(preco)) {
                 alert('Todos os campos devem ser preenchidos corretamente.');
                 return;
             }
-            
-            const produtoData = {
-                produto,
-                categoria,
-                unidade,
-                quantidade,
-                estoqueMin,
-                preco
-            };
-            
-            if (estado.produtoEditando) {
-                produtoData.id = estado.produtoEditando.id;
-            }
-            
+
+            const produtoData = { produto, categoria, unidade, quantidade, estoqueMin, preco };
+            if (estado.produtoEditando) produtoData.id = estado.produtoEditando.id;
+
             try {
                 const result = await api.saveProduto(produtoData);
-                
                 if (result.success) {
-                    mostrarAlerta(
-                        estado.produtoEditando ? 'Produto atualizado com sucesso!' : 'Produto adicionado com sucesso!', 
-                        'success', 
-                        'estoqueAlert'
-                    );
-                    
-                    // Fechar modal e atualizar dados
+                    mostrarAlerta(estado.produtoEditando ? 'Produto atualizado com sucesso!' : 'Produto adicionado com sucesso!', 'success', 'estoqueAlert');
                     fecharTodosModais();
                     await carregarEstoque();
                 } else {
@@ -2507,12 +2284,10 @@
             }
         }
 
-        // Excluir cliente
         async function excluirCliente(id) {
             if (confirm('Tem certeza que deseja excluir este cliente?')) {
                 try {
                     const result = await api.deleteCliente(id);
-                    
                     if (result.success) {
                         mostrarAlerta('Cliente excluído com sucesso!', 'success', 'clienteAlert');
                         await carregarClientes();
@@ -2526,12 +2301,10 @@
             }
         }
 
-        // Excluir lavagem
         async function excluirLavagem(id) {
             if (confirm('Tem certeza que deseja excluir este registro de lavagem?')) {
                 try {
                     const result = await api.deleteLavagem(id);
-                    
                     if (result.success) {
                         mostrarAlerta('Lavagem excluída com sucesso!', 'success', 'lavagemAlert');
                         await carregarLavagens();
@@ -2546,12 +2319,10 @@
             }
         }
 
-        // Excluir produto
         async function excluirProduto(id) {
             if (confirm('Tem certeza que deseja excluir este produto?')) {
                 try {
                     const result = await api.deleteProduto(id);
-                    
                     if (result.success) {
                         mostrarAlerta('Produto excluído com sucesso!', 'success', 'estoqueAlert');
                         await carregarEstoque();
@@ -2564,9 +2335,7 @@
             }
         }
 
-        // ========== NOVAS FUNÇÕES DE RELATÓRIOS ==========
-
-        // Gerar relatório
+        // ========== RELATÓRIOS ==========
         async function gerarRelatorio() {
             try {
                 const tipoRelatorio = document.getElementById('tipoRelatorio').value;
@@ -2574,16 +2343,13 @@
                 const dataInicio = document.getElementById('dataInicio').value;
                 const dataFim = document.getElementById('dataFim').value;
 
-                // Validar datas personalizadas
                 if (periodo === 'personalizado' && (!dataInicio || !dataFim)) {
                     alert('Para período personalizado, selecione data início e fim.');
                     return;
                 }
 
-                // Carregar dados necessários
                 await carregarDadosRelatorio();
 
-                // Gerar relatório baseado no tipo
                 let relatorioHTML = '';
                 let resumo = {};
 
@@ -2606,10 +2372,7 @@
                         break;
                 }
 
-                // Exibir relatório
                 document.getElementById('conteudoRelatorio').innerHTML = relatorioHTML;
-                
-                // Exibir resumo
                 if (Object.keys(resumo).length > 0) {
                     document.getElementById('resumoRelatorio').style.display = 'grid';
                     document.getElementById('totalRegistros').textContent = resumo.totalRegistros || 0;
@@ -2617,91 +2380,60 @@
                     document.getElementById('lucroPeriodo').textContent = `R$ ${(resumo.lucroTotal || 0).toFixed(2)}`;
                     document.getElementById('clientesPeriodo').textContent = resumo.clientesAtivos || 0;
                 }
-
             } catch (error) {
                 console.error('Erro ao gerar relatório:', error);
                 alert('Erro ao gerar relatório: ' + error.message);
             }
         }
 
-        // Carregar dados para relatório
         async function carregarDadosRelatorio() {
             await carregarClientes();
             await carregarLavagens();
             await carregarEstoque();
         }
 
-        // Função para obter datas do período
         function obterDatasPeriodo(periodo, dataInicio, dataFim) {
             const hoje = new Date();
             let inicio, fim;
-
             switch (periodo) {
                 case 'hoje':
-                    inicio = new Date(hoje);
-                    fim = new Date(hoje);
-                    break;
+                    inicio = new Date(hoje); fim = new Date(hoje); break;
                 case 'semana':
-                    inicio = new Date(hoje);
-                    inicio.setDate(hoje.getDate() - 7);
-                    fim = new Date(hoje);
-                    break;
+                    inicio = new Date(hoje); inicio.setDate(hoje.getDate() - 7); fim = new Date(hoje); break;
                 case 'mes':
                     inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-                    fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-                    break;
+                    fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
                 case 'trimestre':
                     const trimestre = Math.floor(hoje.getMonth() / 3);
                     inicio = new Date(hoje.getFullYear(), trimestre * 3, 1);
-                    fim = new Date(hoje.getFullYear(), (trimestre + 1) * 3, 0);
-                    break;
+                    fim = new Date(hoje.getFullYear(), (trimestre + 1) * 3, 0); break;
                 case 'ano':
                     inicio = new Date(hoje.getFullYear(), 0, 1);
-                    fim = new Date(hoje.getFullYear(), 11, 31);
-                    break;
+                    fim = new Date(hoje.getFullYear(), 11, 31); break;
                 case 'personalizado':
-                    inicio = new Date(dataInicio);
-                    fim = new Date(dataFim);
-                    break;
+                    inicio = new Date(dataInicio); fim = new Date(dataFim); break;
                 default:
-                    inicio = new Date(hoje);
-                    fim = new Date(hoje);
+                    inicio = new Date(hoje); fim = new Date(hoje);
             }
-
             return { inicio, fim };
         }
 
-        // Gerar relatório de lavagens
         async function gerarRelatorioLavagens(periodo, dataInicio, dataFim) {
             const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
-            
             const lavagensFiltradas = estado.lavagens.filter(lavagem => {
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-
             let html = `
                 <div class="page-header">
                     <h3>Relatório de Lavagens - ${periodo.toUpperCase()}</h3>
                     <small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small>
                 </div>
                 <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Cliente</th>
-                            <th>Placa</th>
-                            <th>Serviço</th>
-                            <th>Funcionário</th>
-                            <th>Tipo</th>
-                            <th>Preço (R$)</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Tipo</th><th>Preço (R$)</th></tr></thead>
                     <tbody>
             `;
-
             lavagensFiltradas.forEach(lavagem => {
-                // Para assinantes, busca a mensalidade do cliente
                 let precoExibir = lavagem.preco;
                 if (lavagem.tipo === 'assinante' && lavagem.clienteId) {
                     const cli = estado.clientes.find(c => c.id === lavagem.clienteId);
@@ -2719,138 +2451,55 @@
                     </tr>
                 `;
             });
-
-            html += `
-                    </tbody>
-                </table>
-                <div style="margin-top: 20px; text-align: right;">
-                    <strong>Total de lavagens: ${lavagensFiltradas.length}</strong>
-                </div>
-            `;
-
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de lavagens: ${lavagensFiltradas.length}</strong></div>`;
             return html;
         }
 
-        // Calcular resumo de lavagens
         async function calcularResumoLavagens(periodo, dataInicio, dataFim) {
             const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
-            
             const lavagensFiltradas = estado.lavagens.filter(lavagem => {
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-
             const receitaTotal = lavagensFiltradas.reduce((sum, lavagem) => sum + lavagem.preco, 0);
             const lavagensAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').length;
-            const lavagensAssinantes = lavagensFiltradas.filter(l => l.tipo === 'assinante').length;
-
             return {
                 totalRegistros: lavagensFiltradas.length,
                 receitaTotal: receitaTotal,
                 lavagensAvulsas: lavagensAvulsas,
-                lavagensAssinantes: lavagensAssinantes
+                lavagensAssinantes: lavagensFiltradas.filter(l => l.tipo === 'assinante').length
             };
         }
 
-        // Gerar relatório financeiro
         async function gerarRelatorioFinanceiro(periodo, dataInicio, dataFim) {
             const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
-            
             const lavagensFiltradas = estado.lavagens.filter(lavagem => {
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-
-            const receitaAvulsas = lavagensFiltradas
-                .filter(l => l.tipo === 'avulsa')
-                .reduce((sum, l) => sum + l.preco, 0);
-
-            const receitaMensalidades = estado.clientes
-                .filter(c => c.status === 'Pago')
-                .reduce((sum, c) => sum + c.mensalidade, 0);
-
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
             const receitaTotal = receitaAvulsas + receitaMensalidades;
-
             let html = `
-                <div class="page-header">
-                    <h3>Relatório Financeiro - ${periodo.toUpperCase()}</h3>
-                    <small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small>
-                </div>
-                
+                <div class="page-header"><h3>Relatório Financeiro - ${periodo.toUpperCase()}</h3><small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small></div>
                 <div class="financeiro-summary">
-                    <div class="summary-card success">
-                        <h4>Receita Total</h4>
-                        <div class="value">R$ ${receitaTotal.toFixed(2)}</div>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Receita Avulsas</h4>
-                        <div class="value">R$ ${receitaAvulsas.toFixed(2)}</div>
-                    </div>
-                    <div class="summary-card">
-                        <h4>Receita Mensalidades</h4>
-                        <div class="value">R$ ${receitaMensalidades.toFixed(2)}</div>
-                    </div>
+                    <div class="summary-card success"><h4>Receita Total</h4><div class="value">R$ ${receitaTotal.toFixed(2)}</div></div>
+                    <div class="summary-card"><h4>Receita Avulsas</h4><div class="value">R$ ${receitaAvulsas.toFixed(2)}</div></div>
+                    <div class="summary-card"><h4>Receita Mensalidades</h4><div class="value">R$ ${receitaMensalidades.toFixed(2)}</div></div>
                 </div>
-
-                <h4 style="margin-top: 30px;">Detalhamento por Serviço</h4>
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Serviço</th>
-                            <th>Quantidade</th>
-                            <th>Receita Total (R$)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
             `;
-
-            // Agrupar por serviço
-            const servicos = {};
-            lavagensFiltradas.forEach(lavagem => {
-                if (!servicos[lavagem.servico]) {
-                    servicos[lavagem.servico] = { quantidade: 0, receita: 0 };
-                }
-                servicos[lavagem.servico].quantidade++;
-                servicos[lavagem.servico].receita += lavagem.preco;
-            });
-
-            Object.keys(servicos).forEach(servico => {
-                html += `
-                    <tr>
-                        <td>${servico}</td>
-                        <td>${servicos[servico].quantidade}</td>
-                        <td>R$ ${servicos[servico].receita.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                    </tbody>
-                </table>
-            `;
-
             return html;
         }
 
-        // Calcular resumo financeiro
         async function calcularResumoFinanceiro(periodo, dataInicio, dataFim) {
             const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
-            
             const lavagensFiltradas = estado.lavagens.filter(lavagem => {
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-
-            const receitaAvulsas = lavagensFiltradas
-                .filter(l => l.tipo === 'avulsa')
-                .reduce((sum, l) => sum + l.preco, 0);
-
-            const receitaMensalidades = estado.clientes
-                .filter(c => c.status === 'Pago')
-                .reduce((sum, c) => sum + c.mensalidade, 0);
-
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
             const receitaTotal = receitaAvulsas + receitaMensalidades;
-
             return {
                 totalRegistros: lavagensFiltradas.length,
                 receitaTotal: receitaTotal,
@@ -2859,28 +2508,13 @@
             };
         }
 
-        // Gerar relatório de clientes
         async function gerarRelatorioClientes() {
             let html = `
-                <div class="page-header">
-                    <h3>Relatório de Clientes</h3>
-                    <small>Data: ${new Date().toLocaleDateString('pt-BR')}</small>
-                </div>
+                <div class="page-header"><h3>Relatório de Clientes</h3><small>Data: ${new Date().toLocaleDateString('pt-BR')}</small></div>
                 <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Telefone</th>
-                            <th>Placa</th>
-                            <th>Veículo</th>
-                            <th>Plano</th>
-                            <th>Mensalidade (R$)</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Nome</th><th>Telefone</th><th>Placa</th><th>Veículo</th><th>Plano</th><th>Mensalidade (R$)</th><th>Status</th></tr></thead>
                     <tbody>
             `;
-
             estado.clientes.forEach(cliente => {
                 html += `
                     <tr>
@@ -2894,61 +2528,30 @@
                     </tr>
                 `;
             });
-
-            html += `
-                    </tbody>
-                </table>
-                <div style="margin-top: 20px; text-align: right;">
-                    <strong>Total de clientes: ${estado.clientes.length}</strong>
-                </div>
-            `;
-
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de clientes: ${estado.clientes.length}</strong></div>`;
             return html;
         }
 
-        // Calcular resumo de clientes
         async function calcularResumoClientes() {
             const clientesAtivos = estado.clientes.filter(c => c.status === 'Pago').length;
-            const inadimplentes = estado.clientes.filter(c => c.status === 'Vencido').length;
-            const pendentes = estado.clientes.filter(c => c.status === 'Pendente').length;
-
             return {
                 totalRegistros: estado.clientes.length,
                 clientesAtivos: clientesAtivos,
-                inadimplentes: inadimplentes,
-                pendentes: pendentes
+                inadimplentes: estado.clientes.filter(c => c.status === 'Vencido').length,
+                pendentes: estado.clientes.filter(c => c.status === 'Pendente').length
             };
         }
 
-        // Gerar relatório de estoque
         async function gerarRelatorioEstoque() {
             let html = `
-                <div class="page-header">
-                    <h3>Relatório de Estoque</h3>
-                    <small>Data: ${new Date().toLocaleDateString('pt-BR')}</small>
-                </div>
+                <div class="page-header"><h3>Relatório de Estoque</h3><small>Data: ${new Date().toLocaleDateString('pt-BR')}</small></div>
                 <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Produto</th>
-                            <th>Categoria</th>
-                            <th>Unidade</th>
-                            <th>Estoque Atual</th>
-                            <th>Estoque Mínimo</th>
-                            <th>Status</th>
-                            <th>Valor Total (R$)</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th>Estoque Atual</th><th>Estoque Mínimo</th><th>Status</th><th>Valor Total (R$)</th></tr></thead>
                     <tbody>
             `;
-
             estado.produtos.forEach(produto => {
-                const status = produto.quantidade <= produto.estoqueMin ? 
-                    '<span class="status-badge status-vencido">Baixo</span>' : 
-                    '<span class="status-badge status-pago">Normal</span>';
-                
+                const status = produto.quantidade <= produto.estoqueMin ? '<span class="status-badge status-vencido">Baixo</span>' : '<span class="status-badge status-pago">Normal</span>';
                 const valorTotal = produto.quantidade * produto.preco;
-
                 html += `
                     <tr>
                         <td>${produto.produto}</td>
@@ -2961,23 +2564,13 @@
                     </tr>
                 `;
             });
-
-            html += `
-                    </tbody>
-                </table>
-                <div style="margin-top: 20px; text-align: right;">
-                    <strong>Total de produtos: ${estado.produtos.length}</strong>
-                </div>
-            `;
-
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de produtos: ${estado.produtos.length}</strong></div>`;
             return html;
         }
 
-        // Calcular resumo de estoque
         async function calcularResumoEstoque() {
             const produtosBaixoEstoque = estado.produtos.filter(p => p.quantidade <= p.estoqueMin).length;
             const valorTotalEstoque = estado.produtos.reduce((sum, p) => sum + (p.quantidade * p.preco), 0);
-
             return {
                 totalRegistros: estado.produtos.length,
                 produtosBaixoEstoque: produtosBaixoEstoque,
@@ -2985,74 +2578,31 @@
             };
         }
 
-        // Exportar relatório
-        function exportarRelatorio() {
-            const conteudo = document.getElementById('conteudoRelatorio').innerHTML;
-            if (!conteudo) {
-                alert('Gere um relatório primeiro antes de exportar.');
-                return;
-            }
-
-            const janela = window.open('', '_blank');
-            janela.document.write(`
-                <html>
-                    <head>
-                        <title>Relatório RPCAR</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                            th { background-color: #f2f2f2; }
-                            .page-header { margin-bottom: 20px; }
-                            .summary-card { display: inline-block; margin: 10px; padding: 15px; border: 1px solid #ddd; }
-                        </style>
-                    </head>
-                    <body>
-                        ${conteudo}
-                    </body>
-                </html>
-            `);
-            janela.document.close();
-        }
-
-        // Imprimir relatório
         function imprimirRelatorio() {
             const conteudo = document.getElementById('conteudoRelatorio').innerHTML;
-            if (!conteudo) {
-                alert('Gere um relatório primeiro antes de imprimir.');
-                return;
-            }
-
+            if (!conteudo) { alert('Gere um relatório primeiro antes de imprimir.'); return; }
             const janela = window.open('', '_blank');
             janela.document.write(`
-                <html>
-                    <head>
-                        <title>Relatório RPCAR</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                            th { background-color: #f2f2f2; }
-                            .page-header { margin-bottom: 20px; }
-                            @media print {
-                                body { margin: 0; }
-                                .no-print { display: none; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${conteudo}
-                        <div class="no-print" style="margin-top: 20px; text-align: center;">
-                            <button onclick="window.print()">Imprimir</button>
-                            <button onclick="window.close()">Fechar</button>
-                        </div>
-                    </body>
-                </html>
+                <html><head><title>Relatório RPCAR</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .page-header { margin-bottom: 20px; }
+                    @media print { body { margin: 0; } .no-print { display: none; } }
+                </style>
+                </head>
+                <body>${conteudo}
+                <div class="no-print" style="margin-top:20px;text-align:center;">
+                    <button onclick="window.print()">Imprimir</button>
+                    <button onclick="window.close()">Fechar</button>
+                </div>
+                </body></html>
             `);
             janela.document.close();
         }
 
-        // Toggle campo "Outro" veículo
         function toggleOutroVeiculo(sel) {
             const row = document.getElementById('outroVeiculoRow');
             const input = document.getElementById('clienteVeiculoOutro');
@@ -3066,7 +2616,7 @@
             }
         }
 
-        // ========== VENDAS DE PRODUTOS ==========
+        // ========== VENDAS ==========
         let vendas = [];
 
         function abrirModalVenda() {
@@ -3075,7 +2625,6 @@
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('vendaData').value = hoje;
 
-            // Preencher clientes
             const sel = document.getElementById('vendaCliente');
             sel.innerHTML = '<option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option>';
             estado.clientes.forEach(c => {
@@ -3085,7 +2634,6 @@
                 sel.appendChild(opt);
             });
 
-            // Preencher produtos
             const selProd = document.getElementById('vendaProduto');
             selProd.innerHTML = '<option value="">Selecione o produto</option>';
             estado.produtos.forEach(p => {
@@ -3138,9 +2686,7 @@
             };
 
             vendas.push(venda);
-            // Desconta do estoque local
             produto.quantidade -= quantidade;
-
             renderVendas();
             fecharTodosModais();
             mostrarAlerta('Venda registrada com sucesso!', 'success', 'lavagemAlert');
@@ -3177,7 +2723,7 @@
             }
         }
 
-        // ========== PRESTAÇÃO DE SERVIÇOS ==========
+        // ========== SERVIÇOS ==========
         let servicos_registrados = [];
 
         function abrirModalServico() {
@@ -3220,13 +2766,11 @@
             }
 
             const cliente = clienteId === 'avulso' ? { nome: 'Cliente Avulso' } : estado.clientes.find(c => c.id === parseInt(clienteId));
-
             servicos_registrados.push({
                 id: Date.now(),
                 data, clienteNome: cliente.nome, placa,
                 tipo, descricao, valor, funcionario, status: statusServ
             });
-
             renderServicos();
             fecharTodosModais();
             mostrarAlerta('Serviço registrado com sucesso!', 'success', 'lavagemAlert');
@@ -3264,7 +2808,7 @@
             }
         }
 
-        // ========== USUÁRIOS (PAINEL ADMIN) ==========
+        // ========== USUÁRIOS ==========
         let usuarios = [
             { id: 1, nome: 'Administrador', login: 'admin', nivel: 'administrador', status: 'ativo' }
         ];
@@ -3337,24 +2881,18 @@
             }
         }
 
-        // Salvar cliente: capturar campo "Outro" se selecionado
-        
         function mostrarAlerta(mensagem, tipo, elementoId) {
             const alerta = document.getElementById(elementoId);
             alerta.textContent = mensagem;
             alerta.className = `alert alert-${tipo}`;
             alerta.style.display = 'block';
-            
-            // Ocultar alerta após 5 segundos
             setTimeout(() => {
                 alerta.style.display = 'none';
             }, 5000);
         }
 
-        // Formatar data para exibição (corrigido fuso horário)
         function formatarData(dataString) {
             if (!dataString) return '-';
-            // Extrair apenas a parte da data (YYYY-MM-DD) e montar manualmente
             const parte = dataString.split('T')[0];
             const [ano, mes, dia] = parte.split('-');
             return `${dia}/${mes}/${ano}`;
