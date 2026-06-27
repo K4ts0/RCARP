@@ -5,4 +5,3 @@ python-dotenv==1.0.0
 gunicorn==21.2.0
 psycopg[binary]==3.2.13
 SQLAlchemy==2.0.44
-supabase==2.15.0
