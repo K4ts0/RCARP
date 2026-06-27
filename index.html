@@ -1,0 +1,2906 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Way For System - Gestão Automotiva</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a5276;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --water-blue: #5dade2;
+            --soap: #aed6f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            background-image: linear-gradient(to bottom right, #e8f4f8, #d6eaf8);
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--water-blue));
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: "";
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -100px;
+            left: -100px;
+        }
+
+        .login-container::after {
+            content: "";
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            bottom: -75px;
+            right: -75px;
+        }
+
+        .login-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-form h2 i {
+            color: var(--water-blue);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--water-blue);
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #219653;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: var(--accent);
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .app-container {
+            display: none;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 0;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: var(--water-blue);
+            bottom: 0;
+            left: 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: "🚗";
+            font-size: 28px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info button {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .user-info button:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        nav {
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-tabs li {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-tabs li.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .nav-tabs li:hover {
+            background: #f8f9fa;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .page-header h2 {
+            color: var(--primary);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid var(--secondary);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-card.success {
+            border-top-color: var(--success);
+        }
+
+        .stat-card.warning {
+            border-top-color: var(--warning);
+        }
+
+        .stat-card.danger {
+            border-top-color: var(--accent);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pago {
+            background: #d5f4e6;
+            color: var(--success);
+        }
+
+        .status-pendente {
+            background: #fef5e7;
+            color: var(--warning);
+        }
+
+        .status-vencido {
+            background: #fde8e6;
+            color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            margin-bottom: 15px;
+        }
+
+        .form-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-control input, .form-control select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-control input:focus, .form-control select:focus {
+            border-color: var(--water-blue);
+            outline: none;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d5f4e6;
+            color: var(--success);
+            border: 1px solid #a3e4c1;
+        }
+
+        .alert-warning {
+            background: #fef5e7;
+            color: var(--warning);
+            border: 1px solid #fad7a0;
+        }
+
+        .alert-danger {
+            background: #fde8e6;
+            color: var(--accent);
+            border: 1px solid #f5b7b1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        .report-filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-card h4 {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .print-btn {
+            margin-bottom: 20px;
+        }
+
+        .tabs-container {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .login-info {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .produtos-container {
+            margin: 15px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+
+        .lista-produtos {
+            list-style: none;
+            margin: 10px 0;
+            padding: 0;
+        }
+
+        .lista-produtos li {
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .produto-quantidade {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .produto-quantidade input {
+            width: 80px;
+        }
+
+        .financeiro-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .report-table th,
+        .report-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .report-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .report-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .report-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .modal-content {
+                padding: 15px;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+
+        @media print {
+            header, nav, .page-header button, .print-btn {
+                display: none !important;
+            }
+            
+            .tab-content {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            body {
+                background: white;
+            }
+        }
+    </style>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-form">
+            <h2><i class="fas fa-car"></i> Way For System</h2>
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" placeholder="Digite seu usuário" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" autocomplete="current-password">
+            </div>
+            <button class="btn btn-block" id="loginBtn">Entrar</button>
+        </div>
+    </div>
+
+    <!-- Sistema Principal -->
+    <div class="app-container" id="appScreen">
+        <header>
+            <div class="header-content">
+                <div class="logo">Way For System</div>
+                <div class="user-info">
+                    <span id="userName">Administrador</span>
+                    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                </div>
+            </div>
+        </header>
+
+        <nav>
+            <div class="nav-container">
+                <ul class="nav-tabs">
+                    <li class="active" data-tab="dashboard">Dashboard</li>
+                    <li data-tab="clientes">Clientes</li>
+                    <li data-tab="lavagens">Lavagens</li>
+                    <li data-tab="estoque">Estoque</li>
+                    <li data-tab="relatorios">Relatórios</li>
+                    <li data-tab="admin" id="navAdmin" style="display:none; color: var(--accent);">⚙ Painel Administrativo</li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <!-- Dashboard -->
+            <div class="tab-content active" id="dashboard">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <div>
+                        <button class="btn" id="refreshDashboard"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Clientes Ativos</h3>
+                        <div class="value" id="clientesAtivos">0</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>Receita Total (R$)</h3>
+                        <div class="value" id="receitaTotal">0</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>Inadimplentes</h3>
+                        <div class="value" id="inadimplentes">0</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <h3>A Receber (R$)</h3>
+                        <div class="value" id="aReceber">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Lavagens Avulsas</h3>
+                        <div class="value" id="lavagensAvulsas">0</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>Lucro Estimado (R$)</h3>
+                        <div class="value" id="lucroTotal">0</div>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <h3>Últimas Lavagens</h3>
+                </div>
+                <table id="ultimasLavagens">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cliente</th>
+                            <th>Placa</th>
+                            <th>Serviço</th>
+                            <th>Funcionário</th>
+                            <th>Tipo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Clientes -->
+            <div class="tab-content" id="clientes">
+                <div class="page-header">
+                    <h2>Gestão de Clientes</h2>
+                    <div>
+                        <button class="btn" id="addClienteBtn"><i class="fas fa-plus"></i> Novo Cliente</button>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning" id="clienteAlert" style="display: none;"></div>
+
+                <table id="clientesTable">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Telefone</th>
+                            <th>Placa</th>
+                            <th>Veículo</th>
+                            <th>Plano</th>
+                            <th>Mensalidade</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lavagens -->
+            <div class="tab-content" id="lavagens">
+                <div class="page-header">
+                    <h2>Controle de Lavagens</h2>
+                    <div>
+                        <button class="btn" id="addLavagemBtn"><i class="fas fa-plus"></i> Nova Lavagem</button>
+                    </div>
+                </div>
+
+                <div class="tabs-container">
+                    <button class="tab-button active" data-tab="lavagens-assinantes">Lavagens de Assinantes</button>
+                    <button class="tab-button" data-tab="lavagens-avulsas">Lavagens Avulsas</button>
+                    <button class="tab-button" data-tab="lavagens-vendas">Venda de Produtos</button>
+                    <button class="tab-button" data-tab="lavagens-servicos">Prestação de Serviço</button>
+                </div>
+
+                <div class="alert alert-success" id="lavagemAlert" style="display: none;"></div>
+
+                <div class="tab-panel active" id="lavagens-assinantes">
+                    <table id="lavagensTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Placa</th>
+                                <th>Serviço</th>
+                                <th>Funcionário</th>
+                                <th>Observações</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tab-panel" id="lavagens-avulsas">
+                    <table id="lavagensAvulsasTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Placa</th>
+                                <th>Serviço</th>
+                                <th>Funcionário</th>
+                                <th>Preço (R$)</th>
+                                <th>Observações</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Dados serão preenchidos via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Venda de Produtos -->
+                <div class="tab-panel" id="lavagens-vendas">
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3>Vendas de Produtos</h3>
+                        <button class="btn" id="addVendaBtn"><i class="fas fa-plus"></i> Nova Venda</button>
+                    </div>
+                    <table id="vendasTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Valor Unit.</th>
+                                <th>Total (R$)</th>
+                                <th>Funcionário</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendasTableBody">
+                            <tr><td colspan="8" style="text-align:center; color:#999;">Nenhuma venda registrada</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Prestação de Serviço -->
+                <div class="tab-panel" id="lavagens-servicos">
+                    <div class="page-header" style="margin-top:15px;">
+                        <h3>Prestação de Serviços</h3>
+                        <button class="btn" id="addServicoBtn"><i class="fas fa-plus"></i> Novo Serviço</button>
+                    </div>
+                    <table id="servicosTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Placa</th>
+                                <th>Serviço</th>
+                                <th>Descrição</th>
+                                <th>Valor (R$)</th>
+                                <th>Funcionário</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicosTableBody">
+                            <tr><td colspan="9" style="text-align:center; color:#999;">Nenhum serviço registrado</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Estoque -->
+            <div class="tab-content" id="estoque">
+                <div class="page-header">
+                    <h2>Controle de Estoque</h2>
+                    <div>
+                        <button class="btn" id="addProdutoBtn"><i class="fas fa-plus"></i> Novo Produto</button>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning" id="estoqueAlert" style="display: none;"></div>
+
+                <table id="estoqueTable">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Unidade</th>
+                            <th>Estoque</th>
+                            <th>Estoque Mínimo</th>
+                            <th>Preço Unitário</th>
+                            <th>Valor Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Relatórios -->
+            <div class="tab-content" id="relatorios">
+                <div class="page-header">
+                    <h2>Relatórios</h2>
+                    <div>
+                        <button class="btn btn-success" id="imprimirRelatorio"><i class="fas fa-print"></i> Imprimir</button>
+                    </div>
+                </div>
+
+                <div class="report-filters">
+                    <h3>Filtros do Relatório</h3>
+                    <div class="form-row">
+                        <div class="form-control">
+                            <label for="tipoRelatorio">Tipo de Relatório</label>
+                            <select id="tipoRelatorio">
+                                <option value="lavagens">Lavagens</option>
+                                <option value="financeiro">Financeiro</option>
+                                <option value="clientes">Clientes</option>
+                                <option value="estoque">Estoque</option>
+                            </select>
+                        </div>
+                        <div class="form-control">
+                            <label for="periodo">Período</label>
+                            <select id="periodo">
+                                <option value="hoje">Hoje</option>
+                                <option value="semana">Esta Semana</option>
+                                <option value="mes" selected>Este Mês</option>
+                                <option value="trimestre">Este Trimestre</option>
+                                <option value="ano">Este Ano</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="form-control" id="dataInicioContainer" style="display: none;">
+                            <label for="dataInicio">Data Início</label>
+                            <input type="date" id="dataInicio">
+                        </div>
+                        <div class="form-control" id="dataFimContainer" style="display: none;">
+                            <label for="dataFim">Data Fim</label>
+                            <input type="date" id="dataFim">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="gerarRelatorio"><i class="fas fa-chart-bar"></i> Gerar Relatório</button>
+                </div>
+
+                <div class="report-summary" id="resumoRelatorio" style="display: none;">
+                    <div class="summary-card">
+                        <h4>Total Registros</h4>
+                        <div class="value" id="totalRegistros">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Receita Total</h4>
+                        <div class="value" id="receitaPeriodo">R$ 0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Lucro Estimado</h4>
+                        <div class="value" id="lucroPeriodo">R$ 0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>Clientes Ativos</h4>
+                        <div class="value" id="clientesPeriodo">0</div>
+                    </div>
+                </div>
+
+                <div id="conteudoRelatorio">
+                    <!-- Conteúdo do relatório será gerado aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Painel Administrativo (apenas admin) -->
+    <div class="tab-content" id="admin">
+        <div class="page-header">
+            <h2>⚙ Painel Administrativo</h2>
+        </div>
+
+        <div class="tabs-container">
+            <button class="tab-button active" data-subtab="admin-usuarios">Usuários</button>
+            <button class="tab-button" data-subtab="admin-permissoes">Permissões</button>
+        </div>
+
+        <!-- Usuários -->
+        <div class="tab-panel active" id="admin-usuarios">
+            <div class="page-header" style="margin-top:15px;">
+                <h3>Gerenciamento de Usuários</h3>
+                <button class="btn" id="addUsuarioBtn"><i class="fas fa-plus"></i> Novo Usuário</button>
+            </div>
+            <div class="alert" id="adminAlert" style="display:none;"></div>
+            <table id="usuariosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Usuário</th>
+                        <th>Nível</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- Permissões -->
+        <div class="tab-panel" id="admin-permissoes">
+            <div style="margin-top:15px;">
+                <h3>Níveis de Acesso</h3>
+                <div class="stats-container" style="margin-top:20px;">
+                    <div class="stat-card">
+                        <h3>👑 Administrador</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso total: Dashboard, Clientes, Lavagens, Estoque, Relatórios e Painel Administrativo.</p>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>🧑‍💼 Gerente</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso a: Estoque, Lavagens e Clientes.</p>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>👷 Funcionário</h3>
+                        <p style="font-size:13px; color:#555; margin-top:8px;">Acesso a: Lavagens e Clientes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar/editar cliente -->
+    <div class="modal" id="clienteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="clienteModalTitle">Adicionar Cliente</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="clienteForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="clienteNome">Nome</label>
+                        <input type="text" id="clienteNome" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="clienteTelefone">Telefone</label>
+                        <input type="text" id="clienteTelefone">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="clientePlaca">Placa</label>
+                        <input type="text" id="clientePlaca" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="clienteVeiculo">Tipo de Veículo</label>
+                        <select id="clienteVeiculo" onchange="toggleOutroVeiculo(this)">
+                            <option value="Carro">Carro</option>
+                            <option value="Moto">Moto</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Caminhonete">Caminhonete</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="outroVeiculoRow" style="display:none;">
+                    <div class="form-control">
+                        <label for="clienteVeiculoOutro">Descreva o tipo de veículo</label>
+                        <input type="text" id="clienteVeiculoOutro" placeholder="Ex: Caminhão, Van, Micro-ônibus...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="clientePlano">Plano</label>
+                        <select id="clientePlano">
+                            <option value="Mensal">Mensal</option>
+                            <option value="Trimestral">Trimestral</option>
+                            <option value="Semestral">Semestral</option>
+                            <option value="Anual">Anual</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="clienteMensalidade">Mensalidade (R$)</label>
+                        <input type="number" id="clienteMensalidade" value="500" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="clienteInicio">Data de Início</label>
+                        <input type="date" id="clienteInicio" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="clienteVencimento">Data de Vencimento</label>
+                        <input type="date" id="clienteVencimento" required>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label for="clienteStatus">Status do Pagamento</label>
+                    <select id="clienteStatus">
+                        <option value="Pago">Pago</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Vencido">Vencido</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label for="clienteObservacoes">Observações</label>
+                    <input type="text" id="clienteObservacoes">
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar lavagem -->
+    <div class="modal" id="lavagemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Lavagem</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="lavagemForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="lavagemData">Data</label>
+                        <input type="date" id="lavagemData" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="lavagemTipo">Tipo de Lavagem</label>
+                        <select id="lavagemTipo" required>
+                            <option value="assinante">Lavagem de Assinante</option>
+                            <option value="avulsa">Lavagem Avulsa</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="lavagemCliente">Cliente</label>
+                        <select id="lavagemCliente" required>
+                            <!-- Opções serão preenchidas via JavaScript -->
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="lavagemPlaca">Placa</label>
+                        <input type="text" id="lavagemPlaca" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="lavagemServico">Tipo de Serviço</label>
+                        <select id="lavagemServico" required>
+                            <option value="Lavagem Simples">Lavagem Simples</option>
+                            <option value="Lavagem Completa">Lavagem Completa</option>
+                            <option value="Lavagem com Cera">Lavagem com Cera</option>
+                            <option value="Polimento">Polimento</option>
+                            <option value="Higienização">Higienização</option>
+                        </select>
+                    </div>
+                    <div class="form-control" id="precoContainer">
+                        <label for="precolavagem">Preço Unitário (R$)</label>
+                        <input type="number" id="precolavagem" step="0.01" min="0" placeholder="0,00">
+                    </div>
+                </div>
+                
+                <!-- Seção de produtos utilizados -->
+                <div class="produtos-container">
+                    <h4>Produtos Utilizados</h4>
+                    <div class="form-row">
+                        <div class="form-control">
+                            <label for="lavagemProdutos">Produto</label>
+                            <select id="lavagemProdutos">
+                                <!-- Opções preenchidas via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="form-control produto-quantidade">
+                            <label for="produtoQuantidadeUsada">Quantidade</label>
+                            <input type="number" id="produtoQuantidadeUsada" min="1" value="1">
+                        </div>
+                    </div>
+                    <button type="button" class="btn" id="adicionarProdutoBtn">
+                        <i class="fas fa-plus"></i> Adicionar Produto
+                    </button>
+                    <ul class="lista-produtos" id="listaProdutosUtilizados">
+                        <!-- Produtos adicionados aparecerão aqui -->
+                    </ul>
+                </div>
+
+                <div class="form-control">
+                    <label for="lavagemFuncionario">Funcionário Responsável</label>
+                    <input type="text" id="lavagemFuncionario" required>
+                </div>
+                <div class="form-control">
+                    <label for="lavagemObservacoes">Observações</label>
+                    <input type="text" id="lavagemObservacoes">
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success">Registrar</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar produto -->
+    <div class="modal" id="produtoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="produtoModalTitle">Adicionar Produto</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="produtoForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="produtoNome">Produto</label>
+                        <input type="text" id="produtoNome" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="produtoCategoria">Categoria</label>
+                        <select id="produtoCategoria" required>
+                            <option value="Limpeza">Limpeza</option>
+                            <option value="Químico">Químico</option>
+                            <option value="Acessório">Acessório</option>
+                            <option value="Ferragem">Ferragem</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="produtoUnidade">Unidade</label>
+                        <select id="produtoUnidade" required>
+                            <option value="Unidade">Unidade</option>
+                            <option value="Litro">Litro</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Pacote">Pacote</option>
+                            <option value="Caixa">Caixa</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="produtoQuantidade">Quantidade em Estoque</label>
+                        <input type="number" id="produtoQuantidade" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="produtoEstoqueMin">Estoque Mínimo</label>
+                        <input type="number" id="produtoEstoqueMin" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="produtoPreco">Preço Unitário (R$)</label>
+                        <input type="number" step="0.01" id="produtoPreco" required>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-success">Salvar</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para venda de produto -->
+    <div class="modal" id="vendaModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Venda de Produto</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="vendaForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaData">Data</label>
+                        <input type="date" id="vendaData" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaCliente">Cliente</label>
+                        <select id="vendaCliente" required>
+                            <option value="">Selecione um cliente</option>
+                            <option value="avulso">Cliente Avulso</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaProduto">Produto</label>
+                        <select id="vendaProduto" required>
+                            <option value="">Selecione o produto</option>
+                        </select>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaQuantidade">Quantidade</label>
+                        <input type="number" id="vendaQuantidade" min="1" value="1" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="vendaValorUnit">Valor Unitário (R$)</label>
+                        <input type="number" step="0.01" id="vendaValorUnit" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="vendaFuncionario">Funcionário</label>
+                        <input type="text" id="vendaFuncionario" required>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label for="vendaObs">Observações</label>
+                    <input type="text" id="vendaObs">
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Registrar Venda</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para prestação de serviço -->
+    <div class="modal" id="servicoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Prestação de Serviço</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="servicoForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoData">Data</label>
+                        <input type="date" id="servicoData" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoCliente">Cliente</label>
+                        <select id="servicoCliente" required>
+                            <option value="">Selecione um cliente</option>
+                            <option value="avulso">Cliente Avulso</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoPlaca">Placa</label>
+                        <input type="text" id="servicoPlaca" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoTipo">Tipo de Serviço</label>
+                        <select id="servicoTipo" required>
+                            <option value="Polimento">Polimento</option>
+                            <option value="Cristalização">Cristalização</option>
+                            <option value="Higienização Interna">Higienização Interna</option>
+                            <option value="Recuperação de Faróis">Recuperação de Faróis</option>
+                            <option value="Tratamento de Couro">Tratamento de Couro</option>
+                            <option value="Plotagem">Plotagem</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoDescricao">Descrição</label>
+                        <input type="text" id="servicoDescricao" placeholder="Detalhes do serviço">
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoValor">Valor (R$)</label>
+                        <input type="number" step="0.01" id="servicoValor" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="servicoFuncionario">Funcionário Responsável</label>
+                        <input type="text" id="servicoFuncionario" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="servicoStatus">Status</label>
+                        <select id="servicoStatus">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Registrar Serviço</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar usuário -->
+    <div class="modal" id="usuarioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="usuarioModalTitle">Novo Usuário</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="usuarioForm">
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="usuarioNome">Nome Completo</label>
+                        <input type="text" id="usuarioNome" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="usuarioLogin">Login</label>
+                        <input type="text" id="usuarioLogin" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-control">
+                        <label for="usuarioSenha">Senha</label>
+                        <input type="password" id="usuarioSenha" placeholder="Deixe em branco para não alterar">
+                    </div>
+                    <div class="form-control">
+                        <label for="usuarioNivel">Nível de Acesso</label>
+                        <select id="usuarioNivel" required>
+                            <option value="administrador">👑 Administrador</option>
+                            <option value="gerente">🧑‍💼 Gerente</option>
+                            <option value="funcionario">👷 Funcionário</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-control">
+                    <label for="usuarioStatusAtivo">Status</label>
+                    <select id="usuarioStatusAtivo">
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
+                    </select>
+                </div>
+                <div style="margin-top:20px; display:flex; gap:10px;">
+                    <button type="submit" class="btn btn-success">Salvar Usuário</button>
+                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ========== INTEGRAÇÃO COM API ==========
+        const api = {
+            async request(endpoint, options = {}) {
+                try {
+                    const response = await fetch(`/api${endpoint}`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        },
+                        ...options
+                    });
+                    
+                    if (response.status === 401) {
+                        fazerLogout();
+                        throw new Error('Sessão expirada');
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Erro na API:', error);
+                    throw error;
+                }
+            },
+
+            async login(username, password) {
+                return this.request('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+            },
+
+            async logout() {
+                return this.request('/logout', { method: 'POST' });
+            },
+
+            async getDashboard() {
+                return this.request('/dashboard');
+            },
+
+            async getClientes() {
+                return this.request('/clientes');
+            },
+
+            async saveCliente(cliente) {
+                const endpoint = cliente.id ? `/clientes/${cliente.id}` : '/clientes';
+                const method = cliente.id ? 'PUT' : 'POST';
+                return this.request(endpoint, {
+                    method,
+                    body: JSON.stringify(cliente)
+                });
+            },
+
+            async deleteCliente(id) {
+                return this.request(`/clientes/${id}`, { method: 'DELETE' });
+            },
+
+            async getLavagens() {
+                return this.request('/lavagens');
+            },
+
+            async saveLavagem(lavagem) {
+                return this.request('/lavagens', {
+                    method: 'POST',
+                    body: JSON.stringify(lavagem)
+                });
+            },
+
+            async deleteLavagem(id) {
+                return this.request(`/lavagens/${id}`, { method: 'DELETE' });
+            },
+
+            async getProdutos() {
+                return this.request('/produtos');
+            },
+
+            async saveProduto(produto) {
+                const endpoint = produto.id ? `/produtos/${produto.id}` : '/produtos';
+                const method = produto.id ? 'PUT' : 'POST';
+                return this.request(endpoint, {
+                    method,
+                    body: JSON.stringify(produto)
+                });
+            },
+
+            async deleteProduto(id) {
+                return this.request(`/produtos/${id}`, { method: 'DELETE' });
+            },
+
+            async getFinanceiro() {
+                return this.request('/financeiro');
+            }
+        };
+
+        // Estado da aplicação
+        let estado = {
+            usuarioLogado: null,
+            clienteEditando: null,
+            produtoEditando: null,
+            periodoRelatorio: 'mes',
+            clientes: [],
+            produtos: [],
+            lavagens: []
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('clienteInicio').value = hoje;
+            document.getElementById('lavagemData').value = hoje;
+            
+            const vencimento = new Date();
+            vencimento.setDate(vencimento.getDate() + 30);
+            document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
+            
+            configurarEventos();
+        });
+
+        function configurarValidacaoPlaca() {
+            const campoPlaca = document.getElementById('clientePlaca');
+            campoPlaca.addEventListener('blur', function() {
+                const placa = this.value.toUpperCase().trim();
+                if (placa) {
+                    const placaExistente = estado.clientes.find(cliente => {
+                        if (estado.clienteEditando && cliente.id === estado.clienteEditando.id) {
+                            return false;
+                        }
+                        return cliente.placa.toUpperCase() === placa;
+                    });
+                    if (placaExistente) {
+                        this.style.borderColor = 'var(--accent)';
+                        this.style.backgroundColor = '#fde8e6';
+                        let mensagemErro = this.parentNode.querySelector('.placa-erro');
+                        if (!mensagemErro) {
+                            mensagemErro = document.createElement('div');
+                            mensagemErro.className = 'placa-erro';
+                            mensagemErro.style.color = 'var(--accent)';
+                            mensagemErro.style.fontSize = '12px';
+                            mensagemErro.style.marginTop = '5px';
+                            this.parentNode.appendChild(mensagemErro);
+                        }
+                        mensagemErro.textContent = `Placa já cadastrada para: ${placaExistente.nome}`;
+                    } else {
+                        this.style.borderColor = '';
+                        this.style.backgroundColor = '';
+                        const mensagemErro = this.parentNode.querySelector('.placa-erro');
+                        if (mensagemErro) mensagemErro.remove();
+                    }
+                }
+            });
+            campoPlaca.addEventListener('input', function() {
+                this.style.borderColor = '';
+                this.style.backgroundColor = '';
+                const mensagemErro = this.parentNode.querySelector('.placa-erro');
+                if (mensagemErro) mensagemErro.remove();
+            });
+        }
+
+        function configurarEventos() {
+            document.getElementById('loginBtn').addEventListener('click', fazerLogin);
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') fazerLogin();
+            });
+            document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
+            
+            document.querySelectorAll('.nav-tabs li').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    alternarAba(tabId);
+                });
+            });
+            
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    alternarSubAba(tabId);
+                });
+            });
+            
+            document.getElementById('addClienteBtn').addEventListener('click', function() {
+                abrirModalCliente();
+            });
+            document.getElementById('addLavagemBtn').addEventListener('click', function() {
+                abrirModalLavagem();
+            });
+            document.getElementById('addProdutoBtn').addEventListener('click', function() {
+                abrirModalProduto();
+            });
+            document.getElementById('refreshDashboard').addEventListener('click', function() {
+                carregarDashboard();
+            });
+            
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    fecharTodosModais();
+                });
+            });
+            
+            document.getElementById('clienteForm').addEventListener('submit', salvarCliente);
+            document.getElementById('lavagemForm').addEventListener('submit', salvarLavagem);
+            document.getElementById('produtoForm').addEventListener('submit', salvarProduto);
+            
+            document.getElementById('periodo').addEventListener('change', function() {
+                const periodo = this.value;
+                estado.periodoRelatorio = periodo;
+                if (periodo === 'personalizado') {
+                    document.getElementById('dataInicioContainer').style.display = 'block';
+                    document.getElementById('dataFimContainer').style.display = 'block';
+                } else {
+                    document.getElementById('dataInicioContainer').style.display = 'none';
+                    document.getElementById('dataFimContainer').style.display = 'none';
+                }
+            });
+            
+            document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
+            document.getElementById('imprimirRelatorio').addEventListener('click', imprimirRelatorio);
+            
+            document.getElementById('lavagemTipo').addEventListener('change', function() {
+                const tipo = this.value;
+                const precoContainer = document.getElementById('precoContainer');
+                if (tipo === 'avulsa') {
+                    precoContainer.style.display = 'block';
+                    document.getElementById('precolavagem').required = true;
+                } else {
+                    precoContainer.style.display = 'none';
+                    document.getElementById('precolavagem').required = false;
+                }
+            });
+
+            document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
+                const produtoId = document.getElementById('lavagemProdutos').value;
+                const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
+                if (!produtoId || quantidade <= 0) {
+                    alert('Selecione um produto e informe uma quantidade válida.');
+                    return;
+                }
+                const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
+                if (produto && quantidade > produto.quantidade) {
+                    alert(`Quantidade indisponível em estoque. Disponível: ${produto.quantidade} ${produto.unidade}`);
+                    return;
+                }
+                const listaProdutos = document.getElementById('listaProdutosUtilizados');
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${produto.produto} - ${quantidade} ${produto.unidade} 
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="produtos[]" value="${produtoId}:${quantidade}">
+                `;
+                listaProdutos.appendChild(li);
+                document.getElementById('lavagemProdutos').value = '';
+                document.getElementById('produtoQuantidadeUsada').value = '1';
+            });
+
+            document.getElementById('addVendaBtn').addEventListener('click', abrirModalVenda);
+            document.getElementById('addServicoBtn').addEventListener('click', abrirModalServico);
+            document.getElementById('addUsuarioBtn').addEventListener('click', abrirModalUsuario);
+            document.getElementById('vendaForm').addEventListener('submit', salvarVenda);
+            document.getElementById('servicoForm').addEventListener('submit', salvarServico);
+            document.getElementById('usuarioForm').addEventListener('submit', salvarUsuario);
+
+            document.querySelectorAll('[data-subtab]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('[data-subtab]').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('#admin .tab-panel').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(this.getAttribute('data-subtab')).classList.add('active');
+                });
+            });
+        }
+
+        // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
+        async function fazerLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!username || !password) {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
+            try {
+                const result = await api.login(username, password);
+                if (result.success) {
+                    estado.usuarioLogado = result.user;
+                    document.getElementById('userName').textContent = result.user.nome;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appScreen').style.display = 'block';
+                    aplicarControleAcesso(result.user.nivel || 'funcionario');
+                    await carregarDados();
+                } else {
+                    alert(result.message || 'Erro no login');
+                }
+            } catch (error) {
+                alert('Erro ao fazer login: ' + error.message);
+            }
+        }
+
+        function aplicarControleAcesso(nivel) {
+            estado.nivelUsuario = nivel;
+            const navAdmin = document.getElementById('navAdmin');
+            const tabEstoque = document.querySelector('.nav-tabs li[data-tab="estoque"]');
+            const tabRelatorios = document.querySelector('.nav-tabs li[data-tab="relatorios"]');
+            const tabDashboard = document.querySelector('.nav-tabs li[data-tab="dashboard"]');
+
+            if (nivel === 'administrador') {
+                navAdmin.style.display = 'block';
+                if (tabEstoque) tabEstoque.style.display = '';
+                if (tabRelatorios) tabRelatorios.style.display = '';
+                if (tabDashboard) tabDashboard.style.display = '';
+            } else if (nivel === 'gerente') {
+                navAdmin.style.display = 'none';
+                if (tabEstoque) tabEstoque.style.display = '';
+                if (tabRelatorios) tabRelatorios.style.display = 'none';
+                if (tabDashboard) tabDashboard.style.display = 'none';
+            } else {
+                navAdmin.style.display = 'none';
+                if (tabEstoque) tabEstoque.style.display = 'none';
+                if (tabRelatorios) tabRelatorios.style.display = 'none';
+                if (tabDashboard) tabDashboard.style.display = 'none';
+            }
+        }
+
+        async function fazerLogout() {
+            try {
+                await api.logout();
+            } catch (error) {
+                console.error('Erro no logout:', error);
+            }
+            estado.usuarioLogado = null;
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+
+        // ========== FUNÇÃO ALTERNAR ABA CORRIGIDA ==========
+        async function alternarAba(abaId) {
+            document.querySelectorAll('.nav-tabs li').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelector(`.nav-tabs li[data-tab="${abaId}"]`).classList.add('active');
+            document.getElementById(abaId).classList.add('active');
+
+            if (abaId === 'dashboard') {
+                await carregarDashboard();
+            } else if (abaId === 'clientes') {
+                await carregarClientes();
+            } else if (abaId === 'lavagens') {
+                await carregarLavagens();
+            } else if (abaId === 'estoque') {
+                await carregarEstoque();
+            } else if (abaId === 'admin') {
+                carregarUsuarios();
+            } else if (abaId === 'relatorios') {
+                // não carrega automaticamente
+            }
+        }
+
+        function alternarSubAba(subAbaId) {
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.querySelector(`.tab-button[data-tab="${subAbaId}"]`).classList.add('active');
+            document.getElementById(subAbaId).classList.add('active');
+        }
+
+        async function carregarDados() {
+            await carregarDashboard();
+            await carregarClientes();
+            await carregarLavagens();
+            await carregarEstoque();
+        }
+
+        // ========== FUNÇÕES DE CARREGAMENTO ==========
+        async function carregarDashboard() {
+            try {
+                const data = await api.getDashboard();
+                document.getElementById('clientesAtivos').textContent = data.stats.clientesAtivos;
+                document.getElementById('receitaTotal').textContent = parseFloat(data.stats.receitaTotal || 0).toFixed(2);
+                document.getElementById('inadimplentes').textContent = data.stats.inadimplentes;
+                document.getElementById('aReceber').textContent = parseFloat(data.stats.aReceber || 0).toFixed(2);
+                document.getElementById('lavagensAvulsas').textContent = data.stats.lavagensAvulsas;
+                
+                const receitaAvulsasDash = (estado.lavagens || []).filter(l => l.tipo === 'avulsa').reduce((s, l) => s + parseFloat(l.preco || 0), 0);
+                const receitaMensalDash = (estado.clientes || []).filter(c => c.status === 'Pago').reduce((s, c) => s + parseFloat(c.mensalidade || 0), 0);
+                const lucroEstimado = receitaAvulsasDash + receitaMensalDash;
+                document.getElementById('lucroTotal').textContent = lucroEstimado.toFixed(2);
+                
+                const tbody = document.querySelector('#ultimasLavagens tbody');
+                tbody.innerHTML = '';
+                data.ultimasLavagens.forEach(lavagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.clienteNome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>${lavagem.tipo === 'assinante' ? 'Assinatura' : 'Avulsa'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        async function carregarClientes() {
+            try {
+                const data = await api.getClientes();
+                estado.clientes = data.clientes;
+                const tbody = document.querySelector('#clientesTable tbody');
+                tbody.innerHTML = '';
+                estado.clientes.forEach(cliente => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone}</td>
+                        <td>${cliente.placa}</td>
+                        <td>${cliente.veiculo}</td>
+                        <td>${cliente.plano}</td>
+                        <td>R$ ${cliente.mensalidade.toFixed(2)}</td>
+                        <td>${formatarData(cliente.vencimento)}</td>
+                        <td><span class="status-badge status-${cliente.status.toLowerCase()}">${cliente.status}</span></td>
+                        <td>
+                            <button class="btn btn-warning btn-sm editar-cliente" data-id="${cliente.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm excluir-cliente" data-id="${cliente.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                document.querySelectorAll('.editar-cliente').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        abrirModalCliente(id);
+                    });
+                });
+                document.querySelectorAll('.excluir-cliente').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        excluirCliente(id);
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        async function carregarLavagens() {
+            try {
+                const data = await api.getLavagens();
+                estado.lavagens = data.lavagens;
+                
+                const tbodyAssinantes = document.querySelector('#lavagensTable tbody');
+                tbodyAssinantes.innerHTML = '';
+                const lavagensAssinantes = estado.lavagens.filter(l => l.tipo === 'assinante');
+                lavagensAssinantes.forEach(lavagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.clienteNome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>${lavagem.observacoes || '-'}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbodyAssinantes.appendChild(tr);
+                });
+
+                const tbodyAvulsas = document.querySelector('#lavagensAvulsasTable tbody');
+                tbodyAvulsas.innerHTML = '';
+                const lavagensAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa');
+                lavagensAvulsas.forEach(lavagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.clienteNome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>R$ ${parseFloat(lavagem.preco).toFixed(2)}</td>
+                        <td>${lavagem.observacoes || '-'}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbodyAvulsas.appendChild(tr);
+                });
+
+                document.querySelectorAll('.excluir-lavagem').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        excluirLavagem(id);
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar lavagens:', error);
+            }
+        }
+
+        async function carregarEstoque() {
+            try {
+                const data = await api.getProdutos();
+                estado.produtos = data.produtos;
+                const tbody = document.querySelector('#estoqueTable tbody');
+                tbody.innerHTML = '';
+                estado.produtos.forEach(produto => {
+                    const valorTotal = produto.quantidade * produto.preco;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${produto.produto}</td>
+                        <td>${produto.categoria}</td>
+                        <td>${produto.unidade}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>${produto.estoqueMin}</td>
+                        <td>R$ ${produto.preco.toFixed(2)}</td>
+                        <td>R$ ${valorTotal.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm editar-produto" data-id="${produto.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm excluir-produto" data-id="${produto.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                document.querySelectorAll('.editar-produto').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        abrirModalProduto(id);
+                    });
+                });
+                document.querySelectorAll('.excluir-produto').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        excluirProduto(id);
+                    });
+                });
+            } catch (error) {
+                console.error('Erro ao carregar estoque:', error);
+            }
+        }
+
+        // ========== FUNÇÕES DE MODAIS ==========
+        function abrirModalCliente(id = null) {
+            const modal = document.getElementById('clienteModal');
+            const titulo = document.getElementById('clienteModalTitle');
+            const form = document.getElementById('clienteForm');
+            form.reset();
+            configurarValidacaoPlaca();
+            if (id) {
+                titulo.textContent = 'Editar Cliente';
+                estado.clienteEditando = estado.clientes.find(c => c.id === id);
+                document.getElementById('clienteNome').value = estado.clienteEditando.nome;
+                document.getElementById('clienteTelefone').value = estado.clienteEditando.telefone;
+                document.getElementById('clientePlaca').value = estado.clienteEditando.placa;
+                document.getElementById('clienteVeiculo').value = estado.clienteEditando.veiculo;
+                document.getElementById('clientePlano').value = estado.clienteEditando.plano;
+                document.getElementById('clienteMensalidade').value = estado.clienteEditando.mensalidade;
+                document.getElementById('clienteInicio').value = estado.clienteEditando.inicio;
+                document.getElementById('clienteVencimento').value = estado.clienteEditando.vencimento;
+                document.getElementById('clienteStatus').value = estado.clienteEditando.status;
+                document.getElementById('clienteObservacoes').value = estado.clienteEditando.observacoes || '';
+            } else {
+                titulo.textContent = 'Adicionar Cliente';
+                estado.clienteEditando = null;
+                const hoje = new Date().toISOString().split('T')[0];
+                document.getElementById('clienteInicio').value = hoje;
+                const vencimento = new Date();
+                vencimento.setDate(vencimento.getDate() + 30);
+                document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
+            }
+            modal.style.display = 'flex';
+        }
+
+        async function abrirModalLavagem() {
+            const modal = document.getElementById('lavagemModal');
+            const form = document.getElementById('lavagemForm');
+            const selectCliente = document.getElementById('lavagemCliente');
+            const selectProdutos = document.getElementById('lavagemProdutos');
+            form.reset();
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('lavagemData').value = hoje;
+            
+            selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+            estado.clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = `${cliente.nome} - ${cliente.placa}`;
+                selectCliente.appendChild(option);
+            });
+            const optionAvulso = document.createElement('option');
+            optionAvulso.value = 'avulso';
+            optionAvulso.textContent = 'Cliente Avulso';
+            selectCliente.appendChild(optionAvulso);
+            
+            selectCliente.addEventListener('change', function() {
+                const clienteId = this.value;
+                const campoPlaca = document.getElementById('lavagemPlaca');
+                if (clienteId && clienteId !== 'avulso') {
+                    const cliente = estado.clientes.find(c => c.id === parseInt(clienteId));
+                    if (cliente) {
+                        campoPlaca.value = cliente.placa;
+                        campoPlaca.readOnly = true;
+                    }
+                } else {
+                    campoPlaca.value = '';
+                    campoPlaca.readOnly = false;
+                }
+            });
+
+            selectProdutos.innerHTML = '<option value="">Selecione os produtos utilizados</option>';
+            estado.produtos.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = `${produto.produto} (Estoque: ${produto.quantidade} ${produto.unidade}) - R$ ${produto.preco.toFixed(2)}`;
+                selectProdutos.appendChild(option);
+            });
+
+            document.getElementById('produtoQuantidadeUsada').value = '1';
+            document.getElementById('listaProdutosUtilizados').innerHTML = '';
+            document.getElementById('precoContainer').style.display = 'none';
+            modal.style.display = 'flex';
+        }
+
+        function abrirModalProduto(id = null) {
+            const modal = document.getElementById('produtoModal');
+            const titulo = document.getElementById('produtoModalTitle');
+            const form = document.getElementById('produtoForm');
+            form.reset();
+            if (id) {
+                titulo.textContent = 'Editar Produto';
+                estado.produtoEditando = estado.produtos.find(p => p.id === id);
+                document.getElementById('produtoNome').value = estado.produtoEditando.produto;
+                document.getElementById('produtoCategoria').value = estado.produtoEditando.categoria;
+                document.getElementById('produtoUnidade').value = estado.produtoEditando.unidade;
+                document.getElementById('produtoQuantidade').value = estado.produtoEditando.quantidade;
+                document.getElementById('produtoEstoqueMin').value = estado.produtoEditando.estoqueMin;
+                document.getElementById('produtoPreco').value = estado.produtoEditando.preco;
+            } else {
+                titulo.textContent = 'Adicionar Produto';
+                estado.produtoEditando = null;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function fecharTodosModais() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        // ========== FUNÇÕES SALVAR/EXCLUIR ==========
+        async function salvarCliente(e) {
+            e.preventDefault();
+            const nome = document.getElementById('clienteNome').value;
+            const telefone = document.getElementById('clienteTelefone').value;
+            const placa = document.getElementById('clientePlaca').value.toUpperCase();
+            let veiculo = document.getElementById('clienteVeiculo').value;
+            if (veiculo === 'Outro') {
+                const outro = document.getElementById('clienteVeiculoOutro').value.trim();
+                if (!outro) { alert('Descreva o tipo de veículo.'); return; }
+                veiculo = outro;
+            }
+            const plano = document.getElementById('clientePlano').value;
+            const mensalidade = parseFloat(document.getElementById('clienteMensalidade').value);
+            const inicio = document.getElementById('clienteInicio').value;
+            const vencimento = document.getElementById('clienteVencimento').value;
+            const status = document.getElementById('clienteStatus').value;
+            const observacoes = document.getElementById('clienteObservacoes').value;
+
+            if (!nome || !placa) { alert('Nome e placa são obrigatórios.'); return; }
+            const placaExistente = estado.clientes.find(cliente => {
+                if (estado.clienteEditando && cliente.id === estado.clienteEditando.id) return false;
+                return cliente.placa.toUpperCase() === placa.toUpperCase();
+            });
+            if (placaExistente) {
+                alert(`Já existe um cliente cadastrado com a placa ${placa}.`);
+                document.getElementById('clientePlaca').focus();
+                return;
+            }
+
+            const clienteData = { nome, telefone, placa, veiculo, plano, mensalidade, inicio, vencimento, status, observacoes };
+            if (estado.clienteEditando) clienteData.id = estado.clienteEditando.id;
+
+            try {
+                const result = await api.saveCliente(clienteData);
+                if (result.success) {
+                    mostrarAlerta(estado.clienteEditando ? 'Cliente atualizado com sucesso!' : 'Cliente adicionado com sucesso!', 'success', 'clienteAlert');
+                    fecharTodosModais();
+                    await carregarClientes();
+                    await carregarDashboard();
+                } else {
+                    alert('Erro ao salvar cliente: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro ao salvar cliente: ' + error.message);
+            }
+        }
+
+        async function salvarLavagem(e) {
+            e.preventDefault();
+            const data = document.getElementById('lavagemData').value;
+            const tipo = document.getElementById('lavagemTipo').value;
+            const clienteId = document.getElementById('lavagemCliente').value;
+            const placa = document.getElementById('lavagemPlaca').value;
+            const servico = document.getElementById('lavagemServico').value;
+            const funcionario = document.getElementById('lavagemFuncionario').value;
+            const observacoes = document.getElementById('lavagemObservacoes').value;
+            let preco = 0;
+
+            if (!data || !clienteId || !placa || !servico || !funcionario) {
+                alert('Todos os campos obrigatórios devem ser preenchidos.');
+                return;
+            }
+
+            let clienteNome = '';
+            if (clienteId === 'avulso') {
+                clienteNome = 'Cliente Avulso';
+            } else {
+                const cliente = estado.clientes.find(c => c.id === parseInt(clienteId));
+                if (cliente) clienteNome = cliente.nome;
+            }
+
+            if (tipo === 'avulsa') {
+                const precoInput = document.getElementById('precolavagem');
+                preco = parseFloat(precoInput.value);
+                if (!preco || preco <= 0) { alert('Para lavagem avulsa, o preço é obrigatório.'); return; }
+            } else {
+                preco = 0;
+            }
+
+            const produtosUtilizados = [];
+            document.querySelectorAll('input[name="produtos[]"]').forEach(input => {
+                const [produtoId, quantidade] = input.value.split(':');
+                produtosUtilizados.push({ produtoId: parseInt(produtoId), quantidade: parseInt(quantidade) });
+            });
+
+            const lavagemData = {
+                data,
+                clienteId: clienteId === 'avulso' ? null : parseInt(clienteId),
+                clienteNome,
+                placa,
+                servico,
+                funcionario,
+                tipo,
+                preco,
+                observacoes,
+                produtosUtilizados
+            };
+
+            try {
+                const result = await api.saveLavagem(lavagemData);
+                if (result.success) {
+                    mostrarAlerta('Lavagem registrada com sucesso!', 'success', 'lavagemAlert');
+                    fecharTodosModais();
+                    await carregarLavagens();
+                    await carregarDashboard();
+                    await carregarEstoque();
+                } else {
+                    alert('Erro ao salvar lavagem: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro ao salvar lavagem: ' + error.message);
+            }
+        }
+
+        async function salvarProduto(e) {
+            e.preventDefault();
+            const produto = document.getElementById('produtoNome').value;
+            const categoria = document.getElementById('produtoCategoria').value;
+            const unidade = document.getElementById('produtoUnidade').value;
+            const quantidade = parseInt(document.getElementById('produtoQuantidade').value);
+            const estoqueMin = parseInt(document.getElementById('produtoEstoqueMin').value);
+            const preco = parseFloat(document.getElementById('produtoPreco').value);
+
+            if (!produto || !categoria || !unidade || isNaN(quantidade) || isNaN(estoqueMin) || isNaN(preco)) {
+                alert('Todos os campos devem ser preenchidos corretamente.');
+                return;
+            }
+
+            const produtoData = { produto, categoria, unidade, quantidade, estoqueMin, preco };
+            if (estado.produtoEditando) produtoData.id = estado.produtoEditando.id;
+
+            try {
+                const result = await api.saveProduto(produtoData);
+                if (result.success) {
+                    mostrarAlerta(estado.produtoEditando ? 'Produto atualizado com sucesso!' : 'Produto adicionado com sucesso!', 'success', 'estoqueAlert');
+                    fecharTodosModais();
+                    await carregarEstoque();
+                } else {
+                    alert('Erro ao salvar produto: ' + result.error);
+                }
+            } catch (error) {
+                alert('Erro ao salvar produto: ' + error.message);
+            }
+        }
+
+        async function excluirCliente(id) {
+            if (confirm('Tem certeza que deseja excluir este cliente?')) {
+                try {
+                    const result = await api.deleteCliente(id);
+                    if (result.success) {
+                        mostrarAlerta('Cliente excluído com sucesso!', 'success', 'clienteAlert');
+                        await carregarClientes();
+                        await carregarDashboard();
+                    } else {
+                        alert('Erro ao excluir cliente: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Erro ao excluir cliente: ' + error.message);
+                }
+            }
+        }
+
+        async function excluirLavagem(id) {
+            if (confirm('Tem certeza que deseja excluir este registro de lavagem?')) {
+                try {
+                    const result = await api.deleteLavagem(id);
+                    if (result.success) {
+                        mostrarAlerta('Lavagem excluída com sucesso!', 'success', 'lavagemAlert');
+                        await carregarLavagens();
+                        await carregarDashboard();
+                        await carregarEstoque();
+                    } else {
+                        alert('Erro ao excluir lavagem: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Erro ao excluir lavagem: ' + error.message);
+                }
+            }
+        }
+
+        async function excluirProduto(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                try {
+                    const result = await api.deleteProduto(id);
+                    if (result.success) {
+                        mostrarAlerta('Produto excluído com sucesso!', 'success', 'estoqueAlert');
+                        await carregarEstoque();
+                    } else {
+                        alert('Erro ao excluir produto: ' + result.error);
+                    }
+                } catch (error) {
+                    alert('Erro ao excluir produto: ' + error.message);
+                }
+            }
+        }
+
+        // ========== RELATÓRIOS ==========
+        async function gerarRelatorio() {
+            try {
+                const tipoRelatorio = document.getElementById('tipoRelatorio').value;
+                const periodo = document.getElementById('periodo').value;
+                const dataInicio = document.getElementById('dataInicio').value;
+                const dataFim = document.getElementById('dataFim').value;
+
+                if (periodo === 'personalizado' && (!dataInicio || !dataFim)) {
+                    alert('Para período personalizado, selecione data início e fim.');
+                    return;
+                }
+
+                await carregarDadosRelatorio();
+
+                let relatorioHTML = '';
+                let resumo = {};
+
+                switch (tipoRelatorio) {
+                    case 'lavagens':
+                        relatorioHTML = await gerarRelatorioLavagens(periodo, dataInicio, dataFim);
+                        resumo = await calcularResumoLavagens(periodo, dataInicio, dataFim);
+                        break;
+                    case 'financeiro':
+                        relatorioHTML = await gerarRelatorioFinanceiro(periodo, dataInicio, dataFim);
+                        resumo = await calcularResumoFinanceiro(periodo, dataInicio, dataFim);
+                        break;
+                    case 'clientes':
+                        relatorioHTML = await gerarRelatorioClientes();
+                        resumo = await calcularResumoClientes();
+                        break;
+                    case 'estoque':
+                        relatorioHTML = await gerarRelatorioEstoque();
+                        resumo = await calcularResumoEstoque();
+                        break;
+                }
+
+                document.getElementById('conteudoRelatorio').innerHTML = relatorioHTML;
+                if (Object.keys(resumo).length > 0) {
+                    document.getElementById('resumoRelatorio').style.display = 'grid';
+                    document.getElementById('totalRegistros').textContent = resumo.totalRegistros || 0;
+                    document.getElementById('receitaPeriodo').textContent = `R$ ${(resumo.receitaTotal || 0).toFixed(2)}`;
+                    document.getElementById('lucroPeriodo').textContent = `R$ ${(resumo.lucroTotal || 0).toFixed(2)}`;
+                    document.getElementById('clientesPeriodo').textContent = resumo.clientesAtivos || 0;
+                }
+            } catch (error) {
+                console.error('Erro ao gerar relatório:', error);
+                alert('Erro ao gerar relatório: ' + error.message);
+            }
+        }
+
+        async function carregarDadosRelatorio() {
+            await carregarClientes();
+            await carregarLavagens();
+            await carregarEstoque();
+        }
+
+        function obterDatasPeriodo(periodo, dataInicio, dataFim) {
+            const hoje = new Date();
+            let inicio, fim;
+            switch (periodo) {
+                case 'hoje':
+                    inicio = new Date(hoje); fim = new Date(hoje); break;
+                case 'semana':
+                    inicio = new Date(hoje); inicio.setDate(hoje.getDate() - 7); fim = new Date(hoje); break;
+                case 'mes':
+                    inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                    fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
+                case 'trimestre': {
+                    const trimestre = Math.floor(hoje.getMonth() / 3);
+                    inicio = new Date(hoje.getFullYear(), trimestre * 3, 1);
+                    fim = new Date(hoje.getFullYear(), (trimestre + 1) * 3, 0);
+                    break;
+                }
+                case 'ano':
+                    inicio = new Date(hoje.getFullYear(), 0, 1);
+                    fim = new Date(hoje.getFullYear(), 11, 31); break;
+                case 'personalizado':
+                    inicio = new Date(dataInicio); fim = new Date(dataFim); break;
+                default:
+                    inicio = new Date(hoje); fim = new Date(hoje);
+            }
+            return { inicio, fim };
+        }
+
+        async function gerarRelatorioLavagens(periodo, dataInicio, dataFim) {
+            const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
+            const lavagensFiltradas = estado.lavagens.filter(lavagem => {
+                const dataLavagem = new Date(lavagem.data);
+                return dataLavagem >= inicio && dataLavagem <= fim;
+            });
+            let html = `
+                <div class="page-header">
+                    <h3>Relatório de Lavagens - ${periodo.toUpperCase()}</h3>
+                    <small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small>
+                </div>
+                <table class="report-table">
+                    <thead><tr><th>Data</th><th>Cliente</th><th>Placa</th><th>Serviço</th><th>Funcionário</th><th>Tipo</th><th>Preço (R$)</th></tr></thead>
+                    <tbody>
+            `;
+            lavagensFiltradas.forEach(lavagem => {
+                let precoExibir = lavagem.preco;
+                if (lavagem.tipo === 'assinante' && lavagem.clienteId) {
+                    const cli = estado.clientes.find(c => c.id === lavagem.clienteId);
+                    if (cli) precoExibir = cli.mensalidade;
+                }
+                html += `
+                    <tr>
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.clienteNome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>${lavagem.tipo === 'avulsa' ? 'Avulsa' : 'Assinante'}</td>
+                        <td>R$ ${parseFloat(precoExibir || 0).toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de lavagens: ${lavagensFiltradas.length}</strong></div>`;
+            return html;
+        }
+
+        async function calcularResumoLavagens(periodo, dataInicio, dataFim) {
+            const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
+            const lavagensFiltradas = estado.lavagens.filter(lavagem => {
+                const dataLavagem = new Date(lavagem.data);
+                return dataLavagem >= inicio && dataLavagem <= fim;
+            });
+            const receitaTotal = lavagensFiltradas.reduce((sum, lavagem) => sum + lavagem.preco, 0);
+            const lavagensAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').length;
+            return {
+                totalRegistros: lavagensFiltradas.length,
+                receitaTotal: receitaTotal,
+                lavagensAvulsas: lavagensAvulsas,
+                lavagensAssinantes: lavagensFiltradas.filter(l => l.tipo === 'assinante').length
+            };
+        }
+
+        async function gerarRelatorioFinanceiro(periodo, dataInicio, dataFim) {
+            const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
+            const lavagensFiltradas = estado.lavagens.filter(lavagem => {
+                const dataLavagem = new Date(lavagem.data);
+                return dataLavagem >= inicio && dataLavagem <= fim;
+            });
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
+            const receitaTotal = receitaAvulsas + receitaMensalidades;
+            let html = `
+                <div class="page-header"><h3>Relatório Financeiro - ${periodo.toUpperCase()}</h3><small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small></div>
+                <div class="financeiro-summary">
+                    <div class="summary-card success"><h4>Receita Total</h4><div class="value">R$ ${receitaTotal.toFixed(2)}</div></div>
+                    <div class="summary-card"><h4>Receita Avulsas</h4><div class="value">R$ ${receitaAvulsas.toFixed(2)}</div></div>
+                    <div class="summary-card"><h4>Receita Mensalidades</h4><div class="value">R$ ${receitaMensalidades.toFixed(2)}</div></div>
+                </div>
+            `;
+            return html;
+        }
+
+        async function calcularResumoFinanceiro(periodo, dataInicio, dataFim) {
+            const { inicio, fim } = obterDatasPeriodo(periodo, dataInicio, dataFim);
+            const lavagensFiltradas = estado.lavagens.filter(lavagem => {
+                const dataLavagem = new Date(lavagem.data);
+                return dataLavagem >= inicio && dataLavagem <= fim;
+            });
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
+            const receitaTotal = receitaAvulsas + receitaMensalidades;
+            return {
+                totalRegistros: lavagensFiltradas.length,
+                receitaTotal: receitaTotal,
+                receitaAvulsas: receitaAvulsas,
+                receitaMensalidades: receitaMensalidades
+            };
+        }
+
+        async function gerarRelatorioClientes() {
+            let html = `
+                <div class="page-header"><h3>Relatório de Clientes</h3><small>Data: ${new Date().toLocaleDateString('pt-BR')}</small></div>
+                <table class="report-table">
+                    <thead><tr><th>Nome</th><th>Telefone</th><th>Placa</th><th>Veículo</th><th>Plano</th><th>Mensalidade (R$)</th><th>Status</th></tr></thead>
+                    <tbody>
+            `;
+            estado.clientes.forEach(cliente => {
+                html += `
+                    <tr>
+                        <td>${cliente.nome}</td>
+                        <td>${cliente.telefone || '-'}</td>
+                        <td>${cliente.placa}</td>
+                        <td>${cliente.veiculo}</td>
+                        <td>${cliente.plano}</td>
+                        <td>R$ ${cliente.mensalidade.toFixed(2)}</td>
+                        <td><span class="status-badge status-${cliente.status.toLowerCase()}">${cliente.status}</span></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de clientes: ${estado.clientes.length}</strong></div>`;
+            return html;
+        }
+
+        async function calcularResumoClientes() {
+            const clientesAtivos = estado.clientes.filter(c => c.status === 'Pago').length;
+            return {
+                totalRegistros: estado.clientes.length,
+                clientesAtivos: clientesAtivos,
+                inadimplentes: estado.clientes.filter(c => c.status === 'Vencido').length,
+                pendentes: estado.clientes.filter(c => c.status === 'Pendente').length
+            };
+        }
+
+        async function gerarRelatorioEstoque() {
+            let html = `
+                <div class="page-header"><h3>Relatório de Estoque</h3><small>Data: ${new Date().toLocaleDateString('pt-BR')}</small></div>
+                <table class="report-table">
+                    <thead><tr><th>Produto</th><th>Categoria</th><th>Unidade</th><th>Estoque Atual</th><th>Estoque Mínimo</th><th>Status</th><th>Valor Total (R$)</th></tr></thead>
+                    <tbody>
+            `;
+            estado.produtos.forEach(produto => {
+                const status = produto.quantidade <= produto.estoqueMin ? '<span class="status-badge status-vencido">Baixo</span>' : '<span class="status-badge status-pago">Normal</span>';
+                const valorTotal = produto.quantidade * produto.preco;
+                html += `
+                    <tr>
+                        <td>${produto.produto}</td>
+                        <td>${produto.categoria}</td>
+                        <td>${produto.unidade}</td>
+                        <td>${produto.quantidade}</td>
+                        <td>${produto.estoqueMin}</td>
+                        <td>${status}</td>
+                        <td>R$ ${valorTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table><div style="margin-top:20px;text-align:right;"><strong>Total de produtos: ${estado.produtos.length}</strong></div>`;
+            return html;
+        }
+
+        async function calcularResumoEstoque() {
+            const produtosBaixoEstoque = estado.produtos.filter(p => p.quantidade <= p.estoqueMin).length;
+            const valorTotalEstoque = estado.produtos.reduce((sum, p) => sum + (p.quantidade * p.preco), 0);
+            return {
+                totalRegistros: estado.produtos.length,
+                produtosBaixoEstoque: produtosBaixoEstoque,
+                valorTotalEstoque: valorTotalEstoque
+            };
+        }
+
+        function imprimirRelatorio() {
+            const conteudo = document.getElementById('conteudoRelatorio').innerHTML;
+            if (!conteudo) { alert('Gere um relatório primeiro antes de imprimir.'); return; }
+            const janela = window.open('', '_blank');
+            janela.document.write(`
+                <html><head><title>Relatório RPCAR</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                    .page-header { margin-bottom: 20px; }
+                    @media print { body { margin: 0; } .no-print { display: none; } }
+                </style>
+                </head>
+                <body>${conteudo}
+                <div class="no-print" style="margin-top:20px;text-align:center;">
+                    <button onclick="window.print()">Imprimir</button>
+                    <button onclick="window.close()">Fechar</button>
+                </div>
+                </body></html>
+            `);
+            janela.document.close();
+        }
+
+        function toggleOutroVeiculo(sel) {
+            const row = document.getElementById('outroVeiculoRow');
+            const input = document.getElementById('clienteVeiculoOutro');
+            if (sel.value === 'Outro') {
+                row.style.display = '';
+                input.required = true;
+            } else {
+                row.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // ========== VENDAS ==========
+        let vendas = [];
+
+        function abrirModalVenda() {
+            const modal = document.getElementById('vendaModal');
+            document.getElementById('vendaForm').reset();
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('vendaData').value = hoje;
+
+            const sel = document.getElementById('vendaCliente');
+            sel.innerHTML = '<option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option>';
+            estado.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.nome} - ${c.placa}`;
+                sel.appendChild(opt);
+            });
+
+            const selProd = document.getElementById('vendaProduto');
+            selProd.innerHTML = '<option value="">Selecione o produto</option>';
+            estado.produtos.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = `${p.produto} (Estoque: ${p.quantidade}) - R$ ${parseFloat(p.preco).toFixed(2)}`;
+                opt.dataset.preco = p.preco;
+                selProd.appendChild(opt);
+            });
+
+            selProd.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                if (opt.dataset.preco) {
+                    document.getElementById('vendaValorUnit').value = parseFloat(opt.dataset.preco).toFixed(2);
+                }
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        async function salvarVenda(e) {
+            e.preventDefault();
+            const data = document.getElementById('vendaData').value;
+            const clienteId = document.getElementById('vendaCliente').value;
+            const produtoId = document.getElementById('vendaProduto').value;
+            const quantidade = parseInt(document.getElementById('vendaQuantidade').value);
+            const valorUnit = parseFloat(document.getElementById('vendaValorUnit').value);
+            const funcionario = document.getElementById('vendaFuncionario').value;
+            const obs = document.getElementById('vendaObs').value;
+
+            if (!data || !clienteId || !produtoId || !quantidade || !valorUnit || !funcionario) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
+            if (!produto || quantidade > produto.quantidade) {
+                alert(`Estoque insuficiente. Disponível: ${produto ? produto.quantidade : 0}`);
+                return;
+            }
+
+            const cliente = clienteId === 'avulso' ? { nome: 'Cliente Avulso' } : estado.clientes.find(c => c.id === parseInt(clienteId));
+            const total = quantidade * valorUnit;
+
+            const venda = {
+                id: Date.now(),
+                data, clienteId, clienteNome: cliente.nome,
+                produtoId: parseInt(produtoId), produtoNome: produto.produto,
+                quantidade, valorUnit, total, funcionario, obs
+            };
+
+            vendas.push(venda);
+            produto.quantidade -= quantidade;
+            renderVendas();
+            fecharTodosModais();
+            mostrarAlerta('Venda registrada com sucesso!', 'success', 'lavagemAlert');
+            await carregarEstoque();
+        }
+
+        function renderVendas() {
+            const tbody = document.getElementById('vendasTableBody');
+            if (vendas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#999;">Nenhuma venda registrada</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            vendas.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatarData(v.data)}</td>
+                    <td>${v.clienteNome}</td>
+                    <td>${v.produtoNome}</td>
+                    <td>${v.quantidade}</td>
+                    <td>R$ ${parseFloat(v.valorUnit).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(v.total).toFixed(2)}</td>
+                    <td>${v.funcionario}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirVenda(${v.id})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirVenda(id) {
+            if (confirm('Excluir esta venda?')) {
+                vendas = vendas.filter(v => v.id !== id);
+                renderVendas();
+            }
+        }
+
+        // ========== SERVIÇOS ==========
+        let servicos_registrados = [];
+
+        function abrirModalServico() {
+            const modal = document.getElementById('servicoModal');
+            document.getElementById('servicoForm').reset();
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('servicoData').value = hoje;
+
+            const sel = document.getElementById('servicoCliente');
+            sel.innerHTML = '<option value="">Selecione um cliente</option><option value="avulso">Cliente Avulso</option>';
+            estado.clientes.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.nome} - ${c.placa}`;
+                sel.appendChild(opt);
+            });
+
+            sel.addEventListener('change', function() {
+                const cli = estado.clientes.find(c => c.id === parseInt(this.value));
+                if (cli) document.getElementById('servicoPlaca').value = cli.placa;
+            });
+
+            modal.style.display = 'flex';
+        }
+
+        async function salvarServico(e) {
+            e.preventDefault();
+            const data = document.getElementById('servicoData').value;
+            const clienteId = document.getElementById('servicoCliente').value;
+            const placa = document.getElementById('servicoPlaca').value;
+            const tipo = document.getElementById('servicoTipo').value;
+            const descricao = document.getElementById('servicoDescricao').value;
+            const valor = parseFloat(document.getElementById('servicoValor').value);
+            const funcionario = document.getElementById('servicoFuncionario').value;
+            const statusServ = document.getElementById('servicoStatus').value;
+
+            if (!data || !clienteId || !placa || !tipo || !valor || !funcionario) {
+                alert('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            const cliente = clienteId === 'avulso' ? { nome: 'Cliente Avulso' } : estado.clientes.find(c => c.id === parseInt(clienteId));
+            servicos_registrados.push({
+                id: Date.now(),
+                data, clienteNome: cliente.nome, placa,
+                tipo, descricao, valor, funcionario, status: statusServ
+            });
+            renderServicos();
+            fecharTodosModais();
+            mostrarAlerta('Serviço registrado com sucesso!', 'success', 'lavagemAlert');
+        }
+
+        function renderServicos() {
+            const tbody = document.getElementById('servicosTableBody');
+            if (servicos_registrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:#999;">Nenhum serviço registrado</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            servicos_registrados.forEach(s => {
+                const statusClass = s.status === 'Concluído' ? 'status-pago' : s.status === 'Em Andamento' ? 'status-pendente' : 'status-vencido';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatarData(s.data)}</td>
+                    <td>${s.clienteNome}</td>
+                    <td>${s.placa}</td>
+                    <td>${s.tipo}</td>
+                    <td>${s.descricao || '-'}</td>
+                    <td>R$ ${parseFloat(s.valor).toFixed(2)}</td>
+                    <td>${s.funcionario}</td>
+                    <td><span class="status-badge ${statusClass}">${s.status}</span></td>
+                    <td><button class="btn btn-danger btn-sm" onclick="excluirServico(${s.id})"><i class="fas fa-trash"></i></button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirServico(id) {
+            if (confirm('Excluir este serviço?')) {
+                servicos_registrados = servicos_registrados.filter(s => s.id !== id);
+                renderServicos();
+            }
+        }
+
+        // ========== USUÁRIOS ==========
+        let usuarios = [
+            { id: 1, nome: 'Administrador', login: 'admin', nivel: 'administrador', status: 'ativo' }
+        ];
+
+        function abrirModalUsuario(id = null) {
+            const modal = document.getElementById('usuarioModal');
+            document.getElementById('usuarioForm').reset();
+            document.getElementById('usuarioModalTitle').textContent = id ? 'Editar Usuário' : 'Novo Usuário';
+            if (id) {
+                const u = usuarios.find(u => u.id === id);
+                if (u) {
+                    document.getElementById('usuarioNome').value = u.nome;
+                    document.getElementById('usuarioLogin').value = u.login;
+                    document.getElementById('usuarioNivel').value = u.nivel;
+                    document.getElementById('usuarioStatusAtivo').value = u.status;
+                    modal.dataset.editId = id;
+                }
+            } else {
+                delete modal.dataset.editId;
+            }
+            modal.style.display = 'flex';
+        }
+
+        function salvarUsuario(e) {
+            e.preventDefault();
+            const modal = document.getElementById('usuarioModal');
+            const editId = modal.dataset.editId ? parseInt(modal.dataset.editId) : null;
+            const nome = document.getElementById('usuarioNome').value;
+            const login = document.getElementById('usuarioLogin').value;
+            const senha = document.getElementById('usuarioSenha').value;
+            const nivel = document.getElementById('usuarioNivel').value;
+            const status = document.getElementById('usuarioStatusAtivo').value;
+
+            if (editId) {
+                const u = usuarios.find(u => u.id === editId);
+                if (u) { u.nome = nome; u.login = login; u.nivel = nivel; u.status = status; if (senha) u.senha = senha; }
+            } else {
+                usuarios.push({ id: Date.now(), nome, login, nivel, status });
+            }
+            carregarUsuarios();
+            fecharTodosModais();
+            mostrarAlerta('Usuário salvo com sucesso!', 'success', 'adminAlert');
+        }
+
+        function carregarUsuarios() {
+            const tbody = document.querySelector('#usuariosTable tbody');
+            tbody.innerHTML = '';
+            const nivelLabel = { administrador: '👑 Administrador', gerente: '🧑‍💼 Gerente', funcionario: '👷 Funcionário' };
+            usuarios.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${u.nome}</td>
+                    <td>${u.login}</td>
+                    <td>${nivelLabel[u.nivel] || u.nivel}</td>
+                    <td><span class="status-badge ${u.status === 'ativo' ? 'status-pago' : 'status-vencido'}">${u.status}</span></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="abrirModalUsuario(${u.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirUsuario(${u.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function excluirUsuario(id) {
+            if (usuarios.length === 1) { alert('Não é possível excluir o único usuário.'); return; }
+            if (confirm('Excluir este usuário?')) {
+                usuarios = usuarios.filter(u => u.id !== id);
+                carregarUsuarios();
+            }
+        }
+
+        function mostrarAlerta(mensagem, tipo, elementoId) {
+            const alerta = document.getElementById(elementoId);
+            alerta.textContent = mensagem;
+            alerta.className = `alert alert-${tipo}`;
+            alerta.style.display = 'block';
+            setTimeout(() => {
+                alerta.style.display = 'none';
+            }, 5000);
+        }
+
+        function formatarData(dataString) {
+            if (!dataString) return '-';
+            const parte = dataString.split('T')[0];
+            const [ano, mes, dia] = parte.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+    </script>
+</body>
+</html>
