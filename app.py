@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 import json
 from pathlib import Path
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, request, session, jsonify, send_file
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text, inspect
@@ -10,12 +10,13 @@ from datetime import datetime, date
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "app.db"
+INDEX_HTML = BASE_DIR / "index.html"
 
-app = Flask(__name__, template_folder=str(BASE_DIR))
+app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-lavagem-2024")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados
+# Configuração do banco de dados (PostgreSQL ou SQLite fallback)
 # -------------------------------------------------------------
 database_url = os.environ.get("DATABASE_URL")
 
@@ -26,7 +27,7 @@ if database_url:
     if url_limpa.startswith("postgresql://"):
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Usando PostgreSQL")
+    print(f"🔄 Tentando PostgreSQL...")
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     print("✅ Usando SQLite local")
@@ -195,12 +196,22 @@ def init_db():
             db.session.rollback()
 
 # ============================================================
-# ROTAS DA API
+# ROTAS
 # ============================================================
 @app.route("/")
 def home():
-    return render_template("index.html")
+    """Serve index.html diretamente da pasta raiz."""
+    if INDEX_HTML.exists():
+        return send_file(str(INDEX_HTML))
+    return "<h1>Way For System</h1><p>index.html não encontrado. Coloque o arquivo na mesma pasta do app.py</p>", 200
 
+@app.route("/favicon.ico")
+def favicon():
+    return "", 204
+
+# -------------------------------------------------------------
+# AUTENTICAÇÃO
+# -------------------------------------------------------------
 @app.route("/api/login", methods=["POST"])
 def api_login():
     try:
@@ -239,6 +250,9 @@ def api_logout():
     session.clear()
     return jsonify({'success': True})
 
+# -------------------------------------------------------------
+# DASHBOARD
+# -------------------------------------------------------------
 @app.route("/api/dashboard")
 def api_dashboard():
     if not logged_in():
@@ -303,6 +317,7 @@ def api_dashboard():
         print(f"Erro no dashboard: {e}")
         return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
 
+# ========== CLIENTES ==========
 @app.route("/api/clientes")
 def api_clientes():
     if not logged_in():
@@ -374,6 +389,7 @@ def api_excluir_cliente(cliente_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
+# ========== LAVAGENS ==========
 @app.route("/api/lavagens")
 def api_lavagens():
     if not logged_in():
@@ -434,6 +450,7 @@ def api_excluir_lavagem(lavagem_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
+# ========== PRODUTOS ==========
 @app.route("/api/produtos")
 def api_produtos():
     if not logged_in():
@@ -497,6 +514,7 @@ def api_excluir_produto(produto_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
+# ========== FINANCEIRO ==========
 @app.route("/api/financeiro")
 def api_financeiro():
     if not logged_in():
@@ -522,6 +540,7 @@ def api_financeiro():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ========== DEBUG ==========
 @app.route("/api/debug/db")
 def debug_db():
     try:
@@ -539,9 +558,8 @@ def debug_db():
         return jsonify({"status": "error", "error": str(e)}), 500
 
 # ============================================================
-# INICIALIZAÇÃO - CHAMADA EXPLÍCITA NO NÍVEL DO MÓDULO
+# INICIALIZAÇÃO
 # ============================================================
-# Isso garante que o banco seja inicializado quando o gunicorn importar o módulo
 with app.app_context():
     init_db()
 
