@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== CSS COMPLETO (mantido) ===== */
+        /* ===== CSS COMPLETO (MANTIDO ORIGINAL) ===== */
         :root {
             --primary: #1a5276;
             --secondary: #3498db;
@@ -444,6 +444,7 @@
 
     <script>
         // ===================== CONFIGURAÇÃO SUPABASE =====================
+        // Renomeado para supabaseClient para evitar conflito
         const SUPABASE_URL = 'https://uzwyzmgbzeoonrproevh.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_O_0mHby8J7S_XGbi3_Behg_GppDqpG5';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -526,10 +527,9 @@
                     return;
                 }
 
-                // Log para depuração
                 console.log('Dados do usuário:', data);
 
-                // Verifica a coluna de senha (agora sabemos que é senha_hash)
+                // CORREÇÃO: usar senha_hash (coluna correta)
                 if (password !== data.senha_hash) {
                     alert('Senha incorreta.');
                     return;
@@ -1329,7 +1329,7 @@
             const status = document.getElementById('usuarioStatusAtivo').value;
             if (!nome || !login) { alert('Nome e login são obrigatórios.'); return; }
             if (!editId && !senha) { alert('Senha é obrigatória para novo usuário.'); return; }
-            const dados = { nome, login, nivel, status, senha_hash: senha };
+            const dados = { nome, login, senha_hash: senha, nivel, status };
             try {
                 if (editId) {
                     const { error } = await supabaseClient.from('usuarios').update(dados).eq('id', editId);
@@ -1590,7 +1590,7 @@
             document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
                 const produtoId = document.getElementById('lavagemProdutos').value;
                 const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
-                if (!produtoId || quantité <= 0) { alert('Selecione um produto e quantidade válida.'); return; }
+                if (!produtoId || quantidade <= 0) { alert('Selecione um produto e quantidade válida.'); return; }
                 const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
                 if (!produto || quantidade > produto.quantidade) {
                     alert(`Estoque insuficiente. Disponível: ${produto ? produto.quantidade : 0}`);
