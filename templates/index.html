@@ -681,6 +681,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <!-- Tela de Login -->
@@ -2403,10 +2404,12 @@
                 case 'mes':
                     inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
                     fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
-                case 'trimestre':
+                case 'trimestre': {
                     const trimestre = Math.floor(hoje.getMonth() / 3);
                     inicio = new Date(hoje.getFullYear(), trimestre * 3, 1);
-                    fim = new Date(hoje.getFullYear(), (trimestre + 1) * 3, 0); break;
+                    fim = new Date(hoje.getFullYear(), (trimestre + 1) * 3, 0);
+                    break;
+                }
                 case 'ano':
                     inicio = new Date(hoje.getFullYear(), 0, 1);
                     fim = new Date(hoje.getFullYear(), 11, 31); break;
