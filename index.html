@@ -608,7 +608,7 @@
             estado.produtos = data;
             renderizarProdutos();
         }
-
+        
         async function carregarUsuarios() {
             const { data, error } = await supabaseClient
                 .from('usuarios')
