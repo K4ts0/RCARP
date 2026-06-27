@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados (com fallback para SQLite)
+# Configuração do banco de dados (sem modificações na URL)
 # -------------------------------------------------------------
 database_url = os.environ.get("DATABASE_URL")
 
@@ -23,9 +23,7 @@ if database_url:
     url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
     if url_limpa.startswith("postgres://"):
         url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
-    # CORREÇÃO: usa o driver psycopg2 (mais estável)
-    if url_limpa.startswith("postgresql://"):
-        url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg2://", 1)
+    # NÃO modifique a URL além disso
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
     print(f"🔄 Conectando ao Supabase: {url_limpa.split('@')[1] if '@' in url_limpa else 'URL configurada'}")
 else:
@@ -41,9 +39,10 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 bcrypt = Bcrypt(app)
 
 # -------------------------------------------------------------
-# Inicialização do SQLAlchemy (uma única vez)
+# Inicialização do SQLAlchemy (sem criar engine ainda)
 # -------------------------------------------------------------
-db = SQLAlchemy(app)  # <- já passamos o app diretamente
+db = SQLAlchemy()  # <- não passa app, depois usamos init_app
+db.init_app(app)   # <- vincula ao app
 
 # -------------------------------------------------------------
 # MODELOS
@@ -54,7 +53,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    nivel = db.Column(db.String(20), default="funcionario")  # admin, gerente, funcionario
+    nivel = db.Column(db.String(20), default="funcionario")
 
     def set_password(self, raw):
         self.password_hash = bcrypt.generate_password_hash(raw).decode()
@@ -100,7 +99,7 @@ class Lavagem(db.Model):
     tipo = db.Column(db.String(20), default="assinante")
     preco = db.Column(db.Float, default=0.0)
     observacoes = db.Column(db.Text)
-    produtos_utilizados = db.Column(db.Text)  # JSON
+    produtos_utilizados = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # -------------------------------------------------------------
@@ -110,6 +109,7 @@ def logged_in():
     return bool(session.get("uid"))
 
 def init_db():
+    """Cria tabelas e usuário admin, se não existirem."""
     with app.app_context():
         try:
             db.create_all()
@@ -124,7 +124,7 @@ def init_db():
             print(f"⚠️ Erro na inicialização: {e}")
 
 # -------------------------------------------------------------
-# ROTAS DA API (TODAS AS QUE VOCÊ JÁ TINHA)
+# ROTAS (TODAS AS QUE VOCÊ JÁ TINHA)
 # -------------------------------------------------------------
 @app.route("/")
 def home():
@@ -163,7 +163,6 @@ def api_logout():
 def api_dashboard():
     if not logged_in():
         return jsonify({'error': 'Não autenticado'}), 401
-    
     try:
         hoje = date.today()
         clientes = Cliente.query.all()
@@ -173,7 +172,6 @@ def api_dashboard():
             elif cliente.status == 'Pendente' and cliente.vencimento < hoje:
                 cliente.status = 'Vencido'
         db.session.commit()
-        
         clientes_ativos = Cliente.query.filter_by(status="Pago").count()
         inadimplentes = Cliente.query.filter_by(status="Vencido").count()
         receita_mensalidades = db.session.query(db.func.sum(Cliente.mensalidade)).filter_by(status="Pago").scalar() or 0
@@ -181,7 +179,6 @@ def api_dashboard():
         receita_total = receita_mensalidades + receita_lavagens_avulsas
         a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
         lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
-        
         custo_produtos = 0
         lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
         for lavagem in lavagens_com_produtos:
@@ -195,9 +192,7 @@ def api_dashboard():
                 except:
                     pass
         lucro_total = receita_total - custo_produtos
-        
         ultimas_lavagens = Lavagem.query.order_by(Lavagem.data.desc()).limit(5).all()
-        
         return jsonify({
             'stats': {
                 'clientesAtivos': clientes_ativos,
@@ -491,7 +486,7 @@ def debug_db():
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
 
-# ========== INICIALIZAÇÃO ==========
+# ========== INICIALIZAÇÃO (apenas quando executado diretamente) ==========
 if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 5000))
