@@ -594,7 +594,7 @@
         }
 
         async function carregarClientes() {
-            const { data, error } = await supabaseClient.from('clientes').select('*').order('created_at', { ascending: false });
+            const { data, error } = await supabaseClient.from('clientes').select('*').order('id', { ascending: false });
             if (error) { console.error('Erro ao carregar clientes:', error); return; }
             estado.clientes = data;
             renderizarClientes();
