@@ -418,7 +418,7 @@
     // ===================== CONFIGURAÇÃO SUPABASE =====================
     const SUPABASE_URL = 'https://uzwyzmgbzeoonrproevh.supabase.co';
     const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_O_0mHby8J7S_XGbi3_Behg_GppDqpG5';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
     // ===================== ESTADO GLOBAL =====================
     let estado = {
@@ -473,46 +473,57 @@
         if (tabDashboard) tabDashboard.style.display = 'none';
       }
     }
-
-    // ===================== LOGIN / LOGOUT =====================
+    
+    // ===================== FUNÇÃO DE LOGIN CORRIGIDA =====================
     async function fazerLogin() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if (!username || !password) {
-        alert('Preencha todos os campos.');
-        return;
-      }
-      try {
-        // Buscar usuário no Supabase
-        const { data, error } = await supabase
-          .from('usuarios')
-          .select('*')
-          .eq('login', username)
-          .single();
-        if (error || !data) {
-          alert('Usuário não encontrado.');
-          return;
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+    
+        if (!username || !password) {
+            alert('Preencha todos os campos.');
+            return;
         }
-        // Verificar senha (como estamos usando bcrypt no backend, no frontend não podemos verificar)
-        // Para simplificar, vamos comparar em texto puro (apenas para demo)
-        // Na prática, use uma função de hash no frontend ou compare com o hash armazenado.
-        // Vamos usar uma verificação simples: se a senha for '1234' para admin, ou a mesma do cadastro.
-        // Mas como não temos hash, farei uma validação básica.
-        // Para um sistema real, use o Supabase Auth ou criptografe no backend.
-        if (password !== data.senha && data.senha !== '1234') {
-          alert('Senha incorreta.');
-          return;
+    
+        try {
+            // Buscar usuário no Supabase
+            const { data, error } = await supabaseClient
+                .from('usuarios')
+                .select('*')
+                .eq('login', username)
+                .single();
+    
+            if (error || !data) {
+                console.error('Erro na consulta:', error);
+                alert('Usuário não encontrado.');
+                return;
+            }
+    
+            // Exibe os dados no console para depuração
+            console.log('Dados do usuário:', data);
+    
+            // Verifica se a coluna de senha existe (ajuste para 'senha_hash' se necessário)
+            // Vamos verificar ambas as possibilidades
+            let senhaArmazenada = data.senha || data.senha_hash || '';
+            if (password !== senhaArmazenada) {
+                alert('Senha incorreta.');
+                return;
+            }
+    
+            // Login bem-sucedido
+            estado.usuarioLogado = data;
+            document.getElementById('userName').textContent = data.nome;
+            localStorage.setItem('usuarioLogado', JSON.stringify(data));
+    
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+    
+            aplicarControleAcesso(data.nivel);
+            await carregarDados();
+    
+        } catch (error) {
+            console.error('Erro no login:', error);
+            alert('Erro ao fazer login: ' + error.message);
         }
-        estado.usuarioLogado = data;
-        document.getElementById('userName').textContent = data.nome;
-        localStorage.setItem('usuarioLogado', JSON.stringify(data));
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appScreen').style.display = 'block';
-        aplicarControleAcesso(data.nivel);
-        await carregarDados();
-      } catch (error) {
-        alert('Erro ao fazer login: ' + error.message);
-      }
     }
 
     async function fazerLogout() {
