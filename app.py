@@ -15,17 +15,19 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 # -------------------------------------------------------------
-# Configuração do banco de dados (sem modificações na URL)
+# Configuração do banco de dados (com fallback para SQLite)
 # -------------------------------------------------------------
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
-    # Apenas limpeza básica (remove espaços e parênteses)
+    # Limpeza básica (remove espaços e parênteses)
     url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
     # Substitui 'postgres://' por 'postgresql://' (SQLAlchemy exige)
     if url_limpa.startswith("postgres://"):
         url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
-    # NÃO FAZ MAIS NENHUMA MODIFICAÇÃO NA URL!
+    # Força o uso do psycopg2 (mais estável e compatível)
+    if url_limpa.startswith("postgresql://"):
+        url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg2://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
     print(f"🔄 Conectando ao Supabase: {url_limpa.split('@')[1] if '@' in url_limpa else 'URL configurada'}")
 else:
@@ -124,7 +126,7 @@ def init_db():
             print(f"⚠️ Erro na inicialização: {e}")
 
 # -------------------------------------------------------------
-# ROTAS DA API (TODAS AS QUE VOCÊ JÁ TINHA)
+# ROTAS DA API
 # -------------------------------------------------------------
 @app.route("/")
 def home():
@@ -182,6 +184,7 @@ def api_dashboard():
         a_receber = db.session.query(db.func.sum(Cliente.mensalidade)).filter(Cliente.status != "Pago").scalar() or 0
         lavagens_avulsas = Lavagem.query.filter_by(tipo="avulsa").count()
         
+        # Lucro estimado (considerando custo dos produtos)
         custo_produtos = 0
         lavagens_com_produtos = Lavagem.query.filter(Lavagem.produtos_utilizados.isnot(None)).all()
         for lavagem in lavagens_com_produtos:
@@ -349,6 +352,7 @@ def api_criar_lavagem():
             observacoes=data.get('observacoes', ''),
             produtos_utilizados=json.dumps(data.get('produtosUtilizados', []))
         )
+        # Baixa no estoque
         for pu in data.get('produtosUtilizados', []):
             produto = Produto.query.get(pu['produtoId'])
             if produto:
@@ -366,6 +370,7 @@ def api_excluir_lavagem(lavagem_id):
         return jsonify({'error': 'Não autenticado'}), 401
     lavagem = Lavagem.query.get_or_404(lavagem_id)
     try:
+        # Restaura estoque
         if lavagem.produtos_utilizados:
             for pu in json.loads(lavagem.produtos_utilizados):
                 produto = Produto.query.get(pu['produtoId'])
@@ -451,7 +456,7 @@ def api_excluir_produto(produto_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
 
-# ========== ROTA FINANCEIRO ==========
+# ========== ROTA FINANCEIRO (opcional) ==========
 @app.route("/api/financeiro")
 def api_financeiro():
     if not logged_in():
@@ -474,7 +479,7 @@ def api_financeiro():
         receitas_mensais.append(float(receita_mensalidades + receita_lavagens))
     return jsonify({'receitasMensais': receitas_mensais, 'meses': meses})
 
-# ========== DEBUG ==========
+# ========== DEBUG (opcional) ==========
 @app.route("/api/debug/db")
 def debug_db():
     try:
