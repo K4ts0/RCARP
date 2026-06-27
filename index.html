@@ -130,7 +130,7 @@
     </style>
 </head>
 <body>
-    <!-- Tela de Login -->
+    <!-- ===== TELA DE LOGIN ===== -->
     <div class="login-container" id="loginScreen">
         <div class="login-form">
             <h2><i class="fas fa-car"></i> Way For System</h2>
@@ -146,7 +146,7 @@
         </div>
     </div>
 
-    <!-- Sistema Principal -->
+    <!-- ===== SISTEMA PRINCIPAL ===== -->
     <div class="app-container" id="appScreen">
         <header>
             <div class="header-content">
@@ -261,7 +261,7 @@
         </div>
     </div>
 
-    <!-- Painel Administrativo -->
+    <!-- ===== PAINEL ADMINISTRATIVO ===== -->
     <div class="tab-content" id="admin">
         <div class="page-header"><h2>⚙ Painel Administrativo</h2></div>
         <div class="tabs-container">
@@ -577,7 +577,7 @@
             document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
         });
 
-        // ===================== CARREGAR DADOS (CORRIGIDO) =====================
+        // ===================== CARREGAR DADOS (CORRIGIDO - usa 'criado_em') =====================
         async function carregarDados() {
             await carregarClientes();
             await carregarProdutos();
@@ -588,12 +588,12 @@
             await carregarDashboard();
         }
 
-        // CORREÇÃO: usamos order('id') porque essas tabelas não têm 'created_at'
+        // CORREÇÃO FINAL: usar 'criado_em' (coluna correta) e NÃO 'created_at'
         async function carregarClientes() {
             const { data, error } = await supabaseClient
                 .from('clientes')
                 .select('*')
-                .order('id', { ascending: false });
+                .order('criado_em', { ascending: false });
             if (error) { console.error('Erro ao carregar clientes:', error); return; }
             estado.clientes = data;
             renderizarClientes();
@@ -603,17 +603,17 @@
             const { data, error } = await supabaseClient
                 .from('produtos')
                 .select('*')
-                .order('id', { ascending: false });
+                .order('criado_em', { ascending: false });
             if (error) { console.error('Erro ao carregar produtos:', error); return; }
             estado.produtos = data;
             renderizarProdutos();
         }
-        
+
         async function carregarUsuarios() {
             const { data, error } = await supabaseClient
                 .from('usuarios')
                 .select('*')
-                .order('id', { ascending: false });
+                .order('criado_em', { ascending: false });
             if (error) { console.error('Erro ao carregar usuários:', error); return; }
             estado.usuarios = data;
             renderizarUsuarios();
@@ -649,7 +649,7 @@
             renderizarServicos();
         }
 
-        // ===================== RENDERIZAÇÕES =====================
+        // ===== RENDERIZAÇÕES =====
         function renderizarClientes() {
             const tbody = document.querySelector('#clientesTable tbody');
             tbody.innerHTML = '';
@@ -1627,6 +1627,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             configurarEventos();
         });
+
+        // Aviso no console para desabilitar RLS
+        console.warn('ATENÇÃO: Para que o sistema funcione, desabilite o RLS no Supabase com os comandos:');
+        console.warn('ALTER TABLE clientes DISABLE ROW LEVEL SECURITY;');
+        console.warn('ALTER TABLE produtos DISABLE ROW LEVEL SECURITY;');
+        console.warn('ALTER TABLE lavagens DISABLE ROW LEVEL SECURITY;');
+        console.warn('ALTER TABLE vendas DISABLE ROW LEVEL SECURITY;');
+        console.warn('ALTER TABLE servicos_prestados DISABLE ROW LEVEL SECURITY;');
+        console.warn('ALTER TABLE usuarios DISABLE ROW LEVEL SECURITY;');
     </script>
 </body>
 </html>
