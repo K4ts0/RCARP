@@ -1879,7 +1879,7 @@
             document.getElementById('appScreen').style.display = 'none';
         }
 
-        // Alternar entre abas principais
+        // ========== FUNÇÃO ALTERNAR ABA CORRIGIDA ==========
         async function alternarAba(abaId) {
             // Remover classe active de todas as abas
             document.querySelectorAll('.nav-tabs li').forEach(tab => {
@@ -1905,8 +1905,6 @@
                 await carregarEstoque();
             } else if (abaId === 'admin') {
                 carregarUsuarios();
-            }
-                await carregarEstoque();
             } else if (abaId === 'relatorios') {
                 // Não carregar dados automaticamente para relatórios
             }
