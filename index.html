@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== CSS COMPLETO ===== */
+        /* ===== CSS COMPLETO (mantido igual) ===== */
         :root {
             --primary: #0f172a;
             --primary-light: #1e293b;
@@ -391,7 +391,7 @@
         .alert-danger { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; }
         .alert i { font-size:18px; }
 
-        /* Modals - CORRIGIDO para centralização */
+        /* Modals */
         .modal {
             display:none;
             position:fixed;
@@ -629,7 +629,6 @@
                     <div class="stat-card danger"><div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div><h3>A Receber (R$)</h3><div class="value" id="aReceber">0</div><div class="trend" id="trendReceber"></div></div>
                     <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-car"></i></div><h3>Lavagens Avulsas</h3><div class="value" id="lavagensAvulsas">0</div><div class="trend" id="trendLavagens"></div></div>
                     <div class="stat-card success"><div class="stat-icon cyan"><i class="fas fa-piggy-bank"></i></div><h3>Lucro Estimado (R$)</h3><div class="value" id="lucroTotal">0</div><div class="trend" id="trendLucro"></div></div>
-                    <!-- Card "Valor em Estoque" – removido para evitar erro, ou mantido com verificação -->
                     <div class="stat-card"><div class="stat-icon cyan"><i class="fas fa-boxes"></i></div><h3>Valor em Estoque (R$)</h3><div class="value" id="valorEstoque">0</div><div class="trend" id="trendEstoque"></div></div>
                 </div>
                 <div class="card">
@@ -913,7 +912,7 @@
         </div>
     </div>
 
-    <!-- Usuário Modal (fora da tab admin para evitar conflitos) -->
+    <!-- Usuário Modal -->
     <div class="modal" id="usuarioModal">
         <div class="modal-content">
             <div class="modal-header"><h3><i class="fas fa-user-cog"></i> <span id="usuarioModalTitle">Novo Usuário</span></h3><button class="close-modal">&times;</button></div>
@@ -1042,13 +1041,17 @@
 
         // ===================== CARREGAR DADOS =====================
         async function carregarDados() {
-            await carregarClientes();
-            await carregarProdutos();
-            await carregarLavagens();
-            await carregarVendas();
-            await carregarServicos();
-            await carregarUsuarios();
-            await carregarDashboard();
+            try {
+                await carregarClientes();
+                await carregarProdutos();
+                await carregarLavagens();
+                await carregarVendas();
+                await carregarServicos();
+                await carregarUsuarios();
+                await carregarDashboard();
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
         }
 
         async function carregarClientes() {
@@ -1114,6 +1117,7 @@
         // ===== RENDERIZAÇÕES =====
         function renderizarClientes() {
             const tbody = document.querySelector('#clientesTable tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             estado.clientes.forEach(cliente => {
                 const tr = document.createElement('tr');
@@ -1143,6 +1147,7 @@
 
         function renderizarProdutos() {
             const tbody = document.querySelector('#estoqueTable tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             estado.produtos.forEach(produto => {
                 const valorTotal = produto.quantidade * produto.preco;
@@ -1172,37 +1177,41 @@
 
         function renderizarLavagens() {
             const tbodyAss = document.querySelector('#lavagensTable tbody');
-            tbodyAss.innerHTML = '';
-            estado.lavagens.filter(l => l.tipo === 'assinante').forEach(lavagem => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${formatarData(lavagem.data)}</td>
-                    <td>${lavagem.cliente_nome}</td>
-                    <td>${lavagem.placa}</td>
-                    <td>${lavagem.servico}</td>
-                    <td>${lavagem.funcionario}</td>
-                    <td>${lavagem.observacoes || '-'}</td>
-                    <td><button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button></td>
-                `;
-                tbodyAss.appendChild(tr);
-            });
+            if (tbodyAss) {
+                tbodyAss.innerHTML = '';
+                estado.lavagens.filter(l => l.tipo === 'assinante').forEach(lavagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.cliente_nome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>${lavagem.observacoes || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    tbodyAss.appendChild(tr);
+                });
+            }
 
             const tbodyAv = document.querySelector('#lavagensAvulsasTable tbody');
-            tbodyAv.innerHTML = '';
-            estado.lavagens.filter(l => l.tipo === 'avulsa').forEach(lavagem => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${formatarData(lavagem.data)}</td>
-                    <td>${lavagem.cliente_nome}</td>
-                    <td>${lavagem.placa}</td>
-                    <td>${lavagem.servico}</td>
-                    <td>${lavagem.funcionario}</td>
-                    <td>R$ ${lavagem.preco.toFixed(2)}</td>
-                    <td>${lavagem.observacoes || '-'}</td>
-                    <td><button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button></td>
-                `;
-                tbodyAv.appendChild(tr);
-            });
+            if (tbodyAv) {
+                tbodyAv.innerHTML = '';
+                estado.lavagens.filter(l => l.tipo === 'avulsa').forEach(lavagem => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${formatarData(lavagem.data)}</td>
+                        <td>${lavagem.cliente_nome}</td>
+                        <td>${lavagem.placa}</td>
+                        <td>${lavagem.servico}</td>
+                        <td>${lavagem.funcionario}</td>
+                        <td>R$ ${lavagem.preco.toFixed(2)}</td>
+                        <td>${lavagem.observacoes || '-'}</td>
+                        <td><button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    tbodyAv.appendChild(tr);
+                });
+            }
 
             document.querySelectorAll('.excluir-lavagem').forEach(btn => {
                 btn.addEventListener('click', function() { excluirLavagem(parseInt(this.dataset.id)); });
@@ -1211,6 +1220,7 @@
 
         function renderizarVendas() {
             const tbody = document.getElementById('vendasTableBody');
+            if (!tbody) return;
             if (estado.vendas.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-shopping-basket"></i><p>Nenhuma venda registrada</p></td></tr>';
                 return;
@@ -1237,6 +1247,7 @@
 
         function renderizarServicos() {
             const tbody = document.getElementById('servicosTableBody');
+            if (!tbody) return;
             if (estado.servicos.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-wrench"></i><p>Nenhum serviço registrado</p></td></tr>';
                 return;
@@ -1265,6 +1276,7 @@
 
         function renderizarUsuarios() {
             const tbody = document.querySelector('#usuariosTable tbody');
+            if (!tbody) return;
             tbody.innerHTML = '';
             const nivelLabel = { administrador: '👑 Administrador', gerente: '🧑‍💼 Gerente', funcionario: '👷 Funcionário' };
             estado.usuarios.forEach(u => {
@@ -1289,114 +1301,124 @@
             });
         }
 
-        // ===== DASHBOARD COM DADOS REAIS (corrigido com verificações de null) =====
+        // ===== DASHBOARD COM DADOS REAIS (CORRIGIDO) =====
         async function carregarDashboard() {
-            const clientesAtivos = estado.clientes.filter(c => c.status === 'Pago').length;
-            const inadimplentes = estado.clientes.filter(c => c.status === 'Vencido').length;
-            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((s, c) => s + c.mensalidade, 0);
-            const receitaAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa').reduce((s, l) => s + l.preco, 0);
-            const receitaTotal = receitaMensalidades + receitaAvulsas;
-            const aReceber = estado.clientes.filter(c => c.status !== 'Pago').reduce((s, c) => s + c.mensalidade, 0);
-            const lavagensAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa').length;
-            const lucroEstimado = receitaTotal;
-            const valorEstoque = estado.produtos.reduce((s, p) => s + (p.quantidade * p.preco), 0);
+            try {
+                const clientesAtivos = estado.clientes.filter(c => c.status === 'Pago').length;
+                const inadimplentes = estado.clientes.filter(c => c.status === 'Vencido').length;
+                const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((s, c) => s + c.mensalidade, 0);
+                const receitaAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa').reduce((s, l) => s + l.preco, 0);
+                const receitaTotal = receitaMensalidades + receitaAvulsas;
+                const aReceber = estado.clientes.filter(c => c.status !== 'Pago').reduce((s, c) => s + c.mensalidade, 0);
+                const lavagensAvulsas = estado.lavagens.filter(l => l.tipo === 'avulsa').length;
+                const lucroEstimado = receitaTotal;
+                const valorEstoque = estado.produtos.reduce((s, p) => s + (p.quantidade * p.preco), 0);
 
-            // Atualizar valores com verificação de existência
-            const valores = {
-                clientesAtivos,
-                receitaTotal: receitaTotal.toFixed(2),
-                inadimplentes,
-                aReceber: aReceber.toFixed(2),
-                lavagensAvulsas,
-                lucroTotal: lucroEstimado.toFixed(2),
-                valorEstoque: valorEstoque.toFixed(2)
-            };
-            Object.keys(valores).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = valores[id];
-            });
+                // Mapeamento de IDs para valores
+                const idsValores = {
+                    clientesAtivos,
+                    receitaTotal: receitaTotal.toFixed(2),
+                    inadimplentes,
+                    aReceber: aReceber.toFixed(2),
+                    lavagensAvulsas,
+                    lucroTotal: lucroEstimado.toFixed(2),
+                    valorEstoque: valorEstoque.toFixed(2)
+                };
 
-            // Tendências (cálculo real)
-            const agora = new Date();
-            const mesAtual = agora.getMonth();
-            const anoAtual = agora.getFullYear();
-            const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
-            const anoAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+                // Atualizar cada elemento com verificação
+                Object.keys(idsValores).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = idsValores[id];
+                    } else {
+                        console.warn(`Elemento com id "${id}" não encontrado.`);
+                    }
+                });
 
-            function calcTrend(valorAtual, valorMesAnterior) {
-                if (valorMesAnterior === 0) return { text: 'Sem dados', cls: '' };
-                const pct = ((valorAtual - valorMesAnterior) / Math.abs(valorMesAnterior)) * 100;
-                const sinal = pct > 0 ? '+' : '';
-                return { text: `${sinal}${pct.toFixed(1)}%`, cls: pct > 0 ? 'up' : (pct < 0 ? 'down' : '') };
+                // Tendências
+                const agora = new Date();
+                const mesAtual = agora.getMonth();
+                const anoAtual = agora.getFullYear();
+                const mesAnterior = mesAtual === 0 ? 11 : mesAtual - 1;
+                const anoAnterior = mesAtual === 0 ? anoAtual - 1 : anoAtual;
+
+                function calcTrend(valorAtual, valorMesAnterior) {
+                    if (valorMesAnterior === 0) return { text: 'Sem dados', cls: '' };
+                    const pct = ((valorAtual - valorMesAnterior) / Math.abs(valorMesAnterior)) * 100;
+                    const sinal = pct > 0 ? '+' : '';
+                    return { text: `${sinal}${pct.toFixed(1)}%`, cls: pct > 0 ? 'up' : (pct < 0 ? 'down' : '') };
+                }
+
+                const ativosAtual = estado.clientes.filter(c => c.status === 'Pago' && new Date(c.criado_em).getMonth() === mesAtual && new Date(c.criado_em).getFullYear() === anoAtual).length;
+                const ativosAnterior = estado.clientes.filter(c => c.status === 'Pago' && new Date(c.criado_em).getMonth() === mesAnterior && new Date(c.criado_em).getFullYear() === anoAnterior).length;
+                const trendClientes = calcTrend(ativosAtual, ativosAnterior);
+
+                const receitaAtual = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAtual && new Date(l.data).getFullYear() === anoAtual).reduce((s, l) => s + l.preco, 0) +
+                                     estado.clientes.filter(c => c.status === 'Pago' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).reduce((s, c) => s + c.mensalidade, 0);
+                const receitaAnterior = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAnterior && new Date(l.data).getFullYear() === anoAnterior).reduce((s, l) => s + l.preco, 0) +
+                                        estado.clientes.filter(c => c.status === 'Pago' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).reduce((s, c) => s + c.mensalidade, 0);
+                const trendReceita = calcTrend(receitaAtual, receitaAnterior);
+
+                const inadAtual = estado.clientes.filter(c => c.status === 'Vencido' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).length;
+                const inadAnterior = estado.clientes.filter(c => c.status === 'Vencido' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).length;
+                const trendInad = calcTrend(inadAtual, inadAnterior);
+
+                const receberAtual = estado.clientes.filter(c => c.status !== 'Pago' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).reduce((s, c) => s + c.mensalidade, 0);
+                const receberAnterior = estado.clientes.filter(c => c.status !== 'Pago' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).reduce((s, c) => s + c.mensalidade, 0);
+                const trendReceber = calcTrend(receberAtual, receberAnterior);
+
+                const lavAtual = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAtual && new Date(l.data).getFullYear() === anoAtual).length;
+                const lavAnterior = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAnterior && new Date(l.data).getFullYear() === anoAnterior).length;
+                const trendLavagens = calcTrend(lavAtual, lavAnterior);
+
+                const trendLucro = calcTrend(receitaAtual, receitaAnterior);
+
+                const estoqueAtual = estado.produtos.filter(p => new Date(p.criado_em).getMonth() === mesAtual && new Date(p.criado_em).getFullYear() === anoAtual).reduce((s, p) => s + p.quantidade * p.preco, 0);
+                const estoqueAnterior = estado.produtos.filter(p => new Date(p.criado_em).getMonth() === mesAnterior && new Date(p.criado_em).getFullYear() === anoAnterior).reduce((s, p) => s + p.quantidade * p.preco, 0);
+                const trendEstoque = calcTrend(estoqueAtual, estoqueAnterior);
+
+                const trendMap = {
+                    trendClientes,
+                    trendReceita,
+                    trendInadimplentes: trendInad,
+                    trendReceber,
+                    trendLavagens,
+                    trendLucro,
+                    trendEstoque
+                };
+
+                Object.keys(trendMap).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const data = trendMap[id];
+                    let html = '';
+                    if (data.cls === 'up') html = `<i class="fas fa-arrow-up"></i> ${data.text}`;
+                    else if (data.cls === 'down') html = `<i class="fas fa-arrow-down"></i> ${data.text}`;
+                    else html = `<i class="fas fa-minus"></i> ${data.text}`;
+                    el.innerHTML = html;
+                    el.className = `trend ${data.cls}`;
+                });
+
+                // Últimas lavagens
+                const tbody = document.querySelector('#ultimasLavagens tbody');
+                if (tbody) {
+                    tbody.innerHTML = '';
+                    estado.lavagens.slice(0, 5).forEach(lavagem => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${formatarData(lavagem.data)}</td>
+                            <td>${lavagem.cliente_nome}</td>
+                            <td>${lavagem.placa}</td>
+                            <td>${lavagem.servico}</td>
+                            <td>${lavagem.funcionario}</td>
+                            <td>${lavagem.tipo === 'assinante' ? 'Assinatura' : 'Avulsa'}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
             }
-
-            // Calcular cada tendência
-            const ativosAtual = estado.clientes.filter(c => c.status === 'Pago' && new Date(c.criado_em).getMonth() === mesAtual && new Date(c.criado_em).getFullYear() === anoAtual).length;
-            const ativosAnterior = estado.clientes.filter(c => c.status === 'Pago' && new Date(c.criado_em).getMonth() === mesAnterior && new Date(c.criado_em).getFullYear() === anoAnterior).length;
-            const trendClientes = calcTrend(ativosAtual, ativosAnterior);
-
-            const receitaAtual = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAtual && new Date(l.data).getFullYear() === anoAtual).reduce((s, l) => s + l.preco, 0) +
-                                 estado.clientes.filter(c => c.status === 'Pago' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).reduce((s, c) => s + c.mensalidade, 0);
-            const receitaAnterior = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAnterior && new Date(l.data).getFullYear() === anoAnterior).reduce((s, l) => s + l.preco, 0) +
-                                    estado.clientes.filter(c => c.status === 'Pago' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).reduce((s, c) => s + c.mensalidade, 0);
-            const trendReceita = calcTrend(receitaAtual, receitaAnterior);
-
-            const inadAtual = estado.clientes.filter(c => c.status === 'Vencido' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).length;
-            const inadAnterior = estado.clientes.filter(c => c.status === 'Vencido' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).length;
-            const trendInad = calcTrend(inadAtual, inadAnterior);
-
-            const receberAtual = estado.clientes.filter(c => c.status !== 'Pago' && new Date(c.vencimento).getMonth() === mesAtual && new Date(c.vencimento).getFullYear() === anoAtual).reduce((s, c) => s + c.mensalidade, 0);
-            const receberAnterior = estado.clientes.filter(c => c.status !== 'Pago' && new Date(c.vencimento).getMonth() === mesAnterior && new Date(c.vencimento).getFullYear() === anoAnterior).reduce((s, c) => s + c.mensalidade, 0);
-            const trendReceber = calcTrend(receberAtual, receberAnterior);
-
-            const lavAtual = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAtual && new Date(l.data).getFullYear() === anoAtual).length;
-            const lavAnterior = estado.lavagens.filter(l => l.tipo === 'avulsa' && new Date(l.data).getMonth() === mesAnterior && new Date(l.data).getFullYear() === anoAnterior).length;
-            const trendLavagens = calcTrend(lavAtual, lavAnterior);
-
-            const trendLucro = calcTrend(receitaAtual, receitaAnterior);
-
-            // Estoque – tendência baseada no valor total
-            const estoqueAtual = estado.produtos.filter(p => new Date(p.criado_em).getMonth() === mesAtual && new Date(p.criado_em).getFullYear() === anoAtual).reduce((s, p) => s + p.quantidade * p.preco, 0);
-            const estoqueAnterior = estado.produtos.filter(p => new Date(p.criado_em).getMonth() === mesAnterior && new Date(p.criado_em).getFullYear() === anoAnterior).reduce((s, p) => s + p.quantidade * p.preco, 0);
-            const trendEstoque = calcTrend(estoqueAtual, estoqueAnterior);
-
-            // Atualizar tendências
-            const trendMap = {
-                trendClientes,
-                trendReceita,
-                trendInadimplentes: trendInad,
-                trendReceber,
-                trendLavagens,
-                trendLucro,
-                trendEstoque
-            };
-            Object.keys(trendMap).forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const data = trendMap[id];
-                let html = '';
-                if (data.cls === 'up') html = `<i class="fas fa-arrow-up"></i> ${data.text}`;
-                else if (data.cls === 'down') html = `<i class="fas fa-arrow-down"></i> ${data.text}`;
-                else html = `<i class="fas fa-minus"></i> ${data.text}`;
-                el.innerHTML = html;
-                el.className = `trend ${data.cls}`;
-            });
-
-            // Últimas lavagens
-            const tbody = document.querySelector('#ultimasLavagens tbody');
-            tbody.innerHTML = '';
-            estado.lavagens.slice(0, 5).forEach(lavagem => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${formatarData(lavagem.data)}</td>
-                    <td>${lavagem.cliente_nome}</td>
-                    <td>${lavagem.placa}</td>
-                    <td>${lavagem.servico}</td>
-                    <td>${lavagem.funcionario}</td>
-                    <td>${lavagem.tipo === 'assinante' ? 'Assinatura' : 'Avulsa'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         // ===================== CRUD CLIENTES =====================
@@ -1580,7 +1602,6 @@
             optAvulso.value = 'avulso';
             optAvulso.textContent = 'Cliente Avulso';
             sel.appendChild(optAvulso);
-            // Evento para preencher placa automaticamente
             sel.onchange = function() {
                 const clienteId = this.value;
                 const campoPlaca = document.getElementById('lavagemPlaca');
@@ -1637,7 +1658,6 @@
                 const [produtoId, quantidade] = input.value.split(':');
                 produtosUtilizados.push({ produtoId: parseInt(produtoId), quantidade: parseInt(quantidade) });
             });
-            // Validar estoque
             for (const pu of produtosUtilizados) {
                 const prod = estado.produtos.find(p => p.id === pu.produtoId);
                 if (!prod) { alert(`Produto ID ${pu.produtoId} não encontrado.`); return; }
@@ -1942,7 +1962,6 @@
 
         // ===== RELATÓRIOS (resumido) =====
         async function gerarRelatorio() {
-            // Implementação original – mantida
             alert('Função de relatório em desenvolvimento.');
         }
         function imprimirRelatorio() { /* implementação */ }
