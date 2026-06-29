@@ -88,37 +88,6 @@ Sistema web completo para administração de **lavagem de carros e pequenas ofic
 
 ## 🛠️ Tecnologias Utilizadas
 
-| Camada | Tecnologia |
-|--------|------------|
-| **Backend** | Python — Flask |
-| **Banco de Dados** | SQLite / PostgreSQL (Supabase) |
-| **Frontend** | HTML, CSS, JavaScript (vanilla) |
-| **Estilização** | CSS customizado com variáveis |
-| **Ícones** | Font Awesome 6.4 |
-| **Deploy** | Render |
-| **Ferramentas de IA** | Kimi, DeepSeek, ChatGPT (auxílio no desenvolvimento) |
-
----
-
-way-for-system/
-├── app.py                 # Aplicação principal Flask
-├── database.js            # Configuração do banco de dados
-├── requirements.txt       # Dependências Python
-├── .env                   # Variáveis de ambiente
-├── .env.example           # Exemplo de variáveis
-├── .python-version        # Versão do Python
-├── pyproject.toml         # Configuração do projeto
-├── runtime.txt            # Runtime para deploy
-├── data/                  # Dados CSV (clientes, estoque)
-│   ├── clientes_mensais.csv
-│   └── estoque_avancado.csv
-├── static/
-│   └── css/
-│       └── style.css      # Estilos customizados
-├── templates/
-│   └── index.html         # Aplicação SPA (Single Page Application)
-└── README.md
-
 📌 Status do Projeto :
 
 🚧 Em construção — Funcionalidades principais implementadas, melhorias contínuas em andamento.
