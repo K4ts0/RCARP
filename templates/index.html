@@ -1710,37 +1710,25 @@
                 }
             });
 
-            document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
+                            document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
                     const produtoId = document.getElementById('lavagemProdutos').value;
                     const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
                     
-                    if (!produtoId || produtoId === '' || quantidade <= 0) {
+                    if (!produtoId || produtoId === '' || isNaN(quantidade) || quantidade <= 0) {
                         alert('Selecione um produto e informe uma quantidade válida.');
                         return;
                     }
                     
                     const produtoIdNum = parseInt(produtoId, 10);
-                    if (isNaN(produtoIdNum)) {
-                        alert('ID do produto inválido.');
-                        return;
-                    }
                     
-                    // FIX: Verificar se estado.produtos existe e tem dados
-                    if (!estado.produtos || estado.produtos.length === 0) {
-                        alert('Lista de produtos não carregada. Recarregue a página.');
-                        return;
-                    }
-                    
-                    // FIX: Usar comparação flexível (==) para evitar problemas de tipo string/number
+                    // FIX PRINCIPAL: Usar == (comparação flexível) em vez de ===
+                    // PostgreSQL retorna IDs como STRING, SQLite como NUMBER
                     const produto = estado.produtos.find(p => p.id == produtoIdNum);
                     
                     if (!produto) {
-                        alert('Produto não encontrado no estoque. ID: ' + produtoIdNum);
-                        console.error('Debug - Produto não encontrado:', {
-                            produtoIdBuscado: produtoIdNum,
-                            tipoDoId: typeof produtoIdNum,
-                            produtosDisponiveis: estado.produtos.map(p => ({ id: p.id, tipoId: typeof p.id, nome: p.produto }))
-                        });
+                        console.error('DEBUG - ID buscado:', produtoIdNum, 'Tipo:', typeof produtoIdNum);
+                        console.error('DEBUG - Produtos:', estado.produtos.map(p => ({id: p.id, tipo: typeof p.id})));
+                        alert('Produto não encontrado no estoque.');
                         return;
                     }
                     
@@ -1759,6 +1747,7 @@
                         <input type="hidden" name="produtos[]" value="${produtoIdNum}:${quantidade}">
                     `;
                     listaProdutos.appendChild(li);
+                    
                     document.getElementById('lavagemProdutos').value = '';
                     document.getElementById('produtoQuantidadeUsada').value = '1';
                 });
