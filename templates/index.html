@@ -2068,10 +2068,22 @@
             const form = document.getElementById('lavagemForm');
             const selectCliente = document.getElementById('lavagemCliente');
             const selectProdutos = document.getElementById('lavagemProdutos');
+            
             form.reset();
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('lavagemData').value = hoje;
             
+            // FIX: Carregar produtos do servidor ANTES de preencher o select
+            try {
+                const data = await api.getProdutos();
+                estado.produtos = data.produtos || [];
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar produtos do estoque. Tente novamente.');
+                return;
+            }
+            
+            // Preencher select de clientes
             selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
             estado.clientes.forEach(cliente => {
                 const option = document.createElement('option');
@@ -2084,6 +2096,7 @@
             optionAvulso.textContent = 'Cliente Avulso';
             selectCliente.appendChild(optionAvulso);
             
+            // Evento change do cliente
             selectCliente.addEventListener('change', function() {
                 const clienteId = this.value;
                 const campoPlaca = document.getElementById('lavagemPlaca');
@@ -2098,15 +2111,25 @@
                     campoPlaca.readOnly = false;
                 }
             });
-
+        
+            // FIX: Preencher select de produtos com verificação
             selectProdutos.innerHTML = '<option value="">Selecione os produtos utilizados</option>';
-            estado.produtos.forEach(produto => {
+            
+            if (estado.produtos.length === 0) {
                 const option = document.createElement('option');
-                option.value = produto.id;
-                option.textContent = `${produto.produto} (Estoque: ${produto.quantidade} ${produto.unidade}) - R$ ${produto.preco.toFixed(2)}`;
+                option.value = '';
+                option.textContent = 'Nenhum produto em estoque';
+                option.disabled = true;
                 selectProdutos.appendChild(option);
-            });
-
+            } else {
+                estado.produtos.forEach(produto => {
+                    const option = document.createElement('option');
+                    option.value = produto.id;
+                    option.textContent = `${produto.produto} (Estoque: ${produto.quantidade} ${produto.unidade}) - R$ ${produto.preco.toFixed(2)}`;
+                    selectProdutos.appendChild(option);
+                });
+            }
+        
             document.getElementById('produtoQuantidadeUsada').value = '1';
             document.getElementById('listaProdutosUtilizados').innerHTML = '';
             document.getElementById('precoContainer').style.display = 'none';
