@@ -1716,7 +1716,7 @@
                 }
             });
 
-                            document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
+                document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
                     const produtoId = document.getElementById('lavagemProdutos').value;
                     const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
                     
@@ -1725,15 +1725,9 @@
                         return;
                     }
                     
-                    const produtoIdNum = parseInt(produtoId, 10);
-                    
-                    // FIX PRINCIPAL: Usar == (comparação flexível) em vez de ===
-                    // PostgreSQL retorna IDs como STRING, SQLite como NUMBER
-                    const produto = estado.produtos.find(p => p.id == produtoIdNum);
+                    const produto = buscarProdutoPorId(produtoId);
                     
                     if (!produto) {
-                        console.error('DEBUG - ID buscado:', produtoIdNum, 'Tipo:', typeof produtoIdNum);
-                        console.error('DEBUG - Produtos:', estado.produtos.map(p => ({id: p.id, tipo: typeof p.id})));
                         alert('Produto não encontrado no estoque.');
                         return;
                     }
@@ -1750,7 +1744,7 @@
                         <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
                             <i class="fas fa-times"></i>
                         </button>
-                        <input type="hidden" name="produtos[]" value="${produtoIdNum}:${quantidade}">
+                        <input type="hidden" name="produtos[]" value="${produtoId}:${quantidade}">
                     `;
                     listaProdutos.appendChild(li);
                     
