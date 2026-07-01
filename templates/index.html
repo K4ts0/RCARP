@@ -1599,6 +1599,12 @@
             configurarEventos();
         });
 
+        function buscarProdutoPorId(id) {
+            const idNum = parseInt(id, 10);
+            if (isNaN(idNum)) return null;
+            return estado.produtos.find(p => p.id == idNum);  // == flexível, não ===
+        }
+
         function configurarValidacaoPlaca() {
             const campoPlaca = document.getElementById('clientePlaca');
             campoPlaca.addEventListener('blur', function() {
