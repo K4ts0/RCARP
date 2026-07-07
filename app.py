@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 import json
+import sys
 from pathlib import Path
 from flask import Flask, request, session, jsonify, send_file
 from flask_bcrypt import Bcrypt
@@ -28,24 +29,27 @@ if database_url:
         url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
 
     # Para psycopg v3, usar postgresql+psycopg://
-    if url_limpa.startswith("postgresql://"):
+    if url_limpa.startswith("postgresql://") and not url_limpa.startswith("postgresql+psycopg://"):
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Usando PostgreSQL: {url_limpa[:60]}...")
+    print(f"🔄 Usando PostgreSQL: {url_limpa[:60]}...", flush=True)
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
-    print("✅ Usando SQLite local")
+    print("✅ Usando SQLite local", flush=True)
 
 # Configurações do pool para Connection Pooler do Supabase
+# CORREÇÃO: Removido connect_args de SQLALCHEMY_ENGINE_OPTIONS
+# O Supabase Connection Pooler (porta 6543) funciona melhor sem options extras
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-    "pool_size": 5,
-    "max_overflow": 10,
+    "pool_recycle": 280,        # Menor que 300s (timeout do Supabase)
+    "pool_pre_ping": True,      # Verifica conexão antes de usar
+    "pool_size": 2,             # Reduzido para evitar exceder limites do pooler
+    "max_overflow": 3,          # Overflow menor
+    "pool_timeout": 30,         # Timeout de espera por conexão
     "connect_args": {
         "connect_timeout": 10,
-        "options": "-c statement_timeout=30000"
+        "sslmode": "require"    # Supabase exige SSL
     }
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -171,46 +175,78 @@ def logged_in():
 def init_db():
     """Cria tabelas e usuário admin, se não existirem."""
     with app.app_context():
-        try:
-            db.create_all()
-            print("✅ Tabelas criadas/verificadas")
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                # CORREÇÃO: Testa conexão antes de criar tabelas
+                db.session.execute(text('SELECT 1'))
+                print("✅ Conexão com banco estabelecida", flush=True)
 
-            if not User.query.first():
-                admin = User(
-                    username="admin",
-                    nome="Administrador",
-                    nivel="administrador",
-                    is_admin=True
-                )
-                admin.set_password("1234")
-                db.session.add(admin)
-                db.session.commit()
-                print("✅ Usuário admin criado: admin / 1234")
-            else:
-                print("✅ Usuários já existem")
+                db.create_all()
+                print("✅ Tabelas criadas/verificadas", flush=True)
 
-            if not Produto.query.first():
-                produtos_exemplo = [
-                    Produto(produto='Shampoo Automotivo', categoria='Limpeza', unidade='Litro', quantidade=10, estoque_min=5, preco=25.50),
-                    Produto(produto='Cera Líquida', categoria='Limpeza', unidade='Unidade', quantidade=15, estoque_min=3, preco=18.00),
-                    Produto(produto='Limpador de Pneu', categoria='Limpeza', unidade='Unidade', quantidade=20, estoque_min=5, preco=12.00),
-                    Produto(produto='Pano de Microfibra', categoria='Acessório', unidade='Unidade', quantidade=50, estoque_min=10, preco=8.50),
-                ]
-                for p in produtos_exemplo:
-                    db.session.add(p)
-                db.session.commit()
-                print("✅ Produtos de exemplo criados")
-            else:
-                print("✅ Produtos já existem")
+                if not User.query.first():
+                    admin = User(
+                        username="admin",
+                        nome="Administrador",
+                        nivel="administrador",
+                        is_admin=True
+                    )
+                    admin.set_password("1234")
+                    db.session.add(admin)
+                    db.session.commit()
+                    print("✅ Usuário admin criado: admin / 1234", flush=True)
+                else:
+                    print("✅ Usuários já existem", flush=True)
 
-        except Exception as e:
-            print(f"⚠️ Erro na inicialização: {e}")
-            db.session.rollback()
+                if not Produto.query.first():
+                    produtos_exemplo = [
+                        Produto(produto='Shampoo Automotivo', categoria='Limpeza', unidade='Litro', quantidade=10, estoque_min=5, preco=25.50),
+                        Produto(produto='Cera Líquida', categoria='Limpeza', unidade='Unidade', quantidade=15, estoque_min=3, preco=18.00),
+                        Produto(produto='Limpador de Pneu', categoria='Limpeza', unidade='Unidade', quantidade=20, estoque_min=5, preco=12.00),
+                        Produto(produto='Pano de Microfibra', categoria='Acessório', unidade='Unidade', quantidade=50, estoque_min=10, preco=8.50),
+                    ]
+                    for p in produtos_exemplo:
+                        db.session.add(p)
+                    db.session.commit()
+                    print("✅ Produtos de exemplo criados", flush=True)
+                else:
+                    print("✅ Produtos já existem", flush=True)
+
+                return True  # Sucesso!
+
+            except Exception as e:
+                print(f"⚠️ Erro na inicialização (tentativa {attempt + 1}/{max_retries}): {e}", flush=True)
+                db.session.rollback()
+                if attempt < max_retries - 1:
+                    import time
+                    time.sleep(2)  # Espera 2s antes de tentar novamente
+                else:
+                    print("❌ Falha ao inicializar banco após todas as tentativas", flush=True)
+                    # Não retorna False aqui para não quebrar a app
+                    # Em produção, você pode querer levantar a exceção
+        return False
 
 # ============================================================
-# INICIALIZAÇÃO DO BANCO (executa ao importar o módulo)
+# CORREÇÃO CRÍTICA: Inicialização usando before_first_request
+# para garantir que rode no Render/Gunicorn
 # ============================================================
-init_db()
+_db_initialized = False
+
+@app.before_request
+def ensure_db_initialized():
+    global _db_initialized
+    if not _db_initialized:
+        print("🔧 Primeira requisição - inicializando banco...", flush=True)
+        init_db()
+        _db_initialized = True
+
+# Também tenta inicializar no import (para desenvolvimento local)
+try:
+    init_db()
+    _db_initialized = True
+except Exception as e:
+    print(f"⚠️ init_db no import falhou (normal no Render): {e}", flush=True)
 
 # ============================================================
 # ROTAS
@@ -259,7 +295,7 @@ def api_login():
 
         return jsonify({'success': False, 'message': 'Credenciais inválidas'}), 401
     except Exception as e:
-        print(f"Erro no login: {e}")
+        print(f"Erro no login: {e}", flush=True)
         return jsonify({'success': False, 'message': f'Erro interno: {str(e)}'}), 500
 
 @app.route("/api/logout", methods=["POST"])
@@ -331,7 +367,7 @@ def api_dashboard():
             ]
         })
     except Exception as e:
-        print(f"Erro no dashboard: {e}")
+        print(f"Erro no dashboard: {e}", flush=True)
         return jsonify({'error': f'Erro no dashboard: {str(e)}'}), 500
 
 # ========== CLIENTES ==========
