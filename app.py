@@ -33,7 +33,7 @@ if database_url:
     if url_limpa.startswith("postgresql://"):
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Tentando PostgreSQL...")
+    print(f"🔄 Usando PostgreSQL: {url_limpa[:50]}...")
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     print("✅ Usando SQLite local")
@@ -121,9 +121,9 @@ class Produto(db.Model):
             'produto': self.produto,
             'categoria': self.categoria,
             'unidade': self.unidade,
-            'quantidade': float(self.quantidade),
-            'estoqueMin': float(self.estoque_min),
-            'preco': float(self.preco)
+            'quantidade': float(self.quantidade or 0),
+            'estoqueMin': float(self.estoque_min or 0),
+            'preco': float(self.preco or 0.0)
         }
 
 class Lavagem(db.Model):
@@ -204,7 +204,6 @@ def init_db():
 # ============================================================
 # INICIALIZAÇÃO DO BANCO (executa ao importar o módulo)
 # ============================================================
-# CORREÇÃO: init_db() roda aqui para funcionar no Render com gunicorn
 init_db()
 
 # ============================================================
@@ -560,10 +559,12 @@ def debug_db():
         inspector = inspect(db.engine)
         tables = inspector.get_table_names()
         user_count = User.query.count()
+        produto_count = Produto.query.count()
         return jsonify({
             "status": "success",
             "tables": tables,
             "user_count": user_count,
+            "produto_count": produto_count,
             "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "..."
         })
     except Exception as e:
