@@ -2,6 +2,7 @@ from __future__ import annotations
 import os
 import json
 import sys
+import time
 from pathlib import Path
 from flask import Flask, request, session, jsonify, send_file
 from flask_bcrypt import Bcrypt
@@ -19,6 +20,21 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-lavagem-
 # ============================================================
 # CONFIGURAÇÃO DO BANCO DE DADOS (PostgreSQL ou SQLite fallback)
 # ============================================================
+# ⚠️ IMPORTANTE: No Supabase, use o SHARED POOLER (Supavisor) em SESSION MODE
+# para conectar do Render (IPv4-only). NÃO use o Dedicated Pooler (PgBouncer)
+# na porta 6543 com db.projectref.supabase.co — esse resolve para IPv6 e
+# quebra no Render com "Network is unreachable".
+#
+# ✅ FORMATO CORRETO da DATABASE_URL no Render:
+# postgresql://postgres.PROJECT_REF:SENHA@aws-0-REGION.pooler.supabase.com:5432/postgres
+#
+# ❌ FORMATO INCORRETO (IPv6, não funciona no Render):
+# postgresql://postgres:SENHA@db.PROJECT_REF.supabase.co:6543/postgres
+#
+# Pegue a string correta em: Supabase Dashboard → Project Settings → Database
+# → "Connection pooling" → "Session mode"
+# ============================================================
+
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
@@ -33,23 +49,22 @@ if database_url:
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Usando PostgreSQL: {url_limpa[:60]}...", flush=True)
+    print(f"🔄 Usando PostgreSQL: {url_limpa[:70]}...", flush=True)
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     print("✅ Usando SQLite local", flush=True)
 
-# Configurações do pool para Connection Pooler do Supabase
-# CORREÇÃO: Removido connect_args de SQLALCHEMY_ENGINE_OPTIONS
-# O Supabase Connection Pooler (porta 6543) funciona melhor sem options extras
+# Configurações otimizadas para Supavisor (Shared Pooler) no Render
+# pool_size baixo porque o Supavisor já gerencia o pool do lado dele
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 280,        # Menor que 300s (timeout do Supabase)
+    "pool_recycle": 280,        # Menor que 300s (timeout do Supavisor)
     "pool_pre_ping": True,      # Verifica conexão antes de usar
-    "pool_size": 2,             # Reduzido para evitar exceder limites do pooler
-    "max_overflow": 3,          # Overflow menor
+    "pool_size": 2,             # Baixo — Supavisor gerencia o pool real
+    "max_overflow": 3,          # Overflow conservador
     "pool_timeout": 30,         # Timeout de espera por conexão
     "connect_args": {
         "connect_timeout": 10,
-        "sslmode": "require"    # Supabase exige SSL
+        "sslmode": "require"    # Supabase exige SSL obrigatoriamente
     }
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -178,7 +193,7 @@ def init_db():
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                # CORREÇÃO: Testa conexão antes de criar tabelas
+                # Testa conexão antes de criar tabelas
                 db.session.execute(text('SELECT 1'))
                 print("✅ Conexão com banco estabelecida", flush=True)
 
@@ -213,23 +228,22 @@ def init_db():
                 else:
                     print("✅ Produtos já existem", flush=True)
 
-                return True  # Sucesso!
+                return True
 
             except Exception as e:
                 print(f"⚠️ Erro na inicialização (tentativa {attempt + 1}/{max_retries}): {e}", flush=True)
                 db.session.rollback()
                 if attempt < max_retries - 1:
-                    import time
-                    time.sleep(2)  # Espera 2s antes de tentar novamente
+                    time.sleep(2)
                 else:
                     print("❌ Falha ao inicializar banco após todas as tentativas", flush=True)
-                    # Não retorna False aqui para não quebrar a app
-                    # Em produção, você pode querer levantar a exceção
         return False
 
 # ============================================================
-# CORREÇÃO CRÍTICA: Inicialização usando before_first_request
-# para garantir que rode no Render/Gunicorn
+# INICIALIZAÇÃO DO BANCO — CORREÇÃO CRÍTICA PARA RENDER
+# ============================================================
+# No Render, o Gunicorn importa o módulo sem executar __main__.
+# Usamos before_request como fallback garantido.
 # ============================================================
 _db_initialized = False
 
@@ -237,11 +251,11 @@ _db_initialized = False
 def ensure_db_initialized():
     global _db_initialized
     if not _db_initialized:
-        print("🔧 Primeira requisição - inicializando banco...", flush=True)
+        print("🔧 Primeira requisição — inicializando banco...", flush=True)
         init_db()
         _db_initialized = True
 
-# Também tenta inicializar no import (para desenvolvimento local)
+# Tenta inicializar no import (funciona em desenvolvimento local)
 try:
     init_db()
     _db_initialized = True
@@ -607,7 +621,7 @@ def debug_db():
             "tables": tables,
             "user_count": user_count,
             "produto_count": produto_count,
-            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:60] + "..."
+            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:70] + "..."
         })
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
