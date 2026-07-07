@@ -631,35 +631,35 @@
             .nav-tabs {
                 flex-direction: column;
             }
-            
+
             .stats-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .form-row {
                 grid-template-columns: 1fr;
             }
-            
+
             .report-summary {
                 grid-template-columns: 1fr;
             }
-            
+
             .page-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-            
+
             .header-content {
                 flex-direction: column;
                 gap: 10px;
                 text-align: center;
             }
-            
+
             .modal-content {
                 padding: 15px;
             }
-            
+
             table {
                 display: block;
                 overflow-x: auto;
@@ -670,18 +670,17 @@
             header, nav, .page-header button, .print-btn {
                 display: none !important;
             }
-            
+
             .tab-content {
                 box-shadow: none;
                 padding: 0;
             }
-            
+
             body {
                 background: white;
             }
         }
     </style>
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -1211,7 +1210,7 @@
                         <input type="number" id="precolavagem" step="0.01" min="0" placeholder="0,00">
                     </div>
                 </div>
-                
+
                 <!-- Seção de produtos utilizados -->
                 <div class="produtos-container">
                     <h4>Produtos Utilizados</h4>
@@ -1494,12 +1493,12 @@
                         },
                         ...options
                     });
-                    
+
                     if (response.status === 401) {
                         fazerLogout();
                         throw new Error('Sessão expirada');
                     }
-                    
+
                     return await response.json();
                 } catch (error) {
                     console.error('Erro na API:', error);
@@ -1591,18 +1590,18 @@
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('clienteInicio').value = hoje;
             document.getElementById('lavagemData').value = hoje;
-            
+
             const vencimento = new Date();
             vencimento.setDate(vencimento.getDate() + 30);
             document.getElementById('clienteVencimento').value = vencimento.toISOString().split('T')[0];
-            
+
             configurarEventos();
         });
 
         function buscarProdutoPorId(id) {
             const idNum = parseInt(id, 10);
             if (isNaN(idNum)) return null;
-            return estado.produtos.find(p => p.id == idNum);  // == flexível, não ===
+            return estado.produtos.find(p => p.id == idNum);
         }
 
         function configurarValidacaoPlaca() {
@@ -1651,21 +1650,21 @@
                 if (e.key === 'Enter') fazerLogin();
             });
             document.getElementById('logoutBtn').addEventListener('click', fazerLogout);
-            
+
             document.querySelectorAll('.nav-tabs li').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     alternarAba(tabId);
                 });
             });
-            
+
             document.querySelectorAll('.tab-button').forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     alternarSubAba(tabId);
                 });
             });
-            
+
             document.getElementById('addClienteBtn').addEventListener('click', function() {
                 abrirModalCliente();
             });
@@ -1675,20 +1674,29 @@
             document.getElementById('addProdutoBtn').addEventListener('click', function() {
                 abrirModalProduto();
             });
+
+            // ✅ CORREÇÃO: Adicionar event listeners para botões faltantes
+            document.getElementById('addVendaBtn').addEventListener('click', abrirModalVenda);
+            document.getElementById('addServicoBtn').addEventListener('click', abrirModalServico);
+            document.getElementById('addUsuarioBtn').addEventListener('click', () => abrirModalUsuario());
+
             document.getElementById('refreshDashboard').addEventListener('click', function() {
                 carregarDashboard();
             });
-            
+
             document.querySelectorAll('.close-modal').forEach(btn => {
                 btn.addEventListener('click', function() {
                     fecharTodosModais();
                 });
             });
-            
+
             document.getElementById('clienteForm').addEventListener('submit', salvarCliente);
             document.getElementById('lavagemForm').addEventListener('submit', salvarLavagem);
             document.getElementById('produtoForm').addEventListener('submit', salvarProduto);
-            
+            document.getElementById('vendaForm').addEventListener('submit', salvarVenda);
+            document.getElementById('servicoForm').addEventListener('submit', salvarServico);
+            document.getElementById('usuarioForm').addEventListener('submit', salvarUsuario);
+
             document.getElementById('periodo').addEventListener('change', function() {
                 const periodo = this.value;
                 estado.periodoRelatorio = periodo;
@@ -1700,10 +1708,10 @@
                     document.getElementById('dataFimContainer').style.display = 'none';
                 }
             });
-            
+
             document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
             document.getElementById('imprimirRelatorio').addEventListener('click', imprimirRelatorio);
-            
+
             document.getElementById('lavagemTipo').addEventListener('change', function() {
                 const tipo = this.value;
                 const precoContainer = document.getElementById('precoContainer');
@@ -1716,41 +1724,40 @@
                 }
             });
 
-                document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
-                    const produtoId = document.getElementById('lavagemProdutos').value;
-                    const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
-                    
-                    if (!produtoId || produtoId === '' || isNaN(quantidade) || quantidade <= 0) {
-                        alert('Selecione um produto e informe uma quantidade válida.');
-                        return;
-                    }
-                    
-                    const produto = buscarProdutoPorId(produtoId);
-                    
-                    if (!produto) {
-                        alert('Produto não encontrado no estoque.');
-                        return;
-                    }
-                    
-                    if (quantidade > produto.quantidade) {
-                        alert(`Quantidade indisponível em estoque. Disponível: ${produto.quantidade} ${produto.unidade}`);
-                        return;
-                    }
-                    
-                    const listaProdutos = document.getElementById('listaProdutosUtilizados');
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        ${produto.produto} - ${quantidade} ${produto.unidade} 
-                        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <input type="hidden" name="produtos[]" value="${produtoId}:${quantidade}">
-                    `;
-                    listaProdutos.appendChild(li);
-                    
-                    document.getElementById('lavagemProdutos').value = '';
-                    document.getElementById('produtoQuantidadeUsada').value = '1';
-                });
+            document.getElementById('adicionarProdutoBtn').addEventListener('click', function() {
+                const produtoId = document.getElementById('lavagemProdutos').value;
+                const quantidade = parseInt(document.getElementById('produtoQuantidadeUsada').value);
+
+                if (!produtoId || produtoId === '' || isNaN(quantidade) || quantidade <= 0) {
+                    alert('Selecione um produto e informe uma quantidade válida.');
+                    return;
+                }
+
+                const produto = buscarProdutoPorId(produtoId);
+
+                if (!produto) {
+                    alert('Produto não encontrado no estoque.');
+                    return;
+                }
+
+                if (quantidade > produto.quantidade) {
+                    alert(`Quantidade indisponível em estoque. Disponível: ${produto.quantidade} ${produto.unidade}`);
+                    return;
+                }
+
+                const listaProdutos = document.getElementById('listaProdutosUtilizados');
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${produto.produto} - ${quantidade} ${produto.unidade} 
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="hidden" name="produtos[]" value="${produtoId}:${quantidade}">
+                `;
+                listaProdutos.appendChild(li);
+
+                document.getElementById('lavagemProdutos').value = '';
+                document.getElementById('produtoQuantidadeUsada').value = '1';
             });
         }
 
@@ -1811,6 +1818,9 @@
                 console.error('Erro no logout:', error);
             }
             estado.usuarioLogado = null;
+            estado.clientes = [];
+            estado.produtos = [];
+            estado.lavagens = [];
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             document.getElementById('loginScreen').style.display = 'flex';
@@ -1828,13 +1838,13 @@
             document.querySelector(`.nav-tabs li[data-tab="${abaId}"]`).classList.add('active');
             document.getElementById(abaId).classList.add('active');
 
-               if (abaId === 'dashboard') {
+            if (abaId === 'dashboard') {
                 await carregarDashboard();
             } else if (abaId === 'clientes') {
                 await carregarClientes();
             } else if (abaId === 'lavagens') {
                 await carregarLavagens();
-                await carregarEstoque();  // ← ADICIONE ESTA LINHA
+                await carregarEstoque();
             } else if (abaId === 'estoque') {
                 await carregarEstoque();
             } else if (abaId === 'admin') {
@@ -1869,12 +1879,8 @@
                 document.getElementById('inadimplentes').textContent = data.stats.inadimplentes;
                 document.getElementById('aReceber').textContent = parseFloat(data.stats.aReceber || 0).toFixed(2);
                 document.getElementById('lavagensAvulsas').textContent = data.stats.lavagensAvulsas;
-                
-                const receitaAvulsasDash = (estado.lavagens || []).filter(l => l.tipo === 'avulsa').reduce((s, l) => s + parseFloat(l.preco || 0), 0);
-                const receitaMensalDash = (estado.clientes || []).filter(c => c.status === 'Pago').reduce((s, c) => s + parseFloat(c.mensalidade || 0), 0);
-                const lucroEstimado = receitaAvulsasDash + receitaMensalDash;
-                document.getElementById('lucroTotal').textContent = lucroEstimado.toFixed(2);
-                
+                document.getElementById('lucroTotal').textContent = parseFloat(data.stats.lucroTotal || 0).toFixed(2);
+
                 const tbody = document.querySelector('#ultimasLavagens tbody');
                 tbody.innerHTML = '';
                 data.ultimasLavagens.forEach(lavagem => {
@@ -1897,18 +1903,18 @@
         async function carregarClientes() {
             try {
                 const data = await api.getClientes();
-                estado.clientes = data.clientes;
+                estado.clientes = data.clientes || [];
                 const tbody = document.querySelector('#clientesTable tbody');
                 tbody.innerHTML = '';
                 estado.clientes.forEach(cliente => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${cliente.nome}</td>
-                        <td>${cliente.telefone}</td>
+                        <td>${cliente.telefone || ''}</td>
                         <td>${cliente.placa}</td>
                         <td>${cliente.veiculo}</td>
                         <td>${cliente.plano}</td>
-                        <td>R$ ${cliente.mensalidade.toFixed(2)}</td>
+                        <td>R$ ${parseFloat(cliente.mensalidade || 0).toFixed(2)}</td>
                         <td>${formatarData(cliente.vencimento)}</td>
                         <td><span class="status-badge status-${cliente.status.toLowerCase()}">${cliente.status}</span></td>
                         <td>
@@ -1938,8 +1944,8 @@
         async function carregarLavagens() {
             try {
                 const data = await api.getLavagens();
-                estado.lavagens = data.lavagens;
-                
+                estado.lavagens = data.lavagens || [];
+
                 const tbodyAssinantes = document.querySelector('#lavagensTable tbody');
                 tbodyAssinantes.innerHTML = '';
                 const lavagensAssinantes = estado.lavagens.filter(l => l.tipo === 'assinante');
@@ -1970,7 +1976,7 @@
                         <td>${lavagem.placa}</td>
                         <td>${lavagem.servico}</td>
                         <td>${lavagem.funcionario}</td>
-                        <td>R$ ${parseFloat(lavagem.preco).toFixed(2)}</td>
+                        <td>R$ ${parseFloat(lavagem.preco || 0).toFixed(2)}</td>
                         <td>${lavagem.observacoes || '-'}</td>
                         <td>
                             <button class="btn btn-danger btn-sm excluir-lavagem" data-id="${lavagem.id}"><i class="fas fa-trash"></i></button>
@@ -1993,19 +1999,21 @@
         async function carregarEstoque() {
             try {
                 const data = await api.getProdutos();
-                estado.produtos = data.produtos;
+                estado.produtos = data.produtos || [];
                 const tbody = document.querySelector('#estoqueTable tbody');
                 tbody.innerHTML = '';
                 estado.produtos.forEach(produto => {
-                    const valorTotal = produto.quantidade * produto.preco;
+                    const qtd = parseFloat(produto.quantidade || 0);
+                    const preco = parseFloat(produto.preco || 0);
+                    const valorTotal = qtd * preco;
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${produto.produto}</td>
                         <td>${produto.categoria}</td>
                         <td>${produto.unidade}</td>
-                        <td>${produto.quantidade}</td>
-                        <td>${produto.estoqueMin}</td>
-                        <td>R$ ${produto.preco.toFixed(2)}</td>
+                        <td>${qtd}</td>
+                        <td>${parseFloat(produto.estoqueMin || 0)}</td>
+                        <td>R$ ${preco.toFixed(2)}</td>
                         <td>R$ ${valorTotal.toFixed(2)}</td>
                         <td>
                             <button class="btn btn-warning btn-sm editar-produto" data-id="${produto.id}"><i class="fas fa-edit"></i></button>
@@ -2041,16 +2049,18 @@
             if (id) {
                 titulo.textContent = 'Editar Cliente';
                 estado.clienteEditando = estado.clientes.find(c => c.id === id);
-                document.getElementById('clienteNome').value = estado.clienteEditando.nome;
-                document.getElementById('clienteTelefone').value = estado.clienteEditando.telefone;
-                document.getElementById('clientePlaca').value = estado.clienteEditando.placa;
-                document.getElementById('clienteVeiculo').value = estado.clienteEditando.veiculo;
-                document.getElementById('clientePlano').value = estado.clienteEditando.plano;
-                document.getElementById('clienteMensalidade').value = estado.clienteEditando.mensalidade;
-                document.getElementById('clienteInicio').value = estado.clienteEditando.inicio;
-                document.getElementById('clienteVencimento').value = estado.clienteEditando.vencimento;
-                document.getElementById('clienteStatus').value = estado.clienteEditando.status;
-                document.getElementById('clienteObservacoes').value = estado.clienteEditando.observacoes || '';
+                if (estado.clienteEditando) {
+                    document.getElementById('clienteNome').value = estado.clienteEditando.nome;
+                    document.getElementById('clienteTelefone').value = estado.clienteEditando.telefone || '';
+                    document.getElementById('clientePlaca').value = estado.clienteEditando.placa;
+                    document.getElementById('clienteVeiculo').value = estado.clienteEditando.veiculo;
+                    document.getElementById('clientePlano').value = estado.clienteEditando.plano;
+                    document.getElementById('clienteMensalidade').value = estado.clienteEditando.mensalidade;
+                    document.getElementById('clienteInicio').value = estado.clienteEditando.inicio;
+                    document.getElementById('clienteVencimento').value = estado.clienteEditando.vencimento;
+                    document.getElementById('clienteStatus').value = estado.clienteEditando.status;
+                    document.getElementById('clienteObservacoes').value = estado.clienteEditando.observacoes || '';
+                }
             } else {
                 titulo.textContent = 'Adicionar Cliente';
                 estado.clienteEditando = null;
@@ -2068,12 +2078,12 @@
             const form = document.getElementById('lavagemForm');
             const selectCliente = document.getElementById('lavagemCliente');
             const selectProdutos = document.getElementById('lavagemProdutos');
-            
+
             form.reset();
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('lavagemData').value = hoje;
-            
-            // FIX: Carregar produtos do servidor ANTES de preencher o select
+
+            // Carregar produtos do servidor ANTES de preencher o select
             try {
                 const data = await api.getProdutos();
                 estado.produtos = data.produtos || [];
@@ -2082,7 +2092,17 @@
                 alert('Erro ao carregar produtos do estoque. Tente novamente.');
                 return;
             }
-            
+
+            // ✅ CORREÇÃO: Garantir que clientes também estejam carregados
+            if (estado.clientes.length === 0) {
+                try {
+                    const dataClientes = await api.getClientes();
+                    estado.clientes = dataClientes.clientes || [];
+                } catch (error) {
+                    console.error('Erro ao carregar clientes:', error);
+                }
+            }
+
             // Preencher select de clientes
             selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
             estado.clientes.forEach(cliente => {
@@ -2095,9 +2115,9 @@
             optionAvulso.value = 'avulso';
             optionAvulso.textContent = 'Cliente Avulso';
             selectCliente.appendChild(optionAvulso);
-            
-            // Evento change do cliente
-            selectCliente.addEventListener('change', function() {
+
+            // ✅ CORREÇÃO: Usar onchange em vez de addEventListener para evitar duplicação
+            selectCliente.onchange = function() {
                 const clienteId = this.value;
                 const campoPlaca = document.getElementById('lavagemPlaca');
                 if (clienteId && clienteId !== 'avulso') {
@@ -2110,11 +2130,11 @@
                     campoPlaca.value = '';
                     campoPlaca.readOnly = false;
                 }
-            });
-        
-            // FIX: Preencher select de produtos com verificação
+            };
+
+            // Preencher select de produtos
             selectProdutos.innerHTML = '<option value="">Selecione os produtos utilizados</option>';
-            
+
             if (estado.produtos.length === 0) {
                 const option = document.createElement('option');
                 option.value = '';
@@ -2123,13 +2143,15 @@
                 selectProdutos.appendChild(option);
             } else {
                 estado.produtos.forEach(produto => {
+                    const qtd = parseFloat(produto.quantidade || 0);
+                    const preco = parseFloat(produto.preco || 0);
                     const option = document.createElement('option');
                     option.value = produto.id;
-                    option.textContent = `${produto.produto} (Estoque: ${produto.quantidade} ${produto.unidade}) - R$ ${produto.preco.toFixed(2)}`;
+                    option.textContent = `${produto.produto} (Estoque: ${qtd} ${produto.unidade}) - R$ ${preco.toFixed(2)}`;
                     selectProdutos.appendChild(option);
                 });
             }
-        
+
             document.getElementById('produtoQuantidadeUsada').value = '1';
             document.getElementById('listaProdutosUtilizados').innerHTML = '';
             document.getElementById('precoContainer').style.display = 'none';
@@ -2144,12 +2166,14 @@
             if (id) {
                 titulo.textContent = 'Editar Produto';
                 estado.produtoEditando = estado.produtos.find(p => p.id === id);
-                document.getElementById('produtoNome').value = estado.produtoEditando.produto;
-                document.getElementById('produtoCategoria').value = estado.produtoEditando.categoria;
-                document.getElementById('produtoUnidade').value = estado.produtoEditando.unidade;
-                document.getElementById('produtoQuantidade').value = estado.produtoEditando.quantidade;
-                document.getElementById('produtoEstoqueMin').value = estado.produtoEditando.estoqueMin;
-                document.getElementById('produtoPreco').value = estado.produtoEditando.preco;
+                if (estado.produtoEditando) {
+                    document.getElementById('produtoNome').value = estado.produtoEditando.produto;
+                    document.getElementById('produtoCategoria').value = estado.produtoEditando.categoria;
+                    document.getElementById('produtoUnidade').value = estado.produtoEditando.unidade;
+                    document.getElementById('produtoQuantidade').value = estado.produtoEditando.quantidade;
+                    document.getElementById('produtoEstoqueMin').value = estado.produtoEditando.estoqueMin;
+                    document.getElementById('produtoPreco').value = estado.produtoEditando.preco;
+                }
             } else {
                 titulo.textContent = 'Adicionar Produto';
                 estado.produtoEditando = null;
@@ -2283,8 +2307,8 @@
             const produto = document.getElementById('produtoNome').value;
             const categoria = document.getElementById('produtoCategoria').value;
             const unidade = document.getElementById('produtoUnidade').value;
-            const quantidade = parseInt(document.getElementById('produtoQuantidade').value);
-            const estoqueMin = parseInt(document.getElementById('produtoEstoqueMin').value);
+            const quantidade = parseFloat(document.getElementById('produtoQuantidade').value);
+            const estoqueMin = parseFloat(document.getElementById('produtoEstoqueMin').value);
             const preco = parseFloat(document.getElementById('produtoPreco').value);
 
             if (!produto || !categoria || !unidade || isNaN(quantidade) || isNaN(estoqueMin) || isNaN(preco)) {
@@ -2488,7 +2512,7 @@
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-            const receitaTotal = lavagensFiltradas.reduce((sum, lavagem) => sum + lavagem.preco, 0);
+            const receitaTotal = lavagensFiltradas.reduce((sum, lavagem) => sum + parseFloat(lavagem.preco || 0), 0);
             const lavagensAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').length;
             return {
                 totalRegistros: lavagensFiltradas.length,
@@ -2504,8 +2528,8 @@
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
-            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + parseFloat(l.preco || 0), 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + parseFloat(c.mensalidade || 0), 0);
             const receitaTotal = receitaAvulsas + receitaMensalidades;
             let html = `
                 <div class="page-header"><h3>Relatório Financeiro - ${periodo.toUpperCase()}</h3><small>Período: ${formatarData(inicio.toISOString())} à ${formatarData(fim.toISOString())}</small></div>
@@ -2524,8 +2548,8 @@
                 const dataLavagem = new Date(lavagem.data);
                 return dataLavagem >= inicio && dataLavagem <= fim;
             });
-            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + l.preco, 0);
-            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + c.mensalidade, 0);
+            const receitaAvulsas = lavagensFiltradas.filter(l => l.tipo === 'avulsa').reduce((sum, l) => sum + parseFloat(l.preco || 0), 0);
+            const receitaMensalidades = estado.clientes.filter(c => c.status === 'Pago').reduce((sum, c) => sum + parseFloat(c.mensalidade || 0), 0);
             const receitaTotal = receitaAvulsas + receitaMensalidades;
             return {
                 totalRegistros: lavagensFiltradas.length,
@@ -2550,7 +2574,7 @@
                         <td>${cliente.placa}</td>
                         <td>${cliente.veiculo}</td>
                         <td>${cliente.plano}</td>
-                        <td>R$ ${cliente.mensalidade.toFixed(2)}</td>
+                        <td>R$ ${parseFloat(cliente.mensalidade || 0).toFixed(2)}</td>
                         <td><span class="status-badge status-${cliente.status.toLowerCase()}">${cliente.status}</span></td>
                     </tr>
                 `;
@@ -2577,15 +2601,17 @@
                     <tbody>
             `;
             estado.produtos.forEach(produto => {
-                const status = produto.quantidade <= produto.estoqueMin ? '<span class="status-badge status-vencido">Baixo</span>' : '<span class="status-badge status-pago">Normal</span>';
-                const valorTotal = produto.quantidade * produto.preco;
+                const qtd = parseFloat(produto.quantidade || 0);
+                const estoqueMin = parseFloat(produto.estoqueMin || 0);
+                const status = qtd <= estoqueMin ? '<span class="status-badge status-vencido">Baixo</span>' : '<span class="status-badge status-pago">Normal</span>';
+                const valorTotal = qtd * parseFloat(produto.preco || 0);
                 html += `
                     <tr>
                         <td>${produto.produto}</td>
                         <td>${produto.categoria}</td>
                         <td>${produto.unidade}</td>
-                        <td>${produto.quantidade}</td>
-                        <td>${produto.estoqueMin}</td>
+                        <td>${qtd}</td>
+                        <td>${estoqueMin}</td>
                         <td>${status}</td>
                         <td>R$ ${valorTotal.toFixed(2)}</td>
                     </tr>
@@ -2596,8 +2622,8 @@
         }
 
         async function calcularResumoEstoque() {
-            const produtosBaixoEstoque = estado.produtos.filter(p => p.quantidade <= p.estoqueMin).length;
-            const valorTotalEstoque = estado.produtos.reduce((sum, p) => sum + (p.quantidade * p.preco), 0);
+            const produtosBaixoEstoque = estado.produtos.filter(p => parseFloat(p.quantidade || 0) <= parseFloat(p.estoqueMin || 0)).length;
+            const valorTotalEstoque = estado.produtos.reduce((sum, p) => sum + (parseFloat(p.quantidade || 0) * parseFloat(p.preco || 0)), 0);
             return {
                 totalRegistros: estado.produtos.length,
                 produtosBaixoEstoque: produtosBaixoEstoque,
@@ -2610,7 +2636,7 @@
             if (!conteudo) { alert('Gere um relatório primeiro antes de imprimir.'); return; }
             const janela = window.open('', '_blank');
             janela.document.write(`
-                <html><head><title>Relatório RPCAR</title>
+                <html><head><title>Relatório Way For System</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 20px; }
                     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -2664,19 +2690,21 @@
             const selProd = document.getElementById('vendaProduto');
             selProd.innerHTML = '<option value="">Selecione o produto</option>';
             estado.produtos.forEach(p => {
+                const qtd = parseFloat(p.quantidade || 0);
+                const preco = parseFloat(p.preco || 0);
                 const opt = document.createElement('option');
                 opt.value = p.id;
-                opt.textContent = `${p.produto} (Estoque: ${p.quantidade}) - R$ ${parseFloat(p.preco).toFixed(2)}`;
+                opt.textContent = `${p.produto} (Estoque: ${qtd}) - R$ ${preco.toFixed(2)}`;
                 opt.dataset.preco = p.preco;
                 selProd.appendChild(opt);
             });
 
-            selProd.addEventListener('change', function() {
+            selProd.onchange = function() {
                 const opt = this.options[this.selectedIndex];
                 if (opt.dataset.preco) {
                     document.getElementById('vendaValorUnit').value = parseFloat(opt.dataset.preco).toFixed(2);
                 }
-            });
+            };
 
             modal.style.display = 'flex';
         }
@@ -2697,8 +2725,8 @@
             }
 
             const produto = estado.produtos.find(p => p.id === parseInt(produtoId));
-            if (!produto || quantidade > produto.quantidade) {
-                alert(`Estoque insuficiente. Disponível: ${produto ? produto.quantidade : 0}`);
+            if (!produto || quantidade > parseFloat(produto.quantidade || 0)) {
+                alert(`Estoque insuficiente. Disponível: ${produto ? parseFloat(produto.quantidade || 0) : 0}`);
                 return;
             }
 
@@ -2713,7 +2741,7 @@
             };
 
             vendas.push(venda);
-            produto.quantidade -= quantidade;
+            produto.quantidade = parseFloat(produto.quantidade || 0) - quantidade;
             renderVendas();
             fecharTodosModais();
             mostrarAlerta('Venda registrada com sucesso!', 'success', 'lavagemAlert');
@@ -2734,8 +2762,8 @@
                     <td>${v.clienteNome}</td>
                     <td>${v.produtoNome}</td>
                     <td>${v.quantidade}</td>
-                    <td>R$ ${parseFloat(v.valorUnit).toFixed(2)}</td>
-                    <td>R$ ${parseFloat(v.total).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(v.valorUnit || 0).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(v.total || 0).toFixed(2)}</td>
                     <td>${v.funcionario}</td>
                     <td><button class="btn btn-danger btn-sm" onclick="excluirVenda(${v.id})"><i class="fas fa-trash"></i></button></td>
                 `;
@@ -2745,8 +2773,16 @@
 
         function excluirVenda(id) {
             if (confirm('Excluir esta venda?')) {
+                const venda = vendas.find(v => v.id === id);
+                if (venda) {
+                    const produto = estado.produtos.find(p => p.id === venda.produtoId);
+                    if (produto) {
+                        produto.quantidade = parseFloat(produto.quantidade || 0) + venda.quantidade;
+                    }
+                }
                 vendas = vendas.filter(v => v.id !== id);
                 renderVendas();
+                carregarEstoque();
             }
         }
 
@@ -2768,10 +2804,10 @@
                 sel.appendChild(opt);
             });
 
-            sel.addEventListener('change', function() {
+            sel.onchange = function() {
                 const cli = estado.clientes.find(c => c.id === parseInt(this.value));
                 if (cli) document.getElementById('servicoPlaca').value = cli.placa;
-            });
+            };
 
             modal.style.display = 'flex';
         }
@@ -2819,7 +2855,7 @@
                     <td>${s.placa}</td>
                     <td>${s.tipo}</td>
                     <td>${s.descricao || '-'}</td>
-                    <td>R$ ${parseFloat(s.valor).toFixed(2)}</td>
+                    <td>R$ ${parseFloat(s.valor || 0).toFixed(2)}</td>
                     <td>${s.funcionario}</td>
                     <td><span class="status-badge ${statusClass}">${s.status}</span></td>
                     <td><button class="btn btn-danger btn-sm" onclick="excluirServico(${s.id})"><i class="fas fa-trash"></i></button></td>
