@@ -16,31 +16,37 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key-lavagem-2024")
 
 # ============================================================
-# CONFIGURAÇÃO SUPABASE (SERVICE_ROLE para operações admin)
-# ============================================================
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://uzwyzmgbzeoonrproevh.supabase.co")
-SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
-
-# ============================================================
 # CONFIGURAÇÃO DO BANCO DE DADOS (PostgreSQL ou SQLite fallback)
 # ============================================================
 database_url = os.environ.get("DATABASE_URL")
 
 if database_url:
     url_limpa = database_url.strip().replace('(', '').replace(')', '').strip()
+
+    # Corrigir prefixo postgres:// para postgresql://
     if url_limpa.startswith("postgres://"):
         url_limpa = url_limpa.replace("postgres://", "postgresql://", 1)
+
+    # Para psycopg v3, usar postgresql+psycopg://
     if url_limpa.startswith("postgresql://"):
         url_limpa = url_limpa.replace("postgresql://", "postgresql+psycopg://", 1)
+
     app.config["SQLALCHEMY_DATABASE_URI"] = url_limpa
-    print(f"🔄 Usando PostgreSQL: {url_limpa[:50]}...")
+    print(f"🔄 Usando PostgreSQL: {url_limpa[:60]}...")
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_PATH}"
     print("✅ Usando SQLite local")
 
+# Configurações do pool para Connection Pooler do Supabase
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "pool_size": 5,
+    "max_overflow": 10,
+    "connect_args": {
+        "connect_timeout": 10,
+        "options": "-c statement_timeout=30000"
+    }
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -97,7 +103,7 @@ class Cliente(db.Model):
             'placa': self.placa,
             'veiculo': self.veiculo,
             'plano': self.plano,
-            'mensalidade': float(self.mensalidade),
+            'mensalidade': float(self.mensalidade or 0),
             'inicio': self.inicio.isoformat() if self.inicio else '',
             'vencimento': self.vencimento.isoformat() if self.vencimento else '',
             'status': self.status,
@@ -151,7 +157,7 @@ class Lavagem(db.Model):
             'servico': self.servico,
             'funcionario': self.funcionario,
             'tipo': self.tipo,
-            'preco': float(self.preco),
+            'preco': float(self.preco or 0),
             'observacoes': self.observacoes or '',
             'produtosUtilizados': json.loads(self.produtos_utilizados) if self.produtos_utilizados else []
         }
@@ -565,7 +571,7 @@ def debug_db():
             "tables": tables,
             "user_count": user_count,
             "produto_count": produto_count,
-            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:50] + "..."
+            "database_url": app.config["SQLALCHEMY_DATABASE_URI"][:60] + "..."
         })
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
